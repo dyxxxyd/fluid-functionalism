@@ -5,7 +5,7 @@
  * when the outside value is a gray.
  */
 import { useState } from "react";
-import { afterEach, describe, expect, it } from "vitest";
+import { afterEach, describe, expect, it } from "vite-plus/test";
 import { cleanup, fireEvent, render } from "@testing-library/react";
 import { ColorPicker } from "@/registry/default/color-picker";
 

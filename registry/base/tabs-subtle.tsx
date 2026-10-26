@@ -141,7 +141,7 @@ const TabsSubtle = forwardRef<HTMLDivElement, TabsSubtleProps>(
               ref={(node: HTMLDivElement | null) => {
                 containerRef.current = node;
                 if (typeof ref === "function") ref(node);
-                else if (ref) (ref as React.MutableRefObject<HTMLDivElement | null>).current = node;
+                else if (ref) (ref as React.RefObject<HTMLDivElement | null>).current = node;
               }}
               onMouseMove={handleMouseMove}
               onMouseLeave={handleMouseLeave}
@@ -349,7 +349,7 @@ const TabsSubtleItem = forwardRef<HTMLButtonElement, TabsSubtleItemProps>(
           const button = node as HTMLButtonElement | null;
           internalRef.current = button;
           if (typeof ref === "function") ref(button);
-          else if (ref) (ref as React.MutableRefObject<HTMLButtonElement | null>).current = button;
+          else if (ref) (ref as React.RefObject<HTMLButtonElement | null>).current = button;
         }}
         value={index}
         data-fluid-hover-index={index}

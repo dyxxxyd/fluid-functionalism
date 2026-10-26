@@ -1,6 +1,7 @@
 "use client";
 
 import { useRef, useState, type ReactNode } from "react";
+import Link from "next/link";
 import { DocPage, DocSection } from "@/lib/docs/DocPage";
 import { ComponentPreview } from "@/lib/docs/ComponentPreview";
 import { InspectOverlay, type InspectRaw } from "@/lib/docs/InspectOverlay";
@@ -448,7 +449,7 @@ export default function SizesPage() {
           Type follows the ladder. Compact drops each of the six roles one
           notch, size and leading together, so a dense screen keeps the same
           hierarchy at a smaller size. The full scale lives on
-          <a href="/docs/typography" className="mx-1 text-foreground underline underline-offset-4">Typography</a>.
+          <Link href="/docs/typography" className="mx-1 text-foreground underline underline-offset-4">Typography</Link>.
         </p>
       </DocSection>
 

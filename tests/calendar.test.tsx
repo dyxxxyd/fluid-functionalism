@@ -4,7 +4,7 @@
  * different looks, a range never spans a booked day, week numbers are ISO
  * 8601, and Escape during a range pick puts the previous range back.
  */
-import { afterEach, describe, expect, it, vi } from "vitest";
+import { afterEach, describe, expect, it, vi } from "vite-plus/test";
 import { act, cleanup, fireEvent, render, screen } from "@testing-library/react";
 import { useState } from "react";
 import { dateMatchModifiers } from "@daypicker/react";

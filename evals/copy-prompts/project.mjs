@@ -55,5 +55,5 @@ export function changedFiles(dir, sha) {
     execFileSync("git", args, { cwd: dir, encoding: "utf8", maxBuffer: 64 * 1024 * 1024 })
       .split("\n")
       .filter(Boolean);
-  return [...new Set([...git("diff", "--name-only", sha), ...git("ls-files", "--others", "--exclude-standard")])].sort();
+  return [...new Set([...git("diff", "--name-only", sha), ...git("ls-files", "--others", "--exclude-standard")])].sort((a, b) => a < b ? -1 : a > b ? 1 : 0);
 }

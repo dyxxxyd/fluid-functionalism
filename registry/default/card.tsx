@@ -178,11 +178,11 @@ const CardGroup = forwardRef<HTMLDivElement, CardGroupProps>(
       <CardGroupContext.Provider value={contextValue}>
         <div
           ref={(node) => {
-            (containerRef as React.MutableRefObject<HTMLDivElement | null>).current =
+            (containerRef as React.RefObject<HTMLDivElement | null>).current =
               node;
             if (typeof ref === "function") ref(node);
             else if (ref)
-              (ref as React.MutableRefObject<HTMLDivElement | null>).current = node;
+              (ref as React.RefObject<HTMLDivElement | null>).current = node;
           }}
           {...props}
           data-slot="card-group"
@@ -400,11 +400,11 @@ const Card = forwardRef<HTMLDivElement, CardProps>(
       <CardContext.Provider value={cardContext}>
         <div
           ref={(node) => {
-            (internalRef as React.MutableRefObject<HTMLDivElement | null>).current =
+            (internalRef as React.RefObject<HTMLDivElement | null>).current =
               node;
             if (typeof ref === "function") ref(node);
             else if (ref)
-              (ref as React.MutableRefObject<HTMLDivElement | null>).current = node;
+              (ref as React.RefObject<HTMLDivElement | null>).current = node;
           }}
           data-slot="card"
           data-fluid-hover-index={index}

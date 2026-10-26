@@ -11,7 +11,7 @@
  */
 import { existsSync, readFileSync } from "node:fs";
 import { join } from "node:path";
-import { describe, expect, it } from "vitest";
+import { describe, expect, it } from "vite-plus/test";
 
 const ROOT = new URL("..", import.meta.url).pathname;
 const readme = readFileSync(join(ROOT, "README.md"), "utf-8");
@@ -30,7 +30,7 @@ describe("README", () => {
   it("every registry name in a table cell resolves to a public/r payload", () => {
     // Table rows are `| [Name](url) | \`name\` · \`base/name\` | ... |`; the
     // second cell holds nothing but registry names.
-    const rows = readme.split("\n").filter((line) => /^\| \[/.test(line));
+    const rows = readme.split("\n").filter((line) => line.startsWith('| ['));
     expect(rows.length).toBeGreaterThan(0);
     for (const row of rows) {
       const cell = row.split("|")[2] ?? "";

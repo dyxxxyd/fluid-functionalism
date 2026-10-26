@@ -8,7 +8,7 @@ import { prefersMarkdown } from "@/lib/accept";
 // (utils, springs, ...) are counted too, one event per file.
 const REGISTRY_PATH = /^\/r\/(?:(base|radix)\/)?([a-z0-9-]+)(?:\.json)?$/;
 
-export function middleware(request: NextRequest, event: NextFetchEvent) {
+export function proxy(request: NextRequest, event: NextFetchEvent) {
   // An agent that asks /changelog for Markdown over HTML gets /changelog.md
   // at the same URL. Vary keeps a shared cache from handing the Markdown to
   // a browser. The page's renderer sets its own Vary over this one, so the

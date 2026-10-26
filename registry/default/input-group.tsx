@@ -64,9 +64,9 @@ const InputGroup = forwardRef<HTMLDivElement, InputGroupProps>(
       <InputGroupContext.Provider value={contextValue}>
         <div
           ref={(node) => {
-            (containerRef as React.MutableRefObject<HTMLDivElement | null>).current = node;
+            (containerRef as React.RefObject<HTMLDivElement | null>).current = node;
             if (typeof ref === "function") ref(node);
-            else if (ref) (ref as React.MutableRefObject<HTMLDivElement | null>).current = node;
+            else if (ref) (ref as React.RefObject<HTMLDivElement | null>).current = node;
           }}
           onMouseEnter={handlers.onMouseEnter}
           onMouseMove={handlers.onMouseMove}
@@ -176,9 +176,9 @@ const InputField = forwardRef<HTMLDivElement, InputFieldProps>(
       // aria-describedby, and `invalid` drives aria-invalid / data-invalid.
       <Field.Root
         ref={(node) => {
-          (internalRef as React.MutableRefObject<HTMLDivElement | null>).current = node;
+          (internalRef as React.RefObject<HTMLDivElement | null>).current = node;
           if (typeof ref === "function") ref(node);
-          else if (ref) (ref as React.MutableRefObject<HTMLDivElement | null>).current = node;
+          else if (ref) (ref as React.RefObject<HTMLDivElement | null>).current = node;
         }}
         invalid={!!error}
         disabled={disabled}

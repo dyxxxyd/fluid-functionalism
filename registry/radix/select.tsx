@@ -672,11 +672,11 @@ const SelectItem = forwardRef<HTMLDivElement, SelectItemProps>(
         textValue={typeof children === "string" ? children : undefined}
         ref={(node: HTMLDivElement | null) => {
           (
-            internalRef as React.MutableRefObject<HTMLDivElement | null>
+            internalRef as React.RefObject<HTMLDivElement | null>
           ).current = node;
           if (typeof ref === "function") ref(node);
           else if (ref)
-            (ref as React.MutableRefObject<HTMLDivElement | null>).current =
+            (ref as React.RefObject<HTMLDivElement | null>).current =
               node;
         }}
         data-fluid-hover-index={index}

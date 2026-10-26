@@ -428,7 +428,7 @@ export function typesetRegistryCss(
 ): Record<string, Record<string, Decls | Record<string, Decls>>> {
   const layer: Record<string, Decls | Record<string, Decls>> = {};
   for (const [sel, decls] of typesetRules(scale)) {
-    layer[sel] = { ...((layer[sel] as Decls | undefined) ?? {}), ...decls };
+    layer[sel] = { ...(layer[sel] as Decls | undefined), ...decls };
   }
   layer[FORCED_COLORS] = Object.fromEntries(forcedColorsRules());
   return { "@layer components": layer };

@@ -2,10 +2,11 @@
 // playground's generated code must keep teaching the load-bearing classes the
 // shipped blocks actually use. A retune of a block that doesn't reach the
 // docs (or vice versa) fails here instead of shipping silently.
-import { describe, it, expect } from "vitest";
+import { describe, it, expect } from "vite-plus/test";
 import { readFileSync, readdirSync } from "node:fs";
 import { basename, join } from "node:path";
-import ts from "typescript";
+import * as ts from "typescript/unstable/ast";
+import { parseSourceFile } from "./helpers/typescript.mjs";
 import { FLAVORED_SINGLE_SOURCE } from "../scripts/postbuild-registry.mjs";
 
 const root = new URL("..", import.meta.url).pathname;
@@ -127,10 +128,9 @@ describe("documented imports match where the registry installs each file", () =>
         out.push(node.text);
       else if (ts.isTemplateExpression(node))
         out.push(node.head.text + node.templateSpans.map((s) => s.literal.text).join(""));
-      ts.forEachChild(node, visit);
+      node.forEachChild(visit);
     };
-    const kind = rel.endsWith(".tsx") ? ts.ScriptKind.TSX : ts.ScriptKind.TS;
-    visit(ts.createSourceFile(rel, text, ts.ScriptTarget.Latest, true, kind));
+    visit(parseSourceFile(rel, text));
     return out;
   }
 

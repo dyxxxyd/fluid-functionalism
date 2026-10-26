@@ -6,9 +6,11 @@
  * mounted through its exit instead of being cut (Base UI holds its unmount
  * with preventUnmountOnClose, Radix with forceMount).
  */
-import { afterEach, describe, expect, it } from "vitest";
+import { afterEach, describe, expect, it, vi } from "vite-plus/test";
 import { act, cleanup, fireEvent, render, screen, waitFor } from "@testing-library/react";
 import { useState } from "react";
+import { hydrateRoot } from "react-dom/client";
+import { renderToString } from "react-dom/server";
 import * as Base from "@/registry/base/date-picker";
 import * as Radix from "@/registry/radix/date-picker";
 import {
@@ -34,7 +36,11 @@ class ResizeObserverStub {
   disconnect() {}
 }
 globalThis.ResizeObserver ??= ResizeObserverStub as unknown as typeof ResizeObserver;
-Element.prototype.scrollIntoView ??= () => {};
+Object.defineProperty(Element.prototype, "scrollIntoView", {
+  configurable: true,
+  writable: true,
+  value: () => {},
+});
 window.matchMedia ??= ((query: string) =>
   ({
     matches: false,
@@ -202,6 +208,42 @@ const flavors = [
 
 describe.each(flavors)("%s flavor", (_name, mod) => {
   const { DatePicker } = mod;
+
+  it.each([undefined, "en-US"])("hydrates across different default locales with locale=%s", async (locale) => {
+    let defaultLocale = "en-US";
+    const formatter = new Proxy(Intl.DateTimeFormat, {
+      construct(target, args) {
+        return Reflect.construct(target, [args[0] ?? defaultLocale, args[1]]);
+      },
+      apply(target, receiver, args) {
+        return Reflect.apply(target, receiver, [args[0] ?? defaultLocale, args[1]]);
+      },
+    });
+    vi.stubGlobal("Intl", new Proxy(Intl, {
+      get(target, key, receiver) {
+        return key === "DateTimeFormat" ? formatter : Reflect.get(target, key, receiver);
+      },
+    }));
+    const container = document.createElement("div");
+    const onRecoverableError = vi.fn();
+    let root: ReturnType<typeof hydrateRoot> | undefined;
+    try {
+      const picker = <DatePicker value={new Date(2026, 9, 21)} time="11:00" locale={locale} />;
+      container.innerHTML = renderToString(picker);
+      document.body.appendChild(container);
+      defaultLocale = "en-GB";
+      await act(async () => {
+        root = hydrateRoot(container, picker, { onRecoverableError });
+      });
+      expect(onRecoverableError).not.toHaveBeenCalled();
+      const input = container.querySelector<HTMLInputElement>('[aria-label="Time"]')!;
+      expect(plain(input.value)).toBe(locale ? "11:00 AM" : "11:00");
+    } finally {
+      await act(async () => root?.unmount());
+      container.remove();
+      vi.unstubAllGlobals();
+    }
+  });
 
   function Single() {
     const [date, setDate] = useState<Date | undefined>(new Date(2026, 9, 21));

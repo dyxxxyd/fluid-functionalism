@@ -7,7 +7,7 @@
 // locally with the script's dependency installed:
 //   (cd skills/fluid-functionalism/scripts && npm install)
 //   FF_AUDIT_E2E=1 npx vitest run tests/skill-audit.test.mjs
-import { describe, it, expect } from "vitest";
+import { describe, it, expect } from "vite-plus/test";
 import { execFileSync } from "node:child_process";
 import { mkdtempSync, readFileSync, readdirSync, statSync } from "node:fs";
 import { tmpdir } from "node:os";
@@ -82,7 +82,7 @@ describe("audit tokens match the registry", () => {
     const sizeContext = readFileSync(join(root, "registry/default/lib/size-context.tsx"), "utf8");
     const controls = [...sizeContext.matchAll(/control:\s*"h-(\d+)"/g)].map(([, n]) => Number(n) * 4);
     expect(controls.length).toBeGreaterThan(0);
-    expect([...LADDER_PX].sort()).toEqual([...new Set(controls)].sort());
+    expect([...LADDER_PX].sort((a, b) => a - b)).toEqual([...new Set(controls)].sort((a, b) => a - b));
   });
 });
 

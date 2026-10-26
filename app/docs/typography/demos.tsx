@@ -254,7 +254,7 @@ function WeightItem({
       onDeltaRef.current(on - off);
     };
     // Widths are only right once Inter has loaded.
-    document.fonts.ready.then(measure);
+    void document.fonts.ready.then(measure, measure);
     const ro = new ResizeObserver(measure);
     if (frameRef.current) ro.observe(frameRef.current);
     return () => {
@@ -500,7 +500,7 @@ function CountRow({
       onDriftRef.current(Math.max(...widths) - Math.min(...widths));
     };
     // Widths are only right once Inter has loaded.
-    document.fonts.ready.then(measure);
+    void document.fonts.ready.then(measure, measure);
     const ro = new ResizeObserver(measure);
     if (frameRef.current) ro.observe(frameRef.current);
     return () => {
@@ -633,7 +633,7 @@ function TrimChip({ trimmed, onAbove }: { trimmed: boolean; onAbove: (px: number
       onAboveRef.current(cap);
     };
     // Metrics are only right once Inter has loaded.
-    document.fonts.ready.then(measure);
+    void document.fonts.ready.then(measure, measure);
     const ro = new ResizeObserver(measure);
     if (chipRef.current) ro.observe(chipRef.current);
     return () => {

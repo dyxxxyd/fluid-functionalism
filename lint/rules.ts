@@ -1,0 +1,67 @@
+import type { OxlintConfig } from "vite-plus/lint";
+
+// Oxlint native equivalents of the previous recommended rules. React Compiler
+// config/gating rules only validate compiler configuration; this app has none.
+export const typescriptRules = {
+  "typescript/ban-ts-comment": "error",
+  "no-array-constructor": "error",
+  "typescript/no-duplicate-enum-values": "error",
+  "typescript/no-empty-object-type": "error",
+  "typescript/no-explicit-any": "error",
+  "typescript/no-extra-non-null-assertion": "error",
+  "typescript/no-misused-new": "error",
+  "typescript/no-namespace": "error",
+  "typescript/no-non-null-asserted-optional-chain": "error",
+  "typescript/no-require-imports": "error",
+  "typescript/no-this-alias": "error",
+  "typescript/no-unnecessary-type-constraint": "error",
+  "typescript/no-unsafe-declaration-merging": "error",
+  "typescript/no-unsafe-function-type": "error",
+  "no-unused-expressions": "error",
+  "no-unused-vars": "error",
+  "typescript/no-wrapper-object-types": "error",
+  "typescript/prefer-as-const": "error",
+  "typescript/prefer-namespace-keyword": "error",
+  "typescript/triple-slash-reference": "error",
+} satisfies NonNullable<OxlintConfig["rules"]>;
+
+export const nextRules = {
+  "nextjs/google-font-display": "warn",
+  "nextjs/google-font-preconnect": "warn",
+  "nextjs/next-script-for-ga": "warn",
+  "nextjs/no-async-client-component": "warn",
+  "nextjs/no-before-interactive-script-outside-document": "warn",
+  "nextjs/no-css-tags": "warn",
+  "nextjs/no-head-element": "warn",
+  "nextjs/no-html-link-for-pages": "error",
+  "nextjs/no-img-element": "warn",
+  "nextjs/no-page-custom-font": "warn",
+  "nextjs/no-styled-jsx-in-document": "warn",
+  "nextjs/no-sync-scripts": "error",
+  "nextjs/no-title-in-document-head": "warn",
+  "nextjs/no-typos": "warn",
+  "nextjs/no-unwanted-polyfillio": "warn",
+  "nextjs/inline-script-id": "error",
+  "nextjs/no-assign-module-variable": "error",
+  "nextjs/no-document-import-in-page": "error",
+  "nextjs/no-duplicate-head": "error",
+  "nextjs/no-head-import-in-document": "error",
+  "nextjs/no-script-component-in-head": "error",
+} satisfies NonNullable<OxlintConfig["rules"]>;
+
+export const reactHooksRules = {
+  "react/rules-of-hooks": "error",
+  "react/exhaustive-deps": "warn",
+  "react/static-components": "error",
+  "react/use-memo": "error",
+  "react/preserve-manual-memoization": "error",
+  "react/incompatible-library": "warn",
+  "react/immutability": "error",
+  "react/globals": "error",
+  "react/refs": "error",
+  "react/set-state-in-effect": "error",
+  "react/error-boundaries": "error",
+  "react/purity": "error",
+  "react/set-state-in-render": "error",
+  "react/unsupported-syntax": "warn",
+} satisfies NonNullable<OxlintConfig["rules"]>;

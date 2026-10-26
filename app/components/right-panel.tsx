@@ -2,6 +2,7 @@
 
 import { useEffect, useRef, useState, type ReactNode, type SyntheticEvent } from "react";
 import { usePathname } from "next/navigation";
+import Image from "next/image";
 import { AnimatePresence, motion, useReducedMotion } from "motion/react";
 import { spring } from "@/registry/default/lib/springs";
 import { fontWeights } from "@/registry/default/lib/font-weight";
@@ -81,19 +82,16 @@ function GitHubIcon({ size = 16, className }: { size?: number; className?: strin
 
 /** Standalone GitHub star-count button — rendered next to the "Make them yours" heading. */
 // One fetch per page load, shared by every instance (right panel + the
-// sidebar sheet's footer). Without the cache, each sheet open remounted the
-// button and refired the unauthenticated API call — GitHub rate-limits those
-// per IP, after which the count silently disappeared.
+// sidebar sheet's footer). The shared API route also caches upstream GitHub
+// requests across visitors, so opening a sheet cannot exhaust its rate limit.
 let cachedStars: number | null = null;
 let starsPromise: Promise<number | null> | null = null;
 
 function fetchStars(): Promise<number | null> {
-  starsPromise ??= fetch(`https://api.github.com/repos/${REPO}`, {
-    headers: { Accept: "application/vnd.github.v3+json" },
-  })
+  starsPromise ??= fetch("/api/stars")
     .then((res) => (res.ok ? res.json() : null))
     .then((data) => {
-      if (data?.stargazers_count != null) cachedStars = data.stargazers_count;
+      if (typeof data?.stars === "number") cachedStars = data.stars;
       return cachedStars;
     })
     .catch(() => null);
@@ -107,7 +105,7 @@ export function GitHubStarButton() {
   useEffect(() => {
     if (cachedStars !== null) return;
     let cancelled = false;
-    fetchStars().then((count) => {
+    void fetchStars().then((count) => {
       if (!cancelled && count !== null) setStars(count);
     });
     return () => {
@@ -330,9 +328,11 @@ export function SettingsContent({ tooltipSide = "left" }: { tooltipSide?: "left"
 
       {/* Credit */}
       <div className="flex items-center gap-2">
-        <img
+        <Image
           src="/micka.png"
           alt=""
+          width={20}
+          height={20}
           className="w-5 h-5 rounded-full object-cover shrink-0 outline-1 -outline-offset-1 outline-black/10 dark:outline-white/10"
         />
         <p className="text-site-body text-muted-foreground">

@@ -139,7 +139,7 @@ export function QueuedStack({
     prevStackCountRef.current = stackCount;
     if (stackCount > prev && prev > 0 && !stackExpanded) {
       stackBump.set({ y: -7 });
-      stackBump.start({
+      void stackBump.start({
         y: 0,
         transition: { type: "spring", duration: 0.42, bounce: 0.5 },
       });

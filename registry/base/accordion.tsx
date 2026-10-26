@@ -59,7 +59,7 @@ interface AccordionItemContextValue {
   index?: number;
   value: string;
   isOpen: boolean;
-  triggerRef: React.MutableRefObject<HTMLDivElement | null>;
+  triggerRef: React.RefObject<HTMLDivElement | null>;
   /** Standalone items carry the group's choice themselves. */
   highlight: "trigger" | "item";
 }
@@ -349,12 +349,12 @@ const AccordionGroup = forwardRef<HTMLDivElement, AccordionGroupProps>(
                 {...restRoot}
                 ref={(node) => {
                   (
-                    containerRef as React.MutableRefObject<HTMLDivElement | null>
+                    containerRef as React.RefObject<HTMLDivElement | null>
                   ).current = node;
                   if (typeof ref === "function") ref(node);
                   else if (ref)
                     (
-                      ref as React.MutableRefObject<HTMLDivElement | null>
+                      ref as React.RefObject<HTMLDivElement | null>
                     ).current = node;
                 }}
                 onMouseEnter={handlers.onMouseEnter}
@@ -672,12 +672,12 @@ const AccordionItem = forwardRef<HTMLDivElement, AccordionItemProps>(
                 {...restItem}
                 ref={(node) => {
                   (
-                    internalRef as React.MutableRefObject<HTMLDivElement | null>
+                    internalRef as React.RefObject<HTMLDivElement | null>
                   ).current = node;
                   if (typeof ref === "function") ref(node);
                   else if (ref)
                     (
-                      ref as React.MutableRefObject<HTMLDivElement | null>
+                      ref as React.RefObject<HTMLDivElement | null>
                     ).current = node;
                 }}
                 data-fluid-hover-index={index}

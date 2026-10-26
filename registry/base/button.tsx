@@ -297,6 +297,7 @@ const Button = forwardRef<HTMLButtonElement, ButtonProps>(
       const childProps = asChildElement.props;
       return cloneElement(
         asChildElement,
+        // oxlint-disable-next-line react/refs -- Forward the caller's ref without reading its current value.
         {
           ...props,
           ref,

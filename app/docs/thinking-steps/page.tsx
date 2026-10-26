@@ -286,7 +286,7 @@ function useSequencedSteps(
 interface DemoProps {
   playing: boolean;
   onFinished: () => void;
-  onResetRef: React.MutableRefObject<(() => void) | null>;
+  onResetRef: React.RefObject<(() => void) | null>;
 }
 
 function StreamingDemo({ playing, onFinished, onResetRef }: DemoProps) {

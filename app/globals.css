@@ -280,7 +280,7 @@
      (bg-primary, bg-secondary, bg-popover, *-foreground variants) in Fluid
      Functionalism components. The variables below are undefined at :root and
      only get values inside `.shadcn-theme` (see app/compare/shadcn-theme.css).
-     ESLint enforces this. */
+     Oxlint enforces this. */
   --color-primary: var(--primary);
   --color-primary-foreground: var(--primary-foreground);
   --color-secondary: var(--secondary);
@@ -956,7 +956,7 @@ html.transitioning *::after {
    --shape-input-radius (published by ShapeProvider) so the ring corners
    match the borderless select in both shape modes; 8px = the rounded-mode
    default for pre-hydration paint. Enforced by the focus-ring lint rule in
-   eslint.config.mjs. */
+   lint/fluid.mjs. */
 @layer base {
   :focus-visible {
     outline: 1px solid var(--focus-ring, #6B97FF);

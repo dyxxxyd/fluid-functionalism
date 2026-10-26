@@ -8,6 +8,7 @@ import {
   useMemo,
   useRef,
   useState,
+  useSyncExternalStore,
   type ComponentType,
   type KeyboardEvent,
   type ReactElement,
@@ -981,6 +982,10 @@ function useControllable<T>(value: T | undefined, defaultValue: T | undefined, o
   return [current, set] as const;
 }
 
+const subscribeLocale = () => () => {};
+const browserLocale = () => new Intl.DateTimeFormat().resolvedOptions().locale;
+const serverLocale = () => "en-US";
+
 function DatePickerCore(props: DatePickerProps & { Popover: ComponentType<DatePickerPopoverProps> }) {
   const {
     Popover,
@@ -995,12 +1000,16 @@ function DatePickerCore(props: DatePickerProps & { Popover: ComponentType<DatePi
     calendarProps,
     step = 15,
     hourCycle: hourCycleProp,
-    locale,
+    locale: localeProp,
     className,
     id,
     "aria-label": ariaLabel,
     name,
   } = props;
+  // Hydration repeats the server's locale before following the browser's.
+  // An explicit locale applies from the first render on both sides.
+  const preferredLocale = useSyncExternalStore(subscribeLocale, browserLocale, serverLocale);
+  const locale = localeProp ?? preferredLocale;
   const presets = mode === "range" ? (props as DatePickerRangeProps).presets : undefined;
   const numberOfMonths = numberOfMonthsProp ?? (mode === "range" ? 2 : 1);
 
@@ -1083,6 +1092,7 @@ function DatePickerCore(props: DatePickerProps & { Popover: ComponentType<DatePi
   };
   const resolvedOrientation = orientation === "auto" ? layout : orientation;
 
+  // oxlint-disable-next-line react/purity -- Empty time fields follow the current minute on each render.
   const now = new Date();
   const nowMinutes = now.getHours() * 60 + now.getMinutes();
   const range = mode === "range" ? (value as DateRange | undefined) : undefined;

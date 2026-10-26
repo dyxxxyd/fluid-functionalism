@@ -1205,7 +1205,7 @@ const AskUserQuestions = forwardRef<HTMLDivElement, AskUserQuestionsProps>(
           rootRef.current = node;
           if (typeof ref === "function") ref(node);
           else if (ref)
-            (ref as React.MutableRefObject<HTMLDivElement | null>).current = node;
+            (ref as React.RefObject<HTMLDivElement | null>).current = node;
         }}
         className={cn(
           // overflow-hidden crops the footer buttons to the card's rounded

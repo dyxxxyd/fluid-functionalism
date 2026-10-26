@@ -600,7 +600,7 @@ const SidebarMenu = forwardRef<HTMLUListElement, SidebarMenuProps>(
           ref={(node) => {
             containerRef.current = node;
             if (typeof ref === "function") ref(node);
-            else if (ref) (ref as React.MutableRefObject<HTMLUListElement | null>).current = node;
+            else if (ref) (ref as React.RefObject<HTMLUListElement | null>).current = node;
           }}
           data-sidebar="menu"
           className={cn("relative flex w-full min-w-0 flex-col select-none", className)}
@@ -763,7 +763,7 @@ const SidebarMenuItem = forwardRef<HTMLLIElement, SidebarMenuItemProps>(
       (node: HTMLLIElement | null) => {
         attachRow(node);
         if (typeof ref === "function") ref(node);
-        else if (ref) (ref as React.MutableRefObject<HTMLLIElement | null>).current = node;
+        else if (ref) (ref as React.RefObject<HTMLLIElement | null>).current = node;
       },
       [attachRow, ref]
     );
@@ -795,7 +795,7 @@ const SidebarMenuSubItem = forwardRef<HTMLLIElement, SidebarMenuSubItemProps>(
       (node: HTMLLIElement | null) => {
         attachRow(node);
         if (typeof ref === "function") ref(node);
-        else if (ref) (ref as React.MutableRefObject<HTMLLIElement | null>).current = node;
+        else if (ref) (ref as React.RefObject<HTMLLIElement | null>).current = node;
       },
       [attachRow, ref]
     );
@@ -836,8 +836,10 @@ function MenuRowLabel({
   const nodes = Children.toArray(content);
   const textParts: string[] = [];
   let i = 0;
-  while (i < nodes.length && (typeof nodes[i] === "string" || typeof nodes[i] === "number")) {
-    textParts.push(String(nodes[i]));
+  while (i < nodes.length) {
+    const node = nodes[i];
+    if (typeof node !== "string" && typeof node !== "number") break;
+    textParts.push(String(node));
     i++;
   }
   const label = textParts.join("");
@@ -1051,7 +1053,7 @@ const SidebarMenuButton = forwardRef<HTMLButtonElement, SidebarMenuButtonProps>(
         elementRef={(node: HTMLElement | null) => {
           buttonRef.current = node;
           if (typeof ref === "function") ref(node as HTMLButtonElement | null);
-          else if (ref) (ref as React.MutableRefObject<HTMLElement | null>).current = node;
+          else if (ref) (ref as React.RefObject<HTMLElement | null>).current = node;
         }}
         props={{
           type: template ? undefined : "button",
@@ -1068,7 +1070,7 @@ const SidebarMenuButton = forwardRef<HTMLButtonElement, SidebarMenuButtonProps>(
             className
           ),
           ...props,
-          style: { ...gutterVars, ...(props.style ?? {}) },
+          style: { ...gutterVars, ...props.style },
         }}
       >
         {inner}
@@ -1154,7 +1156,7 @@ const SidebarMenuAction = forwardRef<HTMLButtonElement, SidebarMenuActionProps>(
             onClick?.(event);
           },
           ...props,
-          style: { ...({ "--icon-size": `${sizeClasses.icon}px` } as CSSProperties), ...(props.style ?? {}) },
+          style: { ...({ "--icon-size": `${sizeClasses.icon}px` } as CSSProperties), ...props.style },
         }}
       >
         {content}
@@ -1378,7 +1380,7 @@ const SidebarMenuSub = forwardRef<HTMLUListElement, SidebarMenuSubProps>(
           ref={(node) => {
             containerRef.current = node;
             if (typeof ref === "function") ref(node);
-            else if (ref) (ref as React.MutableRefObject<HTMLUListElement | null>).current = node;
+            else if (ref) (ref as React.RefObject<HTMLUListElement | null>).current = node;
           }}
           data-sidebar="menu-sub"
           data-state={open ? "open" : "closed"}
@@ -1451,7 +1453,7 @@ const SidebarMenuSubButton = forwardRef<HTMLAnchorElement, SidebarMenuSubButtonP
         elementRef={(node: HTMLElement | null) => {
           buttonRef.current = node;
           if (typeof ref === "function") ref(node as HTMLAnchorElement | null);
-          else if (ref) (ref as React.MutableRefObject<HTMLElement | null>).current = node;
+          else if (ref) (ref as React.RefObject<HTMLElement | null>).current = node;
         }}
         props={{
           "data-sidebar": "menu-sub-button",
@@ -1467,7 +1469,7 @@ const SidebarMenuSubButton = forwardRef<HTMLAnchorElement, SidebarMenuSubButtonP
             className
           ),
           ...props,
-          style: { ...gutterVars, ...(props.style ?? {}) },
+          style: { ...gutterVars, ...props.style },
         }}
       >
         <>

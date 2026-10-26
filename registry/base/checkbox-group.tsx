@@ -102,9 +102,9 @@ const CheckboxGroup = forwardRef<HTMLDivElement, CheckboxGroupProps>(
       <CheckboxGroupContext.Provider value={{ registerItem, activeIndex }}>
         <div
           ref={(node) => {
-            (containerRef as React.MutableRefObject<HTMLDivElement | null>).current = node;
+            (containerRef as React.RefObject<HTMLDivElement | null>).current = node;
             if (typeof ref === "function") ref(node);
-            else if (ref) (ref as React.MutableRefObject<HTMLDivElement | null>).current = node;
+            else if (ref) (ref as React.RefObject<HTMLDivElement | null>).current = node;
           }}
           onMouseEnter={handlers.onMouseEnter}
           onMouseMove={handlers.onMouseMove}
@@ -239,9 +239,9 @@ const CheckboxItem = forwardRef<HTMLDivElement, CheckboxItemProps>(
     return (
       <div
         ref={(node) => {
-          (internalRef as React.MutableRefObject<HTMLDivElement | null>).current = node;
+          (internalRef as React.RefObject<HTMLDivElement | null>).current = node;
           if (typeof ref === "function") ref(node);
-          else if (ref) (ref as React.MutableRefObject<HTMLDivElement | null>).current = node;
+          else if (ref) (ref as React.RefObject<HTMLDivElement | null>).current = node;
         }}
         data-fluid-hover-index={index}
         // Every row is its own tab stop: checkboxes toggle independently, so

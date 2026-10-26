@@ -1,7 +1,7 @@
 import { existsSync, mkdtempSync, readdirSync, readFileSync, rmSync, writeFileSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
-import { describe, expect, it, vi } from "vitest";
+import { describe, expect, it, vi } from "vite-plus/test";
 import { parseRelease, releaseEntries, type Inline } from "@/lib/changelog/parse";
 import { AHEAD_OF_RELEASE, latestMarks, loadReleases } from "@/lib/changelog/load";
 import { buildMigrationPrompt } from "@/lib/changelog/migration-prompt";
@@ -284,6 +284,10 @@ describe("Copy migration prompt", () => {
 });
 
 describe("latestMarks", () => {
+  const source = (dir: string) => ({
+    list: () => readdirSync(dir),
+    read: (name: string) => readFileSync(join(dir, name), "utf8"),
+  });
   const release = (month: string, body: string) => `---\nmonth: ${month}\ntitle: A month\n---\n\n${body}`;
   const dirWith = (files: Record<string, string>) => {
     const dir = mkdtempSync(join(tmpdir(), "ff-marks-"));
@@ -311,7 +315,7 @@ describe("latestMarks", () => {
       ),
     });
     try {
-      expect(latestMarks(dir, [])).toEqual({ new: ["combobox"], updated: ["select"], ahead: [] });
+      expect(latestMarks(source(dir), [])).toEqual({ new: ["combobox"], updated: ["select"], ahead: [] });
     } finally {
       rmSync(dir, { recursive: true, force: true });
     }
@@ -326,8 +330,8 @@ describe("latestMarks", () => {
     try {
       // Ahead of its release it is New, not Updated; once October lands, the
       // release marks it and the ahead list lapses.
-      expect(latestMarks(before, ahead)).toEqual({ new: [], updated: [], ahead: ["banner"] });
-      expect(latestMarks(after, ahead)).toEqual({ new: ["banner"], updated: [], ahead: [] });
+      expect(latestMarks(source(before), ahead)).toEqual({ new: [], updated: [], ahead: ["banner"] });
+      expect(latestMarks(source(after), ahead)).toEqual({ new: ["banner"], updated: [], ahead: [] });
     } finally {
       rmSync(before, { recursive: true, force: true });
       rmSync(after, { recursive: true, force: true });
@@ -345,7 +349,7 @@ describe("latestMarks", () => {
     const dir = dirWith({ "2026-09.md": "no frontmatter" });
     const error = vi.spyOn(console, "error").mockImplementation(() => {});
     try {
-      expect(latestMarks(dir)).toEqual({ new: [], updated: [], ahead: [] });
+      expect(latestMarks(source(dir))).toEqual({ new: [], updated: [], ahead: [] });
       expect(error).toHaveBeenCalledOnce();
     } finally {
       error.mockRestore();

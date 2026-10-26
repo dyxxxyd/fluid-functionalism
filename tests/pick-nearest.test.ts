@@ -3,7 +3,7 @@
  * pointer is inside wins; otherwise the nearest center does; ties keep the
  * first item. The hook runs it once per frame and the docs page times it.
  */
-import { describe, expect, it } from "vitest";
+import { describe, expect, it } from "vite-plus/test";
 import { pickNearest, type PickNearestInput } from "../registry/default/hooks/use-fluid-hover";
 
 // Five 36px rows in a 4px-gap column inside 8px padding, in a container

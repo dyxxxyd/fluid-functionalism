@@ -1027,7 +1027,7 @@ function FormatDropdown({
                     shadowLevel={3}
                     ref={(node: HTMLDivElement | null) => {
                       (
-                        containerRef as React.MutableRefObject<HTMLDivElement | null>
+                        containerRef as React.RefObject<HTMLDivElement | null>
                       ).current = node;
                     }}
                   />
@@ -1399,7 +1399,7 @@ const ScrubColorInput = forwardRef<HTMLInputElement, ColorInputProps>(
       (node: HTMLInputElement | null) => {
         inputRef.current = node;
         if (typeof ref === "function") ref(node);
-        else if (ref) (ref as React.MutableRefObject<HTMLInputElement | null>).current = node;
+        else if (ref) (ref as React.RefObject<HTMLInputElement | null>).current = node;
       },
       [ref]
     );
@@ -1546,13 +1546,13 @@ const ScrubColorInput = forwardRef<HTMLInputElement, ColorInputProps>(
                 const setter = Object.getOwnPropertyDescriptor(
                   window.HTMLInputElement.prototype,
                   "value"
-                )?.set;
+                )?.set?.bind(input);
                 if (setter && fieldValue != null) {
                   const restored =
                     decimals != null
                       ? fieldValue.toFixed(decimals)
                       : String(Math.round(fieldValue));
-                  setter.call(input, hasPercent ? `${restored}%` : restored);
+                  setter(hasPercent ? `${restored}%` : restored);
                   input.dispatchEvent(new Event("input", { bubbles: true }));
                 }
                 input.blur();

@@ -36,7 +36,13 @@ const ENV = ["shadcn", "next", "react", "react-dom", "tailwindcss", "typescript"
 const readJson = (path) => JSON.parse(readFileSync(join(ROOT, path), "utf8"));
 const registry = readJson("registry.json");
 const pkg = readJson("package.json");
-const lock = readJson("package-lock.json");
+const installedVersion = (name) => {
+  try {
+    return readJson(`node_modules/${name}/package.json`).version ?? null;
+  } catch {
+    return null;
+  }
+};
 
 /** "@scope/name@^1.2.0" -> { name: "@scope/name", range: "^1.2.0" } */
 function splitSpec(spec) {
@@ -129,7 +135,7 @@ function notesUrl(repo) {
 }
 
 async function inspect(name) {
-  const site = lock.packages?.[`node_modules/${name}`]?.version ?? null;
+  const site = installedVersion(name);
   const view = await npmView(name);
   const entry = shipped.get(name);
   const base = {
@@ -140,7 +146,7 @@ async function inspect(name) {
     shippedBy: entry ? entry.items.length : 0,
     usage: usage.has(name)
       ? Object.fromEntries(
-          [...usage.get(name)].map(([sub, { files, names }]) => [sub, { files: [...files].sort(), names: [...names].sort() }]),
+          [...usage.get(name)].map(([sub, { files, names }]) => [sub, { files: [...files].sort((a, b) => a < b ? -1 : a > b ? 1 : 0), names: [...names].sort((a, b) => a < b ? -1 : a > b ? 1 : 0) }]),
         )
       : undefined,
   };

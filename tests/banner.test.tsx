@@ -7,7 +7,7 @@
  * first open, and a leaving banner takes no clicks.
  */
 import { useEffect, useState } from "react";
-import { afterEach, describe, expect, it } from "vitest";
+import { afterEach, describe, expect, it } from "vite-plus/test";
 import { act, cleanup, fireEvent, render, waitFor } from "@testing-library/react";
 import { Banner, BannerTitle, bannerMotion } from "@/registry/default/banner";
 

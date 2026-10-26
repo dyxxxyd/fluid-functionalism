@@ -4,7 +4,7 @@
  * These tests fail when a copy is stale and pin the tailwind-merge behavior
  * components rely on.
  */
-import { describe, expect, it } from "vitest";
+import { describe, expect, it } from "vite-plus/test";
 import { twMerge } from "tailwind-merge";
 import { generate } from "../scripts/generate-type-scale.mjs";
 import { typeStyles, typeScale, typeClasses, fieldTouchClass } from "../registry/default/lib/type-scale.ts";
@@ -27,7 +27,8 @@ import {
 } from "../lib/typeset/generate.ts";
 import { readFileSync, readdirSync, statSync } from "node:fs";
 import { join, relative } from "node:path";
-import ts from "typescript";
+import * as ts from "typescript/unstable/ast";
+import { parseSourceFile } from "./helpers/typescript.mjs";
 
 describe("type scale generation", () => {
   it("every generated output is up to date", async () => {
@@ -355,7 +356,7 @@ describe("editable fields carry the touch size", () => {
     const where = relative(repoRoot, file);
     if (/document\.createElement\(\s*["'](?:textarea|input)["']\s*\)/.test(source)) created.push([where, source]);
     if (!file.endsWith(".tsx")) continue;
-    const sf = ts.createSourceFile(file, source, ts.ScriptTarget.Latest, true, ts.ScriptKind.TSX);
+    const sf = parseSourceFile(file, source);
     const visit = (node) => {
       if (ts.isJsxOpeningElement(node) || ts.isJsxSelfClosingElement(node)) {
         const tag = node.tagName.getText(sf);
@@ -368,7 +369,7 @@ describe("editable fields carry the touch size", () => {
           fields.push([`${where}:${line} <${tag}>`, unconditional(attr(node, sf, "className")?.initializer)]);
         }
       }
-      ts.forEachChild(node, visit);
+      node.forEachChild(visit);
     };
     visit(sf);
   }

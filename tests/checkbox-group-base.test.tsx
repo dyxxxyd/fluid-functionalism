@@ -6,7 +6,7 @@
  * see it. With a functional updater the two toggles cancel out and the
  * square looks dead; a closure updater would hide the bug.
  */
-import { afterEach, expect, it } from "vitest";
+import { afterEach, expect, it } from "vite-plus/test";
 import { cleanup, fireEvent, render } from "@testing-library/react";
 import { useState } from "react";
 import { CheckboxGroup, CheckboxItem } from "@/registry/base/checkbox-group";

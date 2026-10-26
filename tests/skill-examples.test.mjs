@@ -4,7 +4,7 @@
 // the visitor's clipboard untouched by standing in for
 // navigator.clipboard.writeText. Both lean on InputCopy's internals: these
 // fail when InputCopy changes them, so the example gets updated with it.
-import { describe, it, expect } from "vitest";
+import { describe, it, expect } from "vite-plus/test";
 import { readFileSync } from "node:fs";
 import { join } from "node:path";
 import { fileURLToPath } from "node:url";

@@ -4,7 +4,7 @@
 // get the same flavor verdict, the quality checks must cite where they looked,
 // and the script must never write. The drift guards below fail when the
 // registry grows a component the script would not recognize once installed.
-import { afterAll, describe, it, expect } from "vitest";
+import { afterAll, describe, it, expect } from "vite-plus/test";
 import { execFileSync } from "node:child_process";
 import { mkdirSync, mkdtempSync, readdirSync, readFileSync, rmSync, symlinkSync, writeFileSync } from "node:fs";
 import { tmpdir } from "node:os";
@@ -198,7 +198,7 @@ describe("readStack on a project", () => {
     expect(s.requirements.map((r) => r.ok)).toEqual([true, true, true, true, true]);
     expect(s.wiring.map((w) => w.ok)).toEqual([true, true, true]);
     expect(s.wiring[0].text).toContain("src/components/providers.tsx:3");
-    expect(s.installed.fluid.sort()).toEqual(["select", "springs"]);
+    expect(s.installed.fluid.sort((a, b) => a < b ? -1 : a > b ? 1 : 0)).toEqual(["select", "springs"]);
     expect(s.installed.builtOnFluid).toEqual(["project-list"]);
     expect(s.installed.collisions).toEqual(["src/components/ui/card.tsx"]);
     expect(s.installed.other).toEqual(["avatar"]);
@@ -400,7 +400,7 @@ describe("the stack script keeps up with the registry", () => {
       .filter((f) => f.path.startsWith("registry/default/") && /\.tsx?$/.test(f.path))
       .filter((f) => importsOf(readFileSync(join(root, f.path), "utf8")).some((s) => s.startsWith("@base-ui/")))
       .map((f) => basename(f.path, extname(f.path)));
-    expect([...new Set(sharedBase)].sort(), "update SHARED_BASE_UI in stack.mjs").toEqual([...SHARED_BASE_UI].sort());
+    expect([...new Set(sharedBase)].sort((a, b) => a < b ? -1 : a > b ? 1 : 0), "update SHARED_BASE_UI in stack.mjs").toEqual([...SHARED_BASE_UI].sort());
   });
 
   it("only fingerprints modules the registry actually ships", () => {

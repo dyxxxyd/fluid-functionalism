@@ -96,11 +96,11 @@ const NavMenu = forwardRef<HTMLElement, NavMenuProps>(
         <nav
           ref={(node) => {
             (
-              containerRef as React.MutableRefObject<HTMLElement | null>
+              containerRef as React.RefObject<HTMLElement | null>
             ).current = node;
             if (typeof ref === "function") ref(node);
             else if (ref)
-              (ref as React.MutableRefObject<HTMLElement | null>).current = node;
+              (ref as React.RefObject<HTMLElement | null>).current = node;
           }}
           onMouseEnter={handlers.onMouseEnter}
           onMouseMove={handlers.onMouseMove}

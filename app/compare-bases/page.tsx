@@ -237,7 +237,7 @@ export default function CompareBasesPage() {
         <h1
           // The 60px hero is a marketing stage outside the 5 styles on
           // purpose; this internal page stays off the sitemap.
-          // eslint-disable-next-line no-restricted-syntax
+          // oxlint-disable-next-line fluid/design-system
           className="text-6xl leading-[1.1] text-foreground"
           style={{ fontVariationSettings: fontWeights.bold }}
         >
@@ -246,7 +246,7 @@ export default function CompareBasesPage() {
         <p
           // The 60px hero is a marketing stage outside the 5 styles on
           // purpose; this internal page stays off the sitemap.
-          // eslint-disable-next-line no-restricted-syntax
+          // oxlint-disable-next-line fluid/design-system
           className="text-6xl leading-[1.1] text-muted-foreground"
           style={{ fontVariationSettings: fontWeights.bold }}
         >
@@ -255,7 +255,7 @@ export default function CompareBasesPage() {
         <motion.p
           // The 60px hero is a marketing stage outside the 5 styles on
           // purpose; this internal page stays off the sitemap.
-          // eslint-disable-next-line no-restricted-syntax
+          // oxlint-disable-next-line fluid/design-system
           className="text-6xl leading-[1.1] text-foreground mb-8"
           style={{ fontVariationSettings: fontWeights.bold }}
           initial={false}

@@ -7,7 +7,7 @@
  * have to keep passing the rest through while the dropped props stay off the
  * DOM. These cover the switched sites nothing else renders.
  */
-import { afterEach, beforeEach, describe, expect, it, vi, type MockInstance } from "vitest";
+import { afterEach, beforeEach, describe, expect, it, vi, type MockInstance } from "vite-plus/test";
 import { cleanup, fireEvent, render } from "@testing-library/react";
 import { omit } from "@/registry/default/lib/omit";
 import * as BaseAccordion from "@/registry/base/accordion";

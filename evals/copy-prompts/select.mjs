@@ -17,7 +17,7 @@ export function isoWeek(date = new Date()) {
  *  week % buckets === i % buckets. */
 export function rotationSlice(ids, { buckets, week }) {
   const bucket = week % buckets;
-  return [...ids].sort().filter((_, i) => i % buckets === bucket);
+  return [...ids].sort((a, b) => a < b ? -1 : a > b ? 1 : 0).filter((_, i) => i % buckets === bucket);
 }
 
 /** Maps "Registry fetch" rows ({ item, visitors }) onto brief ids. The flat

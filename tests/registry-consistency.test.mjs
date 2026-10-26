@@ -14,7 +14,7 @@
  */
 import { readFileSync, readdirSync, existsSync } from "node:fs";
 import { join, posix } from "node:path";
-import { describe, expect, it } from "vitest";
+import { describe, expect, it } from "vite-plus/test";
 import { DUAL_FLAVOR_SLUGS, FLAVORED_SINGLE_SOURCE_SLUGS } from "../lib/dual-flavor-slugs.mjs";
 import { BASE_URL, CUSTOM_ITEMS, FLAVORED_SINGLE_SOURCE } from "../scripts/postbuild-registry.mjs";
 
@@ -43,14 +43,14 @@ describe("dual-flavour slugs", () => {
     // the postbuild derives the same set from registry.json. A component
     // that gains a dual-flavour dependency must be added here, or Base UI
     // installs of it silently pull the Radix flavours.
-    expect([...FLAVORED_SINGLE_SOURCE_SLUGS].sort()).toEqual([...FLAVORED_SINGLE_SOURCE].sort());
+    expect([...FLAVORED_SINGLE_SOURCE_SLUGS].sort()).toEqual([...FLAVORED_SINGLE_SOURCE].sort((a, b) => a < b ? -1 : a > b ? 1 : 0));
   });
 
   it("every -base item in registry.json is a declared dual-flavour slug", () => {
     const baseItems = [...itemNames]
       .filter((name) => name.endsWith("-base"))
       .map((name) => name.replace(/-base$/, ""));
-    expect(baseItems.sort()).toEqual([...DUAL_FLAVOR_SLUGS].sort());
+    expect(baseItems.sort((a, b) => a < b ? -1 : a > b ? 1 : 0)).toEqual([...DUAL_FLAVOR_SLUGS].sort());
   });
 });
 
@@ -493,6 +493,7 @@ describe("fluid hover highlight", () => {
   // `refactor(fluid-hover)` migration emptied this list; it stays so a future
   // hand-rolled copy has to be listed here on purpose, and a listed file
   // that no longer carries one fails until it is removed.
+  /** @type {Set<string>} */
   const HAND_ROLLED_OVERLAYS = new Set([
   ]);
   // Any session-keyed hover fill, whatever the session ref is called

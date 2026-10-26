@@ -1,8 +1,8 @@
-import { describe, expect, it } from "vitest";
+import { describe, expect, it } from "vite-plus/test";
 import { acceptQuality, prefersMarkdown } from "@/lib/accept";
 
 // /changelog serves Markdown at the same URL when the request ranks it above
-// HTML (middleware.ts). Browsers must always get the page.
+// HTML (proxy.ts). Browsers must always get the page.
 
 describe("acceptQuality", () => {
   it("takes the most specific matching range", () => {

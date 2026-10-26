@@ -6,7 +6,7 @@
  * groups have to tell a pointer focus apart on their own. Arrow keys still
  * draw the ring right after a click.
  */
-import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
+import { afterEach, beforeEach, describe, expect, it, vi } from "vite-plus/test";
 import { act, cleanup, fireEvent, render } from "@testing-library/react";
 import type { ComponentType } from "react";
 import * as baseCheckbox from "@/registry/base/checkbox-group";
@@ -25,13 +25,13 @@ globalThis.ResizeObserver ??= ResizeObserverStub as unknown as typeof ResizeObse
 beforeEach(() => {
   // jsdom never matches :focus-visible. Chrome matches it for any script
   // focus(), the mousedown redirect included, which is what the groups face.
-  const matches = Element.prototype.matches;
+  const matches = Object.getOwnPropertyDescriptor(Element.prototype, "matches")!;
   vi.spyOn(Element.prototype, "matches").mockImplementation(function (
     this: Element,
     selector: string
   ) {
     if (selector === ":focus-visible") return this === document.activeElement;
-    return matches.call(this, selector);
+    return Reflect.apply(matches.value, this, [selector]);
   });
   // The ring follows the row's measured rect; jsdom lays nothing out.
   vi.spyOn(HTMLElement.prototype, "offsetWidth", "get").mockReturnValue(200);

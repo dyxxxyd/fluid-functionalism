@@ -321,6 +321,7 @@ const Switch = forwardRef<HTMLDivElement, SwitchProps>(
               }}
               // Duration 0 on the first render (initial={false} already skips the
               // entrance), then shape changes ride the same spring as x.
+              // oxlint-disable-next-line react/refs -- This mount flag only disables the initial animation; it does not drive the rendered state.
               transition={hasMounted.current ? (thumbTransition ?? spring.moderate) : { duration: 0 }}
             />
           </SwitchPrimitive.Thumb>

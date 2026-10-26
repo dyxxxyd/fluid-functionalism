@@ -310,7 +310,7 @@ function BannerMotion({ fixed, reduceMotion, config, children }: BannerMotionPro
 
     if (reduceMotion) {
       const hide = animate(shown, 0, spring.fast.exit);
-      hide.then(() => safeToRemoveRef.current?.());
+      void hide.then(() => safeToRemoveRef.current?.());
       return () => hide.stop();
     }
 
@@ -331,7 +331,7 @@ function BannerMotion({ fixed, reduceMotion, config, children }: BannerMotionPro
       if (scaled) scale.set(Math.min(scaleFrom, Math.max(v, end)));
     });
     const close = animate(row, 0, leave.row);
-    close.then(() => safeToRemoveRef.current?.());
+    void close.then(() => safeToRemoveRef.current?.());
     return () => {
       unfollow();
       close.stop();

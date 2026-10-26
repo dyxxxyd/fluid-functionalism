@@ -10,7 +10,7 @@
  * off the first or last row returns to it, as its own ↓ / ↑ leave it.
  * While it has focus no row is highlighted, and Enter there picks nothing.
  */
-import { afterEach, describe, expect, it, vi } from "vitest";
+import { afterEach, describe, expect, it, vi } from "vite-plus/test";
 import { act, cleanup, fireEvent, render } from "@testing-library/react";
 import { useState } from "react";
 import * as Base from "@/registry/base/dropdown";
@@ -27,7 +27,9 @@ class ResizeObserverStub {
   disconnect() {}
 }
 globalThis.ResizeObserver ??= ResizeObserverStub as unknown as typeof ResizeObserver;
-Element.prototype.scrollIntoView ??= () => {};
+if (typeof Element.prototype.scrollIntoView !== "function") {
+  Element.prototype.scrollIntoView = () => {};
+}
 window.matchMedia ??= ((query: string) =>
   ({
     matches: false,

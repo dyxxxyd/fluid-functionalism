@@ -2,7 +2,7 @@
 // /docs/<slug>.md (lib/docs/markdown.ts), the per-page metadata that points
 // at them, and the robots rules that let agents in. A doc page or PropsTable
 // added without its Markdown counterpart fails here.
-import { describe, expect, it } from "vitest";
+import { describe, expect, it } from "vite-plus/test";
 import { existsSync, readdirSync, readFileSync } from "node:fs";
 import { join } from "node:path";
 import {
@@ -39,7 +39,7 @@ describe("every doc page has a Markdown version", () => {
     if (!used.length) return;
     // Tables come from lib/docs/api/<slug>.ts, the module the Markdown reads.
     expect(page).toContain(`from "@/lib/docs/api/${slug}"`);
-    const mod = await import(`@/lib/docs/api/${slug}`);
+    const mod = await import(`@/lib/docs/api/${slug}.ts`);
     expect(API_REFERENCE[slug]).toBe(mod.apiReference);
     for (const name of used) {
       expect(mod[name], `${name} is not exported by lib/docs/api/${slug}.ts`).toBeDefined();

@@ -9,7 +9,7 @@
  * click on one must not reach the parent's gap-click routing (which would
  * click the parent's highlighted row too).
  */
-import { afterEach, describe, expect, it, vi } from "vitest";
+import { afterEach, describe, expect, it, vi } from "vite-plus/test";
 import { act, cleanup, fireEvent, render, waitFor } from "@testing-library/react";
 import { DirectionProvider as RadixDirectionProvider } from "@radix-ui/react-direction";
 import { DirectionProvider as BaseDirectionProvider } from "@base-ui/react/direction-provider";
@@ -27,7 +27,9 @@ class ResizeObserverStub {
   disconnect() {}
 }
 globalThis.ResizeObserver ??= ResizeObserverStub as unknown as typeof ResizeObserver;
-Element.prototype.scrollIntoView ??= () => {};
+if (typeof Element.prototype.scrollIntoView !== "function") {
+  Element.prototype.scrollIntoView = () => {};
+}
 window.matchMedia ??= ((query: string) =>
   ({
     matches: false,

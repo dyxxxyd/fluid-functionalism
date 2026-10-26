@@ -4,7 +4,7 @@
  * These pin the behaviours the 19 hand-rolled copies it replaced relied on
  * (see the 2026-09-07 `refactor(fluid-hover)` commits).
  */
-import { describe, expect, it, vi, beforeEach } from "vitest";
+import { describe, expect, it, vi, beforeEach } from "vite-plus/test";
 import { render, waitFor } from "@testing-library/react";
 
 const motionState = vi.hoisted(() => ({ reduced: false }));

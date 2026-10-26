@@ -126,7 +126,7 @@ export default function StarsPage() {
           if (alive && typeof d?.stars === "number") setStars(d.stars);
         })
         .catch(() => {});
-    load();
+    void load();
     const id = setInterval(load, 30000);
     return () => {
       alive = false;
@@ -147,10 +147,10 @@ export default function StarsPage() {
       if (cancelled) return;
       const field = buildSwitchField(text);
       setPts(field);
-      setStates(new Array(field.length).fill(false));
+      setStates(Array.from({ length: field.length }, () => false));
     };
     build();
-    document.fonts?.ready.then(build);
+    void document.fonts?.ready.then(build, build);
     return () => {
       cancelled = true;
     };

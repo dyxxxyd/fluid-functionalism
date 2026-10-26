@@ -1,7 +1,4 @@
-import tsParser from "@typescript-eslint/parser";
-import tsPlugin from "@typescript-eslint/eslint-plugin";
-import nextPlugin from "@next/eslint-plugin-next";
-import reactHooks from "eslint-plugin-react-hooks";
+import { definePlugin, defineRule } from "vite-plus/lint/plugins";
 
 // Tailwind utilities reserved for the canonical-shadcn theme on /compare.
 // See app/compare/shadcn-theme.css. These render as transparent outside
@@ -53,7 +50,8 @@ const HARDCODED_TYPE_MESSAGE =
 // platform's, not a step of the scale; any other size behind
 // `pointer-coarse:` is still caught, and so is a line height written into it
 // (`pointer-coarse:text-[16px]/[24px]`).
-const REGISTRY_TYPE_REGEX = "(?<!pointer-coarse:)\\btext-\\[[0-9]|pointer-coarse:text-\\[(?!16px\\](?!\\x2F))[0-9]|\\bleading-\\[(?!var\\(--lh-)|(?:^|[\\s:!])text-(?:site-)?(?:display|title|subtitle|body|caption|micro)(?:-compact)?(?:[\\s!\\x2F]|$)";
+const REGISTRY_TYPE_REGEX =
+  "(?<!pointer-coarse:)\\btext-\\[[0-9]|pointer-coarse:text-\\[(?!16px\\](?!\\x2F))[0-9]|\\bleading-\\[(?!var\\(--lh-)|(?:^|[\\s:!])text-(?:site-)?(?:display|title|subtitle|body|caption|micro)(?:-compact)?(?:[\\s!\\x2F]|$)";
 const REGISTRY_TYPE_MESSAGE =
   "Registry type comes from the type scale: typeClass(role, variant) or sizeClasses.type.<role> from @/lib/size-context, not a raw text-[Npx], leading-[…], or bare text-<role> class.";
 
@@ -64,7 +62,8 @@ const REGISTRY_TYPE_MESSAGE =
 const WEIGHT_MESSAGE =
   "Text uses 3 weights: fontWeights.normal for text, fontWeights.semibold for headings and selected items, fontWeights.bold for the display style (via fontVariationSettings).";
 const RAW_WGHT_REGEX = "'wght' (?!400|550|700)[0-9]";
-const TW_WEIGHT_REGEX = "(^|[\\s:!])font-(thin|extralight|light|medium|semibold|bold|extrabold|black)($|[\\s!])";
+const TW_WEIGHT_REGEX =
+  "(^|[\\s:!])font-(thin|extralight|light|medium|semibold|bold|extrabold|black)($|[\\s!])";
 
 // Hierarchy comes from size and weight: no uppercase, no letter-spacing
 // (tracking-normal is a reset, so it passes). And text uses 2 colors,
@@ -72,7 +71,8 @@ const TW_WEIGHT_REGEX = "(^|[\\s:!])font-(thin|extralight|light|medium|semibold|
 // step of them. Scoped to class strings, so prose naming a class is fine;
 // \x2F is the slash, which would end the selector's regex literal.
 const CASE_TRACKING_REGEX = "(^|[\\s:!])(uppercase($|[\\s!])|tracking-(?!normal)[a-z0-9\\[])";
-const CASE_TRACKING_MESSAGE = "Hierarchy comes from size and weight: no uppercase, no letter-spacing.";
+const CASE_TRACKING_MESSAGE =
+  "Hierarchy comes from size and weight: no uppercase, no letter-spacing.";
 const FADED_TEXT_REGEX = "(^|[\\s:!])text-(muted-foreground|foreground|background)\\x2F[0-9]";
 const FADED_TEXT_MESSAGE =
   "Text uses 2 colors: text-foreground or text-muted-foreground (text-background on dark fills), not an opacity step of them.";
@@ -85,7 +85,8 @@ const TW_SIZE_MESSAGE =
 // 2 text colors: a text element is foreground or muted (text-background on
 // dark fills). Scoped to elements that hold text, so a colored icon (an svg,
 // a lucide component, a status glyph) keeps its hue.
-const TEXT_ELEMENT_REGEX = "^(p|span|h[1-6]|label|li|td|th|dt|dd|time|small|strong|em|blockquote|figcaption|kbd)$";
+const TEXT_ELEMENT_REGEX =
+  "^(p|span|h[1-6]|label|li|td|th|dt|dd|time|small|strong|em|blockquote|figcaption|kbd)$";
 const TEXT_COLOR_REGEX = `(^|[\\s:!])text-(${FOCUS_PALETTE}|white|black|\\[(#|rgb|hsl|oklch))`;
 const TEXT_COLOR_MESSAGE =
   "Text uses 2 colors (/docs/typography): text-foreground or text-muted-foreground, text-background on dark fills. Color an icon, not the words.";
@@ -99,145 +100,79 @@ const classRules = (regex, message) =>
     { selector: `${scope} TemplateElement[value.raw=/${regex}/]`, message },
   ]);
 
-const shadcnRestrictedRules = {
-  "no-restricted-syntax": [
-    "error",
-    ...classRules(CASE_TRACKING_REGEX, CASE_TRACKING_MESSAGE),
-    ...classRules(FADED_TEXT_REGEX, FADED_TEXT_MESSAGE),
-    ...classRules(TW_SIZE_REGEX, TW_SIZE_MESSAGE),
-    {
-      selector: `JSXOpeningElement[name.name=/${TEXT_ELEMENT_REGEX}/] > JSXAttribute[name.name="className"] Literal[value=/${TEXT_COLOR_REGEX}/]`,
-      message: TEXT_COLOR_MESSAGE,
-    },
-    {
-      selector: `JSXOpeningElement[name.name=/${TEXT_ELEMENT_REGEX}/] > JSXAttribute[name.name="className"] TemplateElement[value.raw=/${TEXT_COLOR_REGEX}/]`,
-      message: TEXT_COLOR_MESSAGE,
-    },
-    { selector: `Literal[value=/${RAW_WGHT_REGEX}/]`, message: WEIGHT_MESSAGE },
-    { selector: `TemplateElement[value.raw=/${RAW_WGHT_REGEX}/]`, message: WEIGHT_MESSAGE },
-    { selector: `Literal[value=/${TW_WEIGHT_REGEX}/]`, message: WEIGHT_MESSAGE },
-    { selector: `TemplateElement[value.raw=/${TW_WEIGHT_REGEX}/]`, message: WEIGHT_MESSAGE },
-    {
-      selector: `Literal[value=/${SHADCN_RESERVED_REGEX}/]`,
-      message:
-        "Tailwind utility reserved for /compare's shadcn theme. Use FF tokens (bg-foreground, bg-card, bg-accent, bg-destructive, text-foreground, etc.) instead.",
-    },
-    {
-      selector: `TemplateElement[value.raw=/${SHADCN_RESERVED_REGEX}/]`,
-      message:
-        "Tailwind utility reserved for /compare's shadcn theme. Use FF tokens instead.",
-    },
-    {
-      selector: `Literal[value=/${FOCUS_RING_REGEX}/]`,
-      message: FOCUS_RING_MESSAGE,
-    },
-    {
-      selector: `TemplateElement[value.raw=/${FOCUS_RING_REGEX}/]`,
-      message: FOCUS_RING_MESSAGE,
-    },
-    // `>` into the attribute, not a bare descendant: a component's own
-    // className only. Without it the selector reaches through
-    // `render={<span className="text-[13px]" />}` and flags the nested
-    // element, which is a plain span rendering a row's internals.
-    {
-      selector: `JSXOpeningElement[name.name=/${FF_COMPONENT_REGEX}/] > JSXAttribute[name.name="className"] Literal[value=/${HARDCODED_TYPE_REGEX}/]`,
-      message: HARDCODED_TYPE_MESSAGE,
-    },
-    {
-      selector: `JSXOpeningElement[name.name=/${FF_COMPONENT_REGEX}/] > JSXAttribute[name.name="className"] TemplateElement[value.raw=/${HARDCODED_TYPE_REGEX}/]`,
-      message: HARDCODED_TYPE_MESSAGE,
-    },
-  ],
-};
-
-const registryRestrictedRules = {
-  "no-restricted-syntax": [
-    ...shadcnRestrictedRules["no-restricted-syntax"],
-    { selector: `Literal[value=/${REGISTRY_TYPE_REGEX}/]`, message: REGISTRY_TYPE_MESSAGE },
-    { selector: `TemplateElement[value.raw=/${REGISTRY_TYPE_REGEX}/]`, message: REGISTRY_TYPE_MESSAGE },
-  ],
-};
-
-export default [
+const designRestrictions = [
+  ...classRules(CASE_TRACKING_REGEX, CASE_TRACKING_MESSAGE),
+  ...classRules(FADED_TEXT_REGEX, FADED_TEXT_MESSAGE),
+  ...classRules(TW_SIZE_REGEX, TW_SIZE_MESSAGE),
   {
-    ignores: [
-      ".claude/**",
-      ".next/**",
-      "dist/**",
-      "next-env.d.ts",
-      "node_modules/**",
-      "public/r/**",
-    ],
+    selector: `JSXOpeningElement[name.name=/${TEXT_ELEMENT_REGEX}/] > JSXAttribute[name.name="className"] Literal[value=/${TEXT_COLOR_REGEX}/]`,
+    message: TEXT_COLOR_MESSAGE,
   },
   {
-    files: ["**/*.{js,mjs,cjs,ts,tsx}"],
-    languageOptions: {
-      parser: tsParser,
-      parserOptions: {
-        ecmaVersion: "latest",
-        sourceType: "module",
-        ecmaFeatures: {
-          jsx: true,
-        },
-      },
-    },
-    plugins: {
-      "@typescript-eslint": tsPlugin,
-      "@next/next": nextPlugin,
-    },
-    rules: {
-      ...tsPlugin.configs.recommended.rules,
-      ...nextPlugin.configs.recommended.rules,
-      ...nextPlugin.configs["core-web-vitals"].rules,
-      "@typescript-eslint/no-unused-vars": [
-        "warn",
-        {
-          argsIgnorePattern: "^_",
-          varsIgnorePattern: "^_",
-        },
-      ],
-    },
+    selector: `JSXOpeningElement[name.name=/${TEXT_ELEMENT_REGEX}/] > JSXAttribute[name.name="className"] TemplateElement[value.raw=/${TEXT_COLOR_REGEX}/]`,
+    message: TEXT_COLOR_MESSAGE,
   },
-  // Block shadcn-reserved Tailwind tokens in Fluid Functionalism code.
-  // The canonical shadcn install (components/shadcn/**) and the /compare page
-  // are explicitly exempt because they need these utilities by design.
+  { selector: `Literal[value=/${RAW_WGHT_REGEX}/]`, message: WEIGHT_MESSAGE },
+  { selector: `TemplateElement[value.raw=/${RAW_WGHT_REGEX}/]`, message: WEIGHT_MESSAGE },
+  { selector: `Literal[value=/${TW_WEIGHT_REGEX}/]`, message: WEIGHT_MESSAGE },
+  { selector: `TemplateElement[value.raw=/${TW_WEIGHT_REGEX}/]`, message: WEIGHT_MESSAGE },
   {
-    files: ["**/*.{ts,tsx}"],
-    ignores: [
-      "components/shadcn/**",
-      "app/compare/**",
-      "app/components/shadcn-previews.tsx",
-    ],
-    rules: shadcnRestrictedRules,
+    selector: `Literal[value=/${SHADCN_RESERVED_REGEX}/]`,
+    message:
+      "Tailwind utility reserved for /compare's shadcn theme. Use FF tokens (bg-foreground, bg-card, bg-accent, bg-destructive, text-foreground, etc.) instead.",
   },
-  // Registry sources: the shadcn rules plus the type-scale rule. A later
-  // block replaces no-restricted-syntax wholesale, so this one repeats them.
   {
-    files: ["registry/**/*.{ts,tsx}"],
-    // The tailwind-merge list names the role utilities on purpose.
-    ignores: ["registry/default/lib/utils.ts"],
-    rules: registryRestrictedRules,
+    selector: `TemplateElement[value.raw=/${SHADCN_RESERVED_REGEX}/]`,
+    message: "Tailwind utility reserved for /compare's shadcn theme. Use FF tokens instead.",
   },
-  // Registry sources ship into other people's projects, and a fresh
-  // `create-next-app` lints them with eslint-plugin-react-hooks' full
-  // recommended set (the React Compiler rules: refs, immutability,
-  // static-components, set-state-in-effect, ...). Same rules here, so an
-  // install never opens with lint errors the site's own CI didn't see.
   {
-    files: ["registry/**/*.{ts,tsx}"],
-    plugins: { "react-hooks": reactHooks },
-    rules: reactHooks.configs.recommended.rules,
+    selector: `Literal[value=/${FOCUS_RING_REGEX}/]`,
+    message: FOCUS_RING_MESSAGE,
   },
-  // That app's no-unused-vars has no `^_` ignore, so a prop dropped with
-  // `{ key: _key, ...rest }` is a warning there. Registry code drops props
-  // with omit() from registry/default/lib/omit.ts instead. Both rules are
-  // errors here, so installs open with no warnings either and CI catches a
-  // new one. A plain <img> stays possible with a reasoned disable comment.
   {
-    files: ["registry/**/*.{ts,tsx}"],
-    rules: {
-      "@typescript-eslint/no-unused-vars": ["error", {}],
-      "@next/next/no-img-element": "error",
-    },
+    selector: `TemplateElement[value.raw=/${FOCUS_RING_REGEX}/]`,
+    message: FOCUS_RING_MESSAGE,
+  },
+  // `>` into the attribute, not a bare descendant: a component's own
+  // className only. Without it the selector reaches through
+  // `render={<span className="text-[13px]" />}` and flags the nested
+  // element, which is a plain span rendering a row's internals.
+  {
+    selector: `JSXOpeningElement[name.name=/${FF_COMPONENT_REGEX}/] > JSXAttribute[name.name="className"] Literal[value=/${HARDCODED_TYPE_REGEX}/]`,
+    message: HARDCODED_TYPE_MESSAGE,
+  },
+  {
+    selector: `JSXOpeningElement[name.name=/${FF_COMPONENT_REGEX}/] > JSXAttribute[name.name="className"] TemplateElement[value.raw=/${HARDCODED_TYPE_REGEX}/]`,
+    message: HARDCODED_TYPE_MESSAGE,
   },
 ];
+
+const registryRestrictions = [
+  { selector: `Literal[value=/${REGISTRY_TYPE_REGEX}/]`, message: REGISTRY_TYPE_MESSAGE },
+  {
+    selector: `TemplateElement[value.raw=/${REGISTRY_TYPE_REGEX}/]`,
+    message: REGISTRY_TYPE_MESSAGE,
+  },
+];
+
+// Oxlint supports the same AST selectors used by the former restrictions.
+const restrictedSyntax = (restrictions) =>
+  defineRule({
+    meta: { type: "problem", schema: [] },
+    create(context) {
+      return Object.fromEntries(
+        restrictions.map(({ selector, message }) => [
+          selector,
+          (node) => context.report({ node, message }),
+        ]),
+      );
+    },
+  });
+
+export default definePlugin({
+  meta: { name: "fluid" },
+  rules: {
+    "design-system": restrictedSyntax(designRestrictions),
+    "registry-type": restrictedSyntax(registryRestrictions),
+  },
+});

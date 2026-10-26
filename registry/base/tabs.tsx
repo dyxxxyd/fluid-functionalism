@@ -309,12 +309,12 @@ const TabsList = forwardRef<HTMLDivElement, TabsListProps>(
           activateOnFocus
           ref={(node) => {
             (
-              containerRef as React.MutableRefObject<HTMLDivElement | null>
+              containerRef as React.RefObject<HTMLDivElement | null>
             ).current = node;
             if (typeof ref === "function") ref(node);
             else if (ref)
               (
-                ref as React.MutableRefObject<HTMLDivElement | null>
+                ref as React.RefObject<HTMLDivElement | null>
               ).current = node;
           }}
           onMouseMove={handleMouseMove}
@@ -514,12 +514,12 @@ const TabItem = forwardRef<HTMLButtonElement, TabItemProps>(
         }}
         ref={(node) => {
           (
-            internalRef as React.MutableRefObject<HTMLElement | null>
+            internalRef as React.RefObject<HTMLElement | null>
           ).current = node as HTMLButtonElement | null;
           if (typeof ref === "function") ref(node as HTMLButtonElement);
           else if (ref)
             (
-              ref as React.MutableRefObject<HTMLButtonElement | null>
+              ref as React.RefObject<HTMLButtonElement | null>
             ).current = node as HTMLButtonElement | null;
         }}
         value={value}

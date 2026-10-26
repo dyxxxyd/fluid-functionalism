@@ -4,7 +4,7 @@
  * flavors. A class-string edit once dropped `${shape.container}` from the
  * panel and left it square for weeks: nothing else checks the class.
  */
-import { afterEach, describe, expect, it } from "vitest";
+import { afterEach, describe, expect, it } from "vite-plus/test";
 import { cleanup, render } from "@testing-library/react";
 import * as Base from "@/registry/base/dropdown";
 import * as Radix from "@/registry/radix/dropdown";

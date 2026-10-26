@@ -379,7 +379,7 @@ const SidebarProvider = forwardRef<HTMLDivElement, SidebarProviderProps>(
           ref={(node) => {
             wrapperRef.current = node;
             if (typeof ref === "function") ref(node);
-            else if (ref) (ref as React.MutableRefObject<HTMLDivElement | null>).current = node;
+            else if (ref) (ref as React.RefObject<HTMLDivElement | null>).current = node;
           }}
           data-slot="sidebar-wrapper"
           className={cn("group/sidebar-wrapper relative flex min-h-svh w-full", className)}
@@ -415,7 +415,7 @@ type SlotProps = {
 
 function assignRef<T>(target: Ref<T> | undefined, node: T | null) {
   if (typeof target === "function") target(node);
-  else if (target) (target as React.MutableRefObject<T | null>).current = node;
+  else if (target) (target as React.RefObject<T | null>).current = node;
 }
 
 /** Resolves the element to clone: `render` wins, else `asChild`'s single
@@ -686,7 +686,7 @@ const SidebarShell = forwardRef<HTMLDivElement, SidebarShellProps>(
         ref={(node: HTMLDivElement | null) => {
           shellRef.current = node;
           if (typeof ref === "function") ref(node);
-          else if (ref) (ref as React.MutableRefObject<HTMLDivElement | null>).current = node;
+          else if (ref) (ref as React.RefObject<HTMLDivElement | null>).current = node;
         }}
         data-slot="sidebar"
         data-state={open ? "expanded" : "collapsed"}
@@ -1092,7 +1092,7 @@ const SidebarRail = forwardRef<HTMLButtonElement, SidebarRailProps>(
           ref={(node) => {
             railRef.current = node;
             if (typeof ref === "function") ref(node);
-            else if (ref) (ref as React.MutableRefObject<HTMLButtonElement | null>).current = node;
+            else if (ref) (ref as React.RefObject<HTMLButtonElement | null>).current = node;
           }}
           type="button"
           data-sidebar="rail"
@@ -1430,14 +1430,15 @@ const SidebarGroupLabel = forwardRef<HTMLDivElement, SidebarGroupLabelProps>(
     // trailing controls) stay flex siblings so the row's gap keeps spacing
     // them — same split MenuRowLabel does for menu rows.
     const nodes = Children.toArray(content);
+    const textParts: string[] = [];
     let textEnd = 0;
-    while (
-      textEnd < nodes.length &&
-      (typeof nodes[textEnd] === "string" || typeof nodes[textEnd] === "number")
-    ) {
+    while (textEnd < nodes.length) {
+      const node = nodes[textEnd];
+      if (typeof node !== "string" && typeof node !== "number") break;
+      textParts.push(String(node));
       textEnd++;
     }
-    const leadingText = nodes.slice(0, textEnd).join("");
+    const leadingText = textParts.join("");
     const labelContent = leadingText ? (
       <>
         <span className="min-w-0 truncate">{leadingText}</span>
@@ -1590,7 +1591,7 @@ const SidebarGroupAction = forwardRef<HTMLButtonElement, SidebarGroupActionProps
           // wholesale and drop the icon-size the glyph is sized from.
           style: {
             ...({ "--icon-size": `${sizeClasses.icon}px` } as CSSProperties),
-            ...(props.style ?? {}),
+            ...props.style,
           },
         }}
       >

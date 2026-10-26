@@ -1,33 +1,15 @@
 // Preset installs write a generated file (the demo section) into someone
-// else's project, and a fresh `create-next-app` lints it with
-// eslint-plugin-react-hooks' recommended set: the React Compiler rules
-// (refs, immutability, static-components, ...). The registry sources are held
-// to the same rules by eslint.config.mjs; this holds the generated files to
-// them too, over every field flipped once from its default plus a seeded
-// sample of mixed presets.
-import { describe, it, expect } from "vitest";
-import { ESLint } from "eslint";
-import tsParser from "@typescript-eslint/parser";
-import reactHooks from "eslint-plugin-react-hooks";
+// else's project. Check React Compiler rules (refs, immutability,
+// static-components, ...) through Vite+'s bundled Oxlint, using the same
+// rules as the registry sources, over every field flipped once from its
+// default plus a seeded sample of mixed presets.
+import { describe, it, expect } from "vite-plus/test";
+import { reactHooksRules } from "../lint/rules.ts";
+import { lintGeneratedFiles } from "./helpers/oxlint.mjs";
 // components.ts registers every tag with the codec.
 import "../lib/preset/components.ts";
 import { getAllPresetComponents } from "../lib/preset/codec.ts";
 import { PRESET_GENERATORS } from "../lib/preset/generators.ts";
-
-const eslint = new ESLint({
-  overrideConfigFile: true,
-  overrideConfig: [
-    {
-      files: ["**/*.{ts,tsx}"],
-      languageOptions: {
-        parser: tsParser,
-        parserOptions: { ecmaFeatures: { jsx: true } },
-      },
-      plugins: { "react-hooks": reactHooks },
-      rules: reactHooks.configs.recommended.rules,
-    },
-  ],
-});
 
 /** Defaults, each field flipped to each of its other values once, and a
  *  seeded sample of presets where every field is drawn at random. */
@@ -57,16 +39,18 @@ describe("generated preset files pass the react-hooks lint", () => {
     const generator = PRESET_GENERATORS[def.tag];
     if (!generator) continue;
     it(`${def.label} (${def.tag})`, async () => {
-      const problems = new Set();
-      for (const preset of presetsFor(def)) {
+      const files = [];
+      for (const [index, preset] of presetsFor(def).entries()) {
         for (const file of generator.files(preset)) {
           if (!/\.tsx?$/.test(file.path)) continue;
-          const [result] = await eslint.lintText(file.content, { filePath: file.path });
-          for (const m of result.messages) {
-            problems.add(`${file.path}:${m.line} ${m.ruleId}: ${m.message.split("\n")[0]}`);
-          }
+          files.push({ ...file, path: `${index}/${file.path}` });
         }
       }
+      const problems = new Set(
+        lintGeneratedFiles(files, reactHooksRules).map(
+          (m) => `${m.filename}: ${m.code}: ${m.message.split("\n")[0]}`,
+        ),
+      );
       expect([...problems], [...problems].join("\n")).toEqual([]);
     }, 60_000);
   }

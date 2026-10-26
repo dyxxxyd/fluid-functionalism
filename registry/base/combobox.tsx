@@ -315,45 +315,45 @@ function Combobox<
   // context crosses portals) to one step of the ladder.
   const root = (
     <ComboboxContext.Provider value={ctx}>
-    <ComboboxHighlightContext.Provider value={highlight}>
-      <ComboboxPrimitive.Root
-        items={listItems}
-        multiple={isMultiple}
-        // Always controlled; "" (no selection) maps to Base UI's null. The
-        // value shape follows `multiple`, which the primitive's generics
-        // can't express from a boolean prop — hence the cast.
-        value={(isMultiple ? selectedItems : (selectedItems[0] ?? null)) as never}
-        onValueChange={handleValueChange as never}
-        isItemEqualToValue={(a: T, b: T) => itemValue(a) === itemValue(b)}
-        itemToStringLabel={itemLabel}
-        itemToStringValue={itemValue}
-        filter={filterFn}
-        open={open}
-        onOpenChange={(next, details) => {
-          // Hold the unmount for the exit spring; the content releases it.
-          if (!next) details.preventUnmountOnClose();
-          setOpen(next);
-        }}
-        onInputValueChange={(next) => setInputValue(next)}
-        actionsRef={actionsRef}
-        autoHighlight={ALWAYS_HIGHLIGHT}
-        onItemHighlighted={(item, details) =>
-          setHighlight(
-            item === undefined
-              ? null
-              : { index: details.index, keyboard: details.reason !== "pointer" }
-          )
-        }
-        disabled={disabled}
-        name={name}
-        required={required}
-        // Non-modal: the page keeps scrolling and the Positioner tracks the
-        // anchor, so the popup follows its field instead of detaching.
-        modal={false}
-      >
-        {children}
-      </ComboboxPrimitive.Root>
-    </ComboboxHighlightContext.Provider>
+      <ComboboxHighlightContext.Provider value={highlight}>
+        <ComboboxPrimitive.Root
+          items={listItems}
+          multiple={isMultiple}
+          // Always controlled; "" (no selection) maps to Base UI's null. The
+          // value shape follows `multiple`, which the primitive's generics
+          // can't express from a boolean prop — hence the cast.
+          value={(isMultiple ? selectedItems : (selectedItems[0] ?? null)) as never}
+          onValueChange={handleValueChange as never}
+          isItemEqualToValue={(a: T, b: T) => itemValue(a) === itemValue(b)}
+          itemToStringLabel={itemLabel}
+          itemToStringValue={itemValue}
+          filter={filterFn}
+          open={open}
+          onOpenChange={(next, details) => {
+            // Hold the unmount for the exit spring; the content releases it.
+            if (!next) details.preventUnmountOnClose();
+            setOpen(next);
+          }}
+          onInputValueChange={(next) => setInputValue(next)}
+          actionsRef={actionsRef}
+          autoHighlight={ALWAYS_HIGHLIGHT}
+          onItemHighlighted={(item, details) =>
+            setHighlight(
+              item === undefined
+                ? null
+                : { index: details.index, keyboard: details.reason !== "pointer" }
+            )
+          }
+          disabled={disabled}
+          name={name}
+          required={required}
+          // Non-modal: the page keeps scrolling and the Positioner tracks the
+          // anchor, so the popup follows its field instead of detaching.
+          modal={false}
+        >
+          {children}
+        </ComboboxPrimitive.Root>
+      </ComboboxHighlightContext.Provider>
     </ComboboxContext.Provider>
   );
 
@@ -417,10 +417,10 @@ const chipRemoveClass = cn(fieldButtonClass, "rounded hover:bg-active");
 
 interface ComboboxFieldProps
   extends Omit<
-      InputHTMLAttributes<HTMLInputElement>,
-      "size" | "value" | "defaultValue" | "onChange"
-    >,
-    VariantProps<typeof fieldVariants> {
+    InputHTMLAttributes<HTMLInputElement>,
+    "size" | "value" | "defaultValue" | "onChange"
+  >,
+  VariantProps<typeof fieldVariants> {
   icon?: IconComponent;
   placeholder?: string;
   error?: string;
@@ -987,91 +987,91 @@ const ComboboxList = forwardRef<HTMLDivElement, ComboboxListProps>(
     return (
       <ComboboxContentContext.Provider value={contentCtx}>
         <ScrollArea className={popupScrollAreaClass} viewportClassName={cn(popupViewportClass, "scroll-fade")}>
-        <ComboboxPrimitive.List
-          ref={(node: HTMLDivElement | null) => {
-            (containerRef as React.MutableRefObject<HTMLDivElement | null>).current =
-              node;
-            if (typeof ref === "function") ref(node);
-            else if (ref)
-              (ref as React.MutableRefObject<HTMLDivElement | null>).current = node;
-          }}
-          onMouseEnter={handlers.onMouseEnter}
-          onMouseMove={handlers.onMouseMove}
-          onMouseLeave={handlers.onMouseLeave}
-          onClick={handlers.onClick}
-          className={cn(
-            // The list is the overlays' offsetParent, so rows and overlays
-            // scroll together inside the ScrollArea. Padding collapses when
-            // the list is empty (ComboboxEmpty takes over).
-            "relative flex flex-col p-1 outline-none data-[empty]:p-0",
-            className
-          )}
-        >
-          {/* The three overlays are torn down as the close begins rather
+          <ComboboxPrimitive.List
+            ref={(node: HTMLDivElement | null) => {
+              (containerRef as React.RefObject<HTMLDivElement | null>).current =
+                node;
+              if (typeof ref === "function") ref(node);
+              else if (ref)
+                (ref as React.RefObject<HTMLDivElement | null>).current = node;
+            }}
+            onMouseEnter={handlers.onMouseEnter}
+            onMouseMove={handlers.onMouseMove}
+            onMouseLeave={handlers.onMouseLeave}
+            onClick={handlers.onClick}
+            className={cn(
+              // The list is the overlays' offsetParent, so rows and overlays
+              // scroll together inside the ScrollArea. Padding collapses when
+              // the list is empty (ComboboxEmpty takes over).
+              "relative flex flex-col p-1 outline-none data-[empty]:p-0",
+              className
+            )}
+          >
+            {/* The three overlays are torn down as the close begins rather
               than exit-animated: an overlay still mounted when the popup
               reopens is one AnimatePresence re-adopts under its old key and
               animates from the row it had before. */}
-          {/* Selected background */}
-          {open && multiple && (
-            <SelectionBackgrounds
-              blocks={reflowSnap ? blocks.map((b) => ({ ...b, instant: true })) : blocks}
-            />
-          )}
-          {open && !multiple && (
-            <AnimatePresence>
-              {checkedRect && (
-                <motion.div
-                  key="checked"
-                  aria-hidden
-                  className={`absolute ${shape.bg} bg-active pointer-events-none`}
-                  initial={false}
-                  animate={{
-                    top: checkedRect.top,
-                    left: checkedRect.left,
-                    width: checkedRect.width,
-                    height: checkedRect.height,
-                    opacity: 1,
-                  }}
-                  exit={{ opacity: 0, transition: spring.moderate.exit }}
-                  transition={
-                    reflowSnap
-                      ? { duration: 0 }
-                      : { ...spring.moderate, opacity: { duration: 0.08 } }
-                  }
-                />
-              )}
-            </AnimatePresence>
-          )}
+            {/* Selected background */}
+            {open && multiple && (
+              <SelectionBackgrounds
+                blocks={reflowSnap ? blocks.map((b) => ({ ...b, instant: true })) : blocks}
+              />
+            )}
+            {open && !multiple && (
+              <AnimatePresence>
+                {checkedRect && (
+                  <motion.div
+                    key="checked"
+                    aria-hidden
+                    className={`absolute ${shape.bg} bg-active pointer-events-none`}
+                    initial={false}
+                    animate={{
+                      top: checkedRect.top,
+                      left: checkedRect.left,
+                      width: checkedRect.width,
+                      height: checkedRect.height,
+                      opacity: 1,
+                    }}
+                    exit={{ opacity: 0, transition: spring.moderate.exit }}
+                    transition={
+                      reflowSnap
+                        ? { duration: 0 }
+                        : { ...spring.moderate, opacity: { duration: 0.08 } }
+                    }
+                  />
+                )}
+              </AnimatePresence>
+            )}
 
-          {/* Hover background. Snaps (no travel) while a filter reflow is
+            {/* Hover background. Snaps (no travel) while a filter reflow is
               moving the rows underneath. */}
-          {open && (
-            <FluidHoverHighlight
-              hover={hover}
-              className={shape.bg}
-              transition={reflowSnap ? false : undefined}
-            />
-          )}
+            {open && (
+              <FluidHoverHighlight
+                hover={hover}
+                className={shape.bg}
+                transition={reflowSnap ? false : undefined}
+              />
+            )}
 
-          {/* The overlays above are plain children, so the rows come from
+            {/* The overlays above are plain children, so the rows come from
               an explicit Collection (a function child on List would have
               to be its only child). */}
-          <ComboboxPrimitive.Collection>
-            {(item: ComboboxItemData, index: number) => (
-              <ComboboxItemIndexContext.Provider key={itemValue(item)} value={index}>
-                {/* The create row is the list's, not the consumer's: it
+            <ComboboxPrimitive.Collection>
+              {(item: ComboboxItemData, index: number) => (
+                <ComboboxItemIndexContext.Provider key={itemValue(item)} value={index}>
+                  {/* The create row is the list's, not the consumer's: it
                     reads the label from the root and picks like any row. */}
-                {isCreateItem(item) ? (
-                  <ComboboxItem value={CREATE_VALUE} icon={PlusIcon}>
-                    {createRow}
-                  </ComboboxItem>
-                ) : (
-                  children(item, index)
-                )}
-              </ComboboxItemIndexContext.Provider>
-            )}
-          </ComboboxPrimitive.Collection>
-        </ComboboxPrimitive.List>
+                  {isCreateItem(item) ? (
+                    <ComboboxItem value={CREATE_VALUE} icon={PlusIcon}>
+                      {createRow}
+                    </ComboboxItem>
+                  ) : (
+                    children(item, index)
+                  )}
+                </ComboboxItemIndexContext.Provider>
+              )}
+            </ComboboxPrimitive.Collection>
+          </ComboboxPrimitive.List>
         </ScrollArea>
       </ComboboxContentContext.Provider>
     );
@@ -1121,11 +1121,11 @@ const ComboboxItem = forwardRef<HTMLDivElement, ComboboxItemProps>(
         render={
           <div
             ref={(node: HTMLDivElement | null) => {
-              (internalRef as React.MutableRefObject<HTMLDivElement | null>).current =
+              (internalRef as React.RefObject<HTMLDivElement | null>).current =
                 node;
               if (typeof ref === "function") ref(node);
               else if (ref)
-                (ref as React.MutableRefObject<HTMLDivElement | null>).current = node;
+                (ref as React.RefObject<HTMLDivElement | null>).current = node;
             }}
             data-fluid-hover-index={index}
             data-value={value}
@@ -1227,7 +1227,7 @@ const ComboboxEmpty = forwardRef<HTMLDivElement, ComboboxEmptyProps>(
       <ComboboxPrimitive.Empty
         ref={ref}
         className={cn(
-          "px-3 text-center text-muted-foreground [&:not(:empty)]:py-6",
+          "px-3 text-center text-muted-foreground not-empty:py-6",
           sizeClasses.text,
           className
         )}

@@ -4,7 +4,7 @@
  * default filter, the sectioning with suggestions first, and the keyboard
  * flow the input drives through aria-activedescendant.
  */
-import { afterEach, describe, expect, it, vi } from "vitest";
+import { afterEach, describe, expect, it, vi } from "vite-plus/test";
 import { act, cleanup, fireEvent, render, createEvent } from "@testing-library/react";
 import { useRef } from "react";
 import {
@@ -33,7 +33,9 @@ class ResizeObserverStub {
   disconnect() {}
 }
 globalThis.ResizeObserver ??= ResizeObserverStub as unknown as typeof ResizeObserver;
-Element.prototype.scrollIntoView ??= () => {};
+if (typeof Element.prototype.scrollIntoView !== "function") {
+  Element.prototype.scrollIntoView = () => {};
+}
 window.matchMedia ??= ((query: string) =>
   ({
     matches: false,

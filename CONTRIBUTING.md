@@ -8,11 +8,12 @@ Open an issue before a pull request, so the direction is agreed before the work 
 
 ## Set up
 
-You need Node 22, the version CI runs.
+Install [Vite+](https://viteplus.dev/guide/). The Node version in `.node-version`
+and the pnpm version in `package.json` match CI.
 
 ```bash
-npm ci
-npm run dev              # docs site on http://localhost:3000
+vp install --frozen-lockfile
+vp run dev              # docs site on http://localhost:3000
 ```
 
 ## Where things live
@@ -27,7 +28,7 @@ npm run dev              # docs site on http://localhost:3000
 ## 5 rules
 
 1. **Both flavors change together.** A fix or a new prop in `registry/radix/<name>.tsx` gets the same change in `registry/base/<name>.tsx`.
-2. **Rebuild the registry.** After any change under `registry/` or to `registry.json`, run `npm run registry:build` and commit `public/r`. CI fails when it drifts.
+2. **Rebuild the registry.** After any change under `registry/` or to `registry.json`, run `vp run registry:build` and commit `public/r`. CI fails when it drifts.
 3. **Registry files install alone.** Each one lands in someone else's app, so it imports only what its `registry.json` item declares, and its comments make sense there (no paths into this repo). A new npm dependency gets a `^` floor at the version you tested, like `@base-ui/react@^1.9.0`.
 4. **Motion comes from the system.** Springs come from `registry/default/lib/springs.ts`, in the 3 speeds [motion-guidelines.md](motion-guidelines.md) describes. No hand-picked durations.
 5. **Copy follows the tone guide.** Docs text, comments and pull request text follow [tone-of-voice.md](tone-of-voice.md): plain words, present tense, no em dashes.
@@ -37,16 +38,20 @@ A new component also gets a docs page, a props table, a Copy prompt and a README
 ## Check your work
 
 ```bash
-npm run lint             # 0 errors; registry/ is held to the React Compiler rules
-npm test
-npm run build
-npm run registry:build   # then commit public/r
+vp check --deny-warnings # Oxlint, type checks, and the design-system rules
+vp test
+vp run build
+vp run registry:build   # then commit public/r
 ```
+
+Formatting is opt-in with `vp run format`; `vp check` runs Oxlint, type
+checking, and the design-system rules without requiring a repository-wide
+formatting change.
 
 When you change a popup (dropdown, select, combobox, dialog, tooltip), also run the close-animation check against your local site, in both flavors:
 
 ```bash
-npm run deps:popups -- --url http://localhost:3000
+vp run deps:popups --url http://localhost:3000
 ```
 
 ## Pull requests

@@ -4,7 +4,7 @@
  * app/globals.css and the `reveal` item in registry.json. This fails when a
  * copy is stale.
  */
-import { describe, expect, it } from "vitest";
+import { describe, expect, it } from "vite-plus/test";
 import { generate } from "../scripts/generate-reveal.mjs";
 
 describe("reveal CSS generation", () => {

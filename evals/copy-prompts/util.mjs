@@ -3,10 +3,10 @@
 // stuck npm install), and output is kept to a tail plus an optional log file.
 import { spawn, execFileSync } from "node:child_process";
 import { createWriteStream } from "node:fs";
+import { stripVTControlCharacters } from "node:util";
 
 const TAIL = 20000;
 // Terminal colors stay in the log files and out of the report.
-const ANSI = /\u001b\[[0-9;]*[A-Za-z]/g;
 
 /** Runs a command to completion. Resolves with { code, timedOut, ms, out }
  *  where `out` is the last 20k characters of stdout+stderr; never rejects
@@ -25,7 +25,7 @@ export function run(cmd, args, { cwd, env, timeoutMs = 10 * 60000, logFile, inpu
     let timedOut = false;
     const onData = (chunk) => {
       log?.write(chunk);
-      out = (out + String(chunk).replace(ANSI, "")).slice(-TAIL);
+      out = (out + stripVTControlCharacters(String(chunk))).slice(-TAIL);
     };
     child.stdout.on("data", onData);
     child.stderr.on("data", onData);
@@ -89,7 +89,7 @@ export function versionOf(bin) {
 
 /** Runs async jobs with at most `limit` in flight, results in input order. */
 export async function pool(items, limit, job) {
-  const results = new Array(items.length);
+  const results = Array.from({ length: items.length });
   let next = 0;
   const worker = async () => {
     while (next < items.length) {

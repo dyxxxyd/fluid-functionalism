@@ -3,9 +3,9 @@
 // a golden code, and a compile guard — generated files are injected as
 // virtual files into a REAL TypeScript program over the project's tsconfig
 // and must produce zero diagnostics.
-import { describe, it, expect } from "vitest";
+import { describe, it, expect } from "vite-plus/test";
 import { readFileSync } from "node:fs";
-import ts from "typescript";
+import { parseDiagnostics } from "./helpers/typescript.mjs";
 import { createPresetTypechecker } from "./helpers/preset-typecheck.mjs";
 import {
   encodeComboboxPreset,
@@ -175,16 +175,7 @@ describe("combobox preset install generator", () => {
     for (let i = 0; i < 100; i++) {
       const p = { ...DEFAULT_COMBOBOX_PRESET, ...randomPreset(rand) };
       for (const file of generateComboboxPresetFiles(p)) {
-        const sf = ts.createSourceFile(
-          file.target,
-          file.content,
-          ts.ScriptTarget.Latest,
-          true,
-          file.target.endsWith(".tsx") ? ts.ScriptKind.TSX : ts.ScriptKind.TS
-        );
-        const errs = sf.parseDiagnostics.map((d) =>
-          ts.flattenDiagnosticMessageText(d.messageText, " ")
-        );
+        const errs = parseDiagnostics(file.target, file.content);
         expect(errs, `iteration ${i} ${file.target}:\n${errs.join("\n")}`).toEqual([]);
       }
     }

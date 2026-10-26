@@ -165,7 +165,7 @@ export default function OgVideoPage() {
     window.__ogVideo = { duration: DURATION, start };
     let autostart: number | undefined;
     if (!isRecord) {
-      document.fonts.ready.then(() => {
+      void document.fonts.ready.then(() => {
         autostart = window.setTimeout(start, 600);
       });
     }

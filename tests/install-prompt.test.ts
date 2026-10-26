@@ -1,4 +1,4 @@
-import { describe, expect, it } from "vitest";
+import { describe, expect, it } from "vite-plus/test";
 import {
   buildInstallPrompt,
   buildPresetPrompt,
@@ -92,7 +92,7 @@ describe("the starter Copy prompt's heading font", () => {
     const prompt = buildStarterPrompt(settings, { font: "source-serif", custom: null, weight: null });
     expect(prompt).toContain(", Source Serif 4 headings.");
     expect(prompt).toContain('import { Source_Serif_4 } from "next/font/google"');
-    // eslint-disable-next-line no-restricted-syntax -- prompt text for the agent's CSS, not a style here
+    // oxlint-disable-next-line fluid/design-system -- prompt text for the agent's CSS, not a style here
     expect(prompt).toContain(`'wght' 450, 'opsz' 25 !important`);
     expect(prompt).toContain("--fs-display: 32px");
     // The starter itself is unchanged: same command, same slug.

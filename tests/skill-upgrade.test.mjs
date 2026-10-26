@@ -4,7 +4,7 @@
 // network: each file is compared in the flavor its imports show, a file
 // that ships inside another item still finds it, what an install rewrites
 // is ignored, a missing index fails loudly, and nothing is ever written.
-import { afterAll, describe, expect, it } from "vitest";
+import { afterAll, describe, expect, it } from "vite-plus/test";
 import { execFileSync } from "node:child_process";
 import { mkdirSync, mkdtempSync, readdirSync, rmSync, writeFileSync } from "node:fs";
 import { tmpdir } from "node:os";
@@ -160,7 +160,7 @@ describe("checkUpgrade", () => {
       registry: registry(),
     });
     const selects = check.results.filter((r) => r.name === "select");
-    expect(selects.map((r) => [r.path, r.status]).sort()).toEqual([
+    expect(selects.map((r) => [r.path, r.status]).sort((a, b) => a[0] < b[0] ? -1 : a[0] > b[0] ? 1 : 0)).toEqual([
       ["src/components/select.tsx", "differs"],
       ["src/components/ui/select.tsx", "current"],
     ]);

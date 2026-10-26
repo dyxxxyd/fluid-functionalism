@@ -9,14 +9,26 @@ import type { ReleaseMarks } from "@/lib/changelog/marks";
 export const CHANGELOG_DIR = join(process.cwd(), "content", "changelog");
 const FILE = /^(\d{4}-\d{2})\.md$/;
 
+export interface ReleaseSource {
+  list(): string[];
+  read(name: string): string;
+}
+
+// Keep production reads statically inside content/changelog so Turbopack
+// traces this directory. Tests inject their own source for temporary files.
+const changelogSource: ReleaseSource = {
+  list: () => readdirSync(CHANGELOG_DIR),
+  read: (name) => readFileSync(join(CHANGELOG_DIR, name), "utf8"),
+};
+
 /** Every release, newest month first. Throws on a malformed file. */
-export function loadReleases(dir = CHANGELOG_DIR): Release[] {
-  return readdirSync(dir)
+export function loadReleases(source = changelogSource): Release[] {
+  return source.list()
     .filter((name) => FILE.test(name))
     .sort()
     .reverse()
     .map((name) => {
-      const release = parseRelease(readFileSync(join(dir, name), "utf8"), `content/changelog/${name}`);
+      const release = parseRelease(source.read(name), `content/changelog/${name}`);
       if (release.month !== FILE.exec(name)![1]) {
         throw new ChangelogFormatError(`content/changelog/${name}`, 2, "`month` does not match the file name");
       }
@@ -48,11 +60,11 @@ let marksCache: ReleaseMarks | null = null;
  *  moves on with each release. Read once per server in production, where
  *  release files only change with a deploy; every request in development,
  *  so an edited release shows. */
-export function latestMarks(dir = CHANGELOG_DIR, ahead = AHEAD_OF_RELEASE): ReleaseMarks {
+export function latestMarks(source = changelogSource, ahead = AHEAD_OF_RELEASE): ReleaseMarks {
   if (marksCache && process.env.NODE_ENV === "production") return marksCache;
   let marks: ReleaseMarks = { new: [], updated: [], ahead: [] };
   try {
-    const latest = loadReleases(dir)[0];
+    const latest = loadReleases(source)[0];
     const pending = ahead.filter((a) => !latest || a.month > latest.month).flatMap((a) => a.slugs);
     if (latest) {
       const slugs = (kinds: ChangeKind[]) =>

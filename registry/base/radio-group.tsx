@@ -107,9 +107,9 @@ const RadioGroup = forwardRef<HTMLDivElement, RadioGroupProps>(
     const content = (
       <div
         ref={(node) => {
-          (containerRef as React.MutableRefObject<HTMLDivElement | null>).current = node;
+          (containerRef as React.RefObject<HTMLDivElement | null>).current = node;
           if (typeof ref === "function") ref(node);
-          else if (ref) (ref as React.MutableRefObject<HTMLDivElement | null>).current = node;
+          else if (ref) (ref as React.RefObject<HTMLDivElement | null>).current = node;
         }}
         onMouseEnter={handlers.onMouseEnter}
         onMouseMove={handlers.onMouseMove}
@@ -342,9 +342,9 @@ const RadioItem = forwardRef<HTMLDivElement, RadioItemProps>(
     return (
       <div
         ref={(node) => {
-          (internalRef as React.MutableRefObject<HTMLDivElement | null>).current = node;
+          (internalRef as React.RefObject<HTMLDivElement | null>).current = node;
           if (typeof ref === "function") ref(node);
-          else if (ref) (ref as React.MutableRefObject<HTMLDivElement | null>).current = node;
+          else if (ref) (ref as React.RefObject<HTMLDivElement | null>).current = node;
         }}
         data-fluid-hover-index={index}
         // Roving tabindex: selected item is the tab stop; with no selection the

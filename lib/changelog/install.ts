@@ -17,8 +17,8 @@ export type EntryInstall =
    *  over several named components. */
   | { kind: "none" };
 
-const ROOT = process.cwd();
-const has = (...parts: string[]) => existsSync(join(ROOT, ...parts));
+const REGISTRY_DIR = join(process.cwd(), "public", "r");
+const has = (...parts: string[]) => existsSync(join(REGISTRY_DIR, ...parts));
 
 /** The registry name a doc page installs: its system entry's `installSlug`
  *  when it has one (Surfaces installs `elevated`), else the slug itself. The
@@ -28,8 +28,8 @@ function installNameForPage(slug: string): string {
 }
 
 const item = (name: string): EntryInstall =>
-  has("public", "r", `${name}.json`)
-    ? { kind: "item", name, base: has("public", "r", "base", `${name}.json`) }
+  has(`${name}.json`)
+    ? { kind: "item", name, base: has("base", `${name}.json`) }
     : { kind: "none" };
 
 export function entryInstall(entry: ChangeEntry): EntryInstall {

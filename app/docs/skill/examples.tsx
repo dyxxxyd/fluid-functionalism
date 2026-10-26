@@ -39,7 +39,7 @@ function GenericTabs({ selected, onSelect }: { selected: number; onSelect: (i: n
           onClick={() => onSelect(i)}
           className={cn(
             "h-9 px-3 text-site-body text-muted-foreground [&:is(:hover,[data-script-hover])]:bg-muted/60",
-            // eslint-disable-next-line no-restricted-syntax -- the generic version, bold on purpose to show the reflow
+            // oxlint-disable-next-line fluid/design-system -- the generic version, bold on purpose to show the reflow
             selected === i && "bg-muted font-semibold text-foreground [&:is(:hover,[data-script-hover])]:bg-muted",
             shape.bg
           )}
@@ -136,17 +136,17 @@ function GenericCopy({ copied, onCopy }: { copied: boolean; onCopy: () => void }
 function clickWithoutClipboard(button: HTMLElement | null, value: string) {
   const clipboard = navigator.clipboard;
   if (!button || !clipboard) return;
-  const own = Object.prototype.hasOwnProperty.call(clipboard, "writeText");
-  const writeText = clipboard.writeText;
+  const descriptor = Object.getOwnPropertyDescriptor(clipboard, "writeText");
+  const writeText = clipboard.writeText.bind(clipboard);
   let restored = false;
   const restore = () => {
     if (restored) return;
     restored = true;
-    if (own) clipboard.writeText = writeText;
+    if (descriptor) Object.defineProperty(clipboard, "writeText", descriptor);
     else Reflect.deleteProperty(clipboard, "writeText");
   };
   clipboard.writeText = (text: string) => {
-    if (text !== value) return writeText.call(clipboard, text);
+    if (text !== value) return writeText(text);
     restore();
     return Promise.resolve();
   };

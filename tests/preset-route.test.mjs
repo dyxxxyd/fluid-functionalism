@@ -2,7 +2,7 @@
 // postbuild's resolver for every item × flavor (they are two copies by
 // necessity — the route can't import the fs-touching script), and generated
 // preset payload sources must obey the same purity rules as static payloads.
-import { describe, it, expect } from "vitest";
+import { describe, it, expect } from "vite-plus/test";
 import { readFileSync } from "node:fs";
 import {
   depUrl as scriptDepUrl,

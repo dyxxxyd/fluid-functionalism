@@ -143,7 +143,7 @@ function SidebarSheet({ side, open, onClose, children }: SidebarSheetProps) {
                   panelRef.current = node;
                   if (typeof baseRef === "function") baseRef(node);
                   else if (baseRef)
-                    (baseRef as React.MutableRefObject<HTMLDivElement | null>).current =
+                    (baseRef as React.RefObject<HTMLDivElement | null>).current =
                       node;
                 }}
                 tabIndex={-1}

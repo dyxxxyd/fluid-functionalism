@@ -81,7 +81,7 @@ export function googleFontHref(font: GoogleFont): string {
  *  KB for a page of picker rows. */
 export function googleFontPreviewHref(fonts: readonly GoogleFont[]): string {
   const families = fonts.map((f) => `family=${familyParam(f.n)}${previewSpec(f)}`).join("&");
-  const text = [...new Set(fonts.flatMap((f) => [...f.n]))].sort().join("");
+  const text = [...new Set(fonts.flatMap((f) => Array.from(f.n)))].sort().join("");
   return `${CSS2}?${families}&text=${encodeURIComponent(text)}&display=swap`;
 }
 

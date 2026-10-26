@@ -94,7 +94,14 @@ export function ComponentPreview({
     routeKeyboardOnMouseDown(e, previewRef.current);
 
   useEffect(() => {
-    if (code) highlight(code).then(setHtml);
+    let cancelled = false;
+    if (code) {
+      void highlight(code).then(
+        (html) => { if (!cancelled) setHtml(html); },
+        () => { if (!cancelled) setHtml(""); },
+      );
+    }
+    return () => { cancelled = true; };
   }, [code]);
 
   const showButton = !!playbackButton || !!onReplay;

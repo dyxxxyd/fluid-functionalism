@@ -63,7 +63,7 @@ function datePickerDemoFile(p: DatePickerPreset): string {
   if (booked || d.presets) l.push(``);
 
   const calendarProps = [
-    ...(booked ? ["booked: BOOKED", "disabled: { before: new Date() }"] : []),
+    ...(booked ? ["booked: BOOKED", "disabled: { before: today }"] : []),
     ...(p.weekNumbers ? ["showWeekNumber: true"] : []),
   ];
   const props = [

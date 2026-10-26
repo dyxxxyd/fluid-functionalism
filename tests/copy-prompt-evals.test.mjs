@@ -1,7 +1,7 @@
 // The weekly Copy-prompt sweep (evals/copy-prompts) runs on a schedule, not
 // in CI, so a page it silently stops covering or a rotation that skips a
 // brief would go unnoticed for weeks. These keep its selection honest.
-import { describe, it, expect } from "vitest";
+import { describe, it, expect } from "vite-plus/test";
 import { docPages, listBriefs, parseInstallCommand } from "../evals/copy-prompts/briefs.mjs";
 import { rankBriefs, rotationSlice, selectWeek } from "../evals/copy-prompts/select.mjs";
 import { attention, compare, reportHtml, summaryMarkdown } from "../evals/copy-prompts/report.mjs";

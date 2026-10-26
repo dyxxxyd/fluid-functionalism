@@ -1,4 +1,5 @@
 // @vitest-environment jsdom
+/* oxlint-disable nextjs/no-html-link-for-pages -- These cases explicitly test plain anchor rendering. */
 /**
  * Button accepts both ways of rendering as another element: Radix's
  * `asChild` and Base UI's `render`. The shadcn CLI rewrites `asChild` to
@@ -6,7 +7,7 @@
  * project, so components that pass a link to Button (BannerAction's `href`)
  * must come out the same either way, in both flavors.
  */
-import { describe, expect, it } from "vitest";
+import { describe, expect, it } from "vite-plus/test";
 import { render } from "@testing-library/react";
 import { Button as RadixButton } from "@/registry/radix/button";
 import { Button as BaseButton } from "@/registry/base/button";

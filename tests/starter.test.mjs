@@ -1,7 +1,7 @@
 // Starter guards: the settings slug round-trips for every combination, the
 // item lists every component once (flavored by the chosen primitive, one
 // icon set), and the generated files compile against the real components.
-import { describe, it, expect } from "vitest";
+import { describe, it, expect } from "vite-plus/test";
 import { readFileSync } from "node:fs";
 import { createPresetTypechecker } from "./helpers/preset-typecheck.mjs";
 import { buildDepResolver } from "../lib/registry-urls.mjs";

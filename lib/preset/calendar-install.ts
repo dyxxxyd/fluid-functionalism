@@ -48,7 +48,7 @@ function calendarDemoFile(p: CalendarPreset): string {
     ...(p.cellSize !== "auto" ? [`cellSize={${p.cellSize}}`] : []),
     ...(p.weekNumbers ? ["showWeekNumber"] : []),
     // Past days can't be picked either, so the booked ones read as taken.
-    ...(booked ? ["booked={BOOKED}", "disabled={{ before: new Date() }}"] : []),
+    ...(booked ? ["booked={BOOKED}", "disabled={{ before: today }}"] : []),
     ...(p.days === "weekdays"
       ? [`available={{ dayOfWeek: [${CALENDAR_WEEKDAYS.join(", ")}] }}`]
       : []),

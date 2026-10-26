@@ -195,7 +195,7 @@ function headingLines(heading: StarterHeading): string[] {
     return [
       "Either way, set the headings in Source Serif 4, as picked on the site (body text and components stay Inter):",
       `- app/layout.tsx: import { Source_Serif_4 } from "next/font/google", load it with { subsets: ["latin"], axes: ["opsz"], variable: "--font-heading" } and add its .variable class to <html> next to Inter's.`,
-      // eslint-disable-next-line no-restricted-syntax -- prompt text for the agent's CSS, not a style here
+      // oxlint-disable-next-line fluid/design-system -- prompt text for the agent's CSS, not a style here
       `- ${css}: h1, h2, h3 { font-family: var(--font-heading), Georgia, serif; font-variation-settings: 'wght' 450, 'opsz' 18 !important; } and h1 { font-variation-settings: 'wght' 450, 'opsz' 25 !important; }. One weight, 450, for every heading: the serif carries its own contrast. !important because component titles set their weight inline.`,
       `- Also in ${css}, the display role runs 4px larger for the serif: :root { --fs-display: 32px; --lh-display: 38px; --fs-display-compact: 28px; --lh-display-compact: 34px; } after the type scale.`,
     ];

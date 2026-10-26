@@ -1,7 +1,7 @@
 // Preset codec guards: round-trip integrity across the whole state space,
 // the shadcn-style compat rules (defaults at index 0, < 53 bits), and a
 // golden code so an accidental table reorder cannot ship silently.
-import { describe, it, expect } from "vitest";
+import { describe, it, expect } from "vite-plus/test";
 import {
   encodeSidebarPreset,
   decodeSidebarPreset,

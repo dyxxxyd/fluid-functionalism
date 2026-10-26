@@ -124,8 +124,12 @@ export default async function RootLayout({
                         {children}
                       </SidebarLayout>
                       <SettingsToast />
-                      <Analytics />
-                      <SpeedInsights />
+                      {process.env.VERCEL === "1" && (
+                        <>
+                          <Analytics />
+                          <SpeedInsights />
+                        </>
+                      )}
                     </HeadingFontProvider>
                   </BaseProvider>
                 </IconPlaygroundProvider>

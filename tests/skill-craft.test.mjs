@@ -3,7 +3,7 @@
 // entry at all), and the skill's generated craft reference matches a fresh
 // run of the generator — the same fails-on-drift contract the registry
 // build has for public/r.
-import { describe, it, expect } from "vitest";
+import { describe, it, expect } from "vite-plus/test";
 import { execFileSync } from "node:child_process";
 import { mkdtempSync, readFileSync, readdirSync, statSync } from "node:fs";
 import { tmpdir } from "node:os";
@@ -76,7 +76,7 @@ describe("the craft reference covers every component", () => {
 
   const catalogRows = catalogSrc
     .split("\n")
-    .filter((line) => /^\| \[/.test(line));
+    .filter((line) => line.startsWith('| ['));
 
   it.each(catalogRows)("catalog row links to a generated craft section: %s", (row) => {
     const target = /\]\(craft\.md#([^)]+)\)/.exec(row)?.[1];

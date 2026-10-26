@@ -142,9 +142,9 @@ const TableRow = forwardRef<HTMLTableRowElement, TableRowProps>(
     return (
       <tr
         ref={(node) => {
-          (internalRef as React.MutableRefObject<HTMLTableRowElement | null>).current = node;
+          (internalRef as React.RefObject<HTMLTableRowElement | null>).current = node;
           if (typeof ref === "function") ref(node);
-          else if (ref) (ref as React.MutableRefObject<HTMLTableRowElement | null>).current = node;
+          else if (ref) (ref as React.RefObject<HTMLTableRowElement | null>).current = node;
         }}
         data-fluid-hover-index={index}
         // Borders fade over 80ms instead of popping as the highlight moves.

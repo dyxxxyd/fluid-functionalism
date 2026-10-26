@@ -117,6 +117,7 @@ export function ChangelogView({ releases }: { releases: ReleaseView[] }) {
               agent; agents also find it from the page's <head>. */}
           <p className="mt-2 text-site-body text-muted-foreground">
             Every change, month by month. A release lands on the first Friday.{" "}
+            {/* oxlint-disable-next-line nextjs/no-html-link-for-pages -- Markdown is a document response, not a Next.js page transition. */}
             <a
               href="/changelog.md"
               className="rounded-sm text-foreground underline decoration-border underline-offset-4 outline-none transition-[text-decoration-color] duration-80 hover:decoration-foreground focus-visible:ring-1 focus-visible:ring-[color:var(--focus-ring,#6B97FF)]"

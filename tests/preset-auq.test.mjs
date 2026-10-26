@@ -1,9 +1,9 @@
 // AskUserQuestions preset install guards — same shape as the other
-// per-component suites: type-checked matrix through a real ts.createProgram
+// per-component suites: type-checked matrix through a real TypeScript program
 // over the project tsconfig, parse fuzz, payload purity. Codec-rule guards
 // come free from the generic block in preset-codec.test.mjs.
-import { describe, it, expect } from "vitest";
-import ts from "typescript";
+import { describe, it, expect } from "vite-plus/test";
+import { parseDiagnostics } from "./helpers/typescript.mjs";
 import { createPresetTypechecker } from "./helpers/preset-typecheck.mjs";
 import {
   generateAuqPresetFiles,
@@ -53,14 +53,8 @@ describe("AUQ preset install generator", () => {
         p[f.key] = f.values[Math.floor(rand() * f.values.length)];
       }
       for (const file of generateAuqPresetFiles(p)) {
-        const sf = ts.createSourceFile(
-          file.target,
-          file.content,
-          ts.ScriptTarget.Latest,
-          true,
-          ts.ScriptKind.TSX
-        );
-        expect(sf.parseDiagnostics.length, `iteration ${i}`).toBe(0);
+        const errs = parseDiagnostics(file.target, file.content);
+        expect(errs.length, `iteration ${i}`).toBe(0);
         expect(file.content).not.toContain("@/lib/docs");
         expect(file.content).not.toContain('from "@/registry/');
       }

@@ -5,7 +5,7 @@
  * past the last row) lands on the highlighted row; a click inside a row, or
  * on a control that sits between rows, is left alone.
  */
-import { afterEach, describe, expect, it, vi } from "vitest";
+import { afterEach, describe, expect, it, vi } from "vite-plus/test";
 import { act, cleanup, fireEvent, render } from "@testing-library/react";
 import { useEffect, useRef, useState, type ReactNode } from "react";
 import { createPortal, flushSync } from "react-dom";

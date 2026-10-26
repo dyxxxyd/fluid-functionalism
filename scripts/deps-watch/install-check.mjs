@@ -64,7 +64,7 @@ const shipped = [
       }),
     ),
   ),
-].sort();
+].sort((a, b) => a < b ? -1 : a > b ? 1 : 0);
 
 if (opts.build) {
   log("building the registry");
@@ -102,7 +102,7 @@ local = `http://127.0.0.1:${server.address().port}/r`;
 log(`serving public/r at ${local}`);
 
 const workDir = mkdtempSync(join(tmpdir(), "ff-deps-install-"));
-const report = { ranAt: new Date().toISOString(), registry: local, shadcn: null, flavors: {} };
+const report = { ranAt: new Date().toISOString(), registry: local, shadcn: "", flavors: {} };
 let failed = false;
 
 try {
@@ -181,7 +181,7 @@ try {
 }
 
 const md = [`# Install check, ${report.ranAt.slice(0, 10)}`, ""];
-if (report.shadcn) md.push(`shadcn ${report.shadcn}, registry served from this checkout's public/r.`, "");
+if (typeof report.shadcn === "string") md.push(`shadcn ${report.shadcn}, registry served from this checkout's public/r.`, "");
 if (report.error) md.push("Setup failed:", "", "```", tail(report.error), "```", "");
 for (const [flavor, r] of Object.entries(report.flavors)) {
   md.push(`## ${flavor}`, "", `${r.items.length} items.`, "");

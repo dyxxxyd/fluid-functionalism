@@ -106,7 +106,7 @@ export function parseRelease(source: string, file = "release.md"): Release {
   if (!month || !MONTH.test(month)) fail(2, "`month` must be YYYY-MM");
   if (!title) fail(2, "`title` is required");
   if (title.length > 90) fail(2, "`title` runs past 90 characters");
-  if (/\.$/.test(title)) fail(2, "`title` ends with a period");
+  if (title.endsWith('.')) fail(2, "`title` ends with a period");
   if (released !== undefined) {
     if (!DAY.test(released)) fail(2, "`released` must be YYYY-MM-DD");
     // The pattern lets 2026-02-31 through; Date would roll it into March.

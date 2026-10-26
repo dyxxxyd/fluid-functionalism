@@ -52,12 +52,12 @@ const NavItem = forwardRef<HTMLAnchorElement, NavItemProps>(
       <Link
         ref={(node) => {
           (
-            internalRef as React.MutableRefObject<HTMLAnchorElement | null>
+            internalRef as React.RefObject<HTMLAnchorElement | null>
           ).current = node;
           if (typeof ref === "function") ref(node);
           else if (ref)
             (
-              ref as React.MutableRefObject<HTMLAnchorElement | null>
+              ref as React.RefObject<HTMLAnchorElement | null>
             ).current = node;
         }}
         href={href}

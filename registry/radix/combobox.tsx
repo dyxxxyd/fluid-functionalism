@@ -1259,11 +1259,11 @@ const ComboboxList = forwardRef<HTMLDivElement, ComboboxListProps>(
         <ScrollArea className={popupScrollAreaClass} viewportClassName={cn(popupViewportClass, "scroll-fade")}>
         <div
           ref={(node: HTMLDivElement | null) => {
-            (containerRef as React.MutableRefObject<HTMLDivElement | null>).current =
+            (containerRef as React.RefObject<HTMLDivElement | null>).current =
               node;
             if (typeof ref === "function") ref(node);
             else if (ref)
-              (ref as React.MutableRefObject<HTMLDivElement | null>).current = node;
+              (ref as React.RefObject<HTMLDivElement | null>).current = node;
           }}
           id={listId}
           role="listbox"
@@ -1391,11 +1391,11 @@ const ComboboxItem = forwardRef<HTMLDivElement, ComboboxItemProps>(
     return (
       <div
         ref={(node: HTMLDivElement | null) => {
-          (internalRef as React.MutableRefObject<HTMLDivElement | null>).current =
+          (internalRef as React.RefObject<HTMLDivElement | null>).current =
             node;
           if (typeof ref === "function") ref(node);
           else if (ref)
-            (ref as React.MutableRefObject<HTMLDivElement | null>).current = node;
+            (ref as React.RefObject<HTMLDivElement | null>).current = node;
         }}
         id={`${comboboxCtx.listId}-${index}`}
         role="option"

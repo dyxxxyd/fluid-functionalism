@@ -6,7 +6,7 @@
  * textareaProps.className with the field's own classes instead of letting
  * it replace them (which dropped the 16px touch size with everything else).
  */
-import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
+import { afterEach, beforeEach, describe, expect, it, vi } from "vite-plus/test";
 import { act, cleanup, fireEvent, render } from "@testing-library/react";
 import { InputCopy } from "@/registry/default/input-copy";
 import { InputMessage } from "@/registry/default/input-message";
@@ -23,7 +23,9 @@ class ResizeObserverStub {
   disconnect() {}
 }
 globalThis.ResizeObserver ??= ResizeObserverStub as unknown as typeof ResizeObserver;
-Element.prototype.scrollIntoView ??= () => {};
+if (typeof Element.prototype.scrollIntoView !== "function") {
+  Element.prototype.scrollIntoView = () => {};
+}
 window.matchMedia ??= ((query: string) =>
   ({
     matches: false,
@@ -37,8 +39,8 @@ window.matchMedia ??= ((query: string) =>
   }) as MediaQueryList) as typeof window.matchMedia;
 
 describe("copy fallbacks on iOS", () => {
-  const select = HTMLTextAreaElement.prototype.select;
-  const execCommand = document.execCommand;
+  const select = Object.getOwnPropertyDescriptor(HTMLTextAreaElement.prototype, "select")!;
+  const execCommand = Object.getOwnPropertyDescriptor(document, "execCommand");
   const clipboard = Object.getOwnPropertyDescriptor(navigator, "clipboard");
   let copied: { text: string; fontSize: string } | null;
 
@@ -65,8 +67,9 @@ describe("copy fallbacks on iOS", () => {
   });
 
   afterEach(() => {
-    HTMLTextAreaElement.prototype.select = select;
-    document.execCommand = execCommand;
+    Object.defineProperty(HTMLTextAreaElement.prototype, "select", select);
+    if (execCommand) Object.defineProperty(document, "execCommand", execCommand);
+    else Reflect.deleteProperty(document, "execCommand");
     if (clipboard) Object.defineProperty(navigator, "clipboard", clipboard);
     else delete (navigator as { clipboard?: unknown }).clipboard;
   });

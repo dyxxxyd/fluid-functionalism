@@ -200,24 +200,34 @@ Or install a whole set (`@fluid/icons-tabler`, `@fluid/icons-phosphor`, `@fluid/
 
 ## Tech stack
 
-- [Next.js](https://nextjs.org) 15 + React 19 (docs site)
+- [Next.js](https://nextjs.org) 16 + React 19 (docs site)
 - [Tailwind CSS](https://tailwindcss.com) v4
 - [Motion](https://motion.dev)
 - [Radix UI](https://www.radix-ui.com) and [Base UI](https://base-ui.com) primitives
-- [shadcn/ui](https://ui.shadcn.com) registry protocol, shadcn CLI 3
+- [shadcn/ui](https://ui.shadcn.com) registry protocol, shadcn CLI 4
 
 ## Development
 
 ```bash
-npm install
-npm run dev              # docs site on http://localhost:3000
-npm test                 # vitest
-npm run lint
-npm run registry:build   # shadcn build + scripts/postbuild-registry.mjs, writes public/r
+vp install --frozen-lockfile
+vp run dev              # Next.js docs site on http://localhost:3000
+vp test                 # Vitest through Vite+
+vp check --deny-warnings # Oxlint, type checks, and the design-system rules
+vp run build            # Next.js production build
+vp run registry:build   # shadcn build + scripts/postbuild-registry.mjs, writes public/r
 node scripts/build-skill-craft.mjs   # writes the skill's craft reference
 ```
 
-Sources live in `registry/`: `radix/` and `base/` hold the two flavors, `default/` the single-source components, hooks, and libs, `blocks/` the compositions. `public/r` is the built output users install from, and it is committed. CI rebuilds it and fails when it drifts from the sources, so run `npm run registry:build` and commit the result with any registry change. The skill's craft reference works the same way: it is generated from the prompt entries in `lib/docs/prompt-entries.ts`, and a test fails when the committed copy has drifted.
+Install [Vite+](https://viteplus.dev/guide/) first; it reads the Node version from
+`.node-version` and the pnpm version from `package.json`. Use `vp run dev` and
+`vp run build` for the Next.js scripts. The built-in `vp dev` and `vp build`
+commands run Vite instead.
+
+`vp check` runs Oxlint, type checking, and the design-system rules in `lint/`.
+Formatting is opt-in with `vp run format`; the existing source files have no
+formatter baseline.
+
+Sources live in `registry/`: `radix/` and `base/` hold the two flavors, `default/` the single-source components, hooks, and libs, `blocks/` the compositions. `public/r` is the built output users install from, and it is committed. CI rebuilds it and fails when it drifts from the sources, so run `vp run registry:build` and commit the result with any registry change. The skill's craft reference works the same way: it is generated from the prompt entries in `lib/docs/prompt-entries.ts`, and a test fails when the committed copy has drifted.
 
 Guides in the repo: [motion-guidelines.md](motion-guidelines.md), [component-documentation-guidelines.md](component-documentation-guidelines.md), [preset-guidelines.md](preset-guidelines.md), [tone-of-voice.md](tone-of-voice.md), and [README-guidelines.md](README-guidelines.md) for what this file carries and what it defers.
 

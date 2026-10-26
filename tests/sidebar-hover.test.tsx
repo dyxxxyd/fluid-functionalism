@@ -1,5 +1,5 @@
 // @vitest-environment jsdom
-import { afterEach, beforeEach, expect, it, vi } from "vitest";
+import { afterEach, beforeEach, expect, it, vi } from "vite-plus/test";
 import { act, cleanup, fireEvent, render } from "@testing-library/react";
 import type { HTMLMotionProps } from "motion/react";
 
@@ -8,24 +8,25 @@ import type { HTMLMotionProps } from "motion/react";
 vi.mock("motion/react", async (importOriginal) => {
   const actual = await importOriginal<typeof import("motion/react")>();
   const { createElement, useRef } = await import("react");
+  const MotionDiv = ({ initial, animate, transition, children, className, "data-slot": slot }: Omit<HTMLMotionProps<"div">, "children"> & { children?: React.ReactNode; "data-slot"?: string }) => {
+    const start = useRef(initial);
+    return createElement("div", {
+      className,
+      "data-slot": slot,
+      "data-start": JSON.stringify(start.current),
+      "data-target": JSON.stringify(animate),
+      "data-transition": JSON.stringify(transition),
+    }, children);
+  };
   return {
     ...actual,
     useReducedMotion: () => false,
     AnimatePresence: ({ children }: { children: React.ReactNode }) => children,
-    motion: {
-      ...actual.motion,
-      div: ({ initial, animate, transition, children, className, "data-slot": slot }: HTMLMotionProps<"div"> & { "data-slot"?: string }) => {
-        const start = useRef(initial);
-        return createElement("div", {
-          children,
-          className,
-          "data-slot": slot,
-          "data-start": JSON.stringify(start.current),
-          "data-target": JSON.stringify(animate),
-          "data-transition": JSON.stringify(transition),
-        });
+    motion: new Proxy(actual.motion, {
+      get(target, key, receiver) {
+        return key === "div" ? MotionDiv : Reflect.get(target, key, receiver);
       },
-    },
+    }),
   };
 });
 

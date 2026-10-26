@@ -4,7 +4,7 @@
  * scope there, leaves a focused text field (so a typed time commits), and
  * a press on a portaled popup keeps focus where it is.
  */
-import { afterEach, describe, expect, it } from "vitest";
+import { afterEach, describe, expect, it } from "vite-plus/test";
 import type { MouseEvent } from "react";
 import { routeKeyboardOnMouseDown } from "@/lib/click-to-focus";
 
