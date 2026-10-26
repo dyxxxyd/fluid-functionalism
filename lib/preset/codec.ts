@@ -33,7 +33,8 @@ export interface PresetComponentDef {
   tag: string;
   /** Human name for dialogs ("Sidebar"). */
   label: string;
-  /** Docs path whose playground hydrates from ?preset= ("/docs/sidebar"). */
+  /** Stable component identity across module reloads, and docs path whose
+   *  playground hydrates from ?preset= ("/docs/sidebar"). */
   docsPath: string;
   /** Version char → field table. Append new versions, keep old ones. */
   versions: Record<string, readonly PresetField[]>;
@@ -75,7 +76,10 @@ const COMPONENTS = new Map<string, PresetComponentDef>();
 
 export function registerPresetComponent(def: PresetComponentDef): void {
   const existing = COMPONENTS.get(def.tag);
-  if (existing && existing !== def) {
+  // Hot reload re-evaluates options modules with new definition objects.
+  // Refresh the same component's definition (including changed field tables),
+  // while still rejecting a tag claimed by a different component.
+  if (existing && existing.docsPath !== def.docsPath) {
     throw new Error(`Preset tag "${def.tag}" is already registered.`);
   }
   COMPONENTS.set(def.tag, def);

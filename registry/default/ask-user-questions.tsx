@@ -574,6 +574,7 @@ const AskUserQuestions = forwardRef<HTMLDivElement, AskUserQuestionsProps>(
     useEffect(() => {
       if (!question) return;
       const handler = (e: KeyboardEvent) => {
+        if (e.defaultPrevented || e.isComposing || e.keyCode === 229) return;
         if (e.metaKey || e.ctrlKey || e.altKey) return;
         const target = e.target as HTMLElement | null;
         if (!target) return;
@@ -645,6 +646,7 @@ const AskUserQuestions = forwardRef<HTMLDivElement, AskUserQuestionsProps>(
     );
 
     const handleNavKey = (e: ReactKeyboardEvent<HTMLDivElement>) => {
+      if (e.defaultPrevented || e.nativeEvent.isComposing || e.nativeEvent.keyCode === 229) return;
       const target = e.target as HTMLElement;
       const isTextInput =
         target.tagName === "INPUT" ||
@@ -726,6 +728,7 @@ const AskUserQuestions = forwardRef<HTMLDivElement, AskUserQuestionsProps>(
     // the event has to bubble up from a focused descendant (no global listener,
     // so stacked demos don't all fire at once).
     const handleRootKey = (e: ReactKeyboardEvent<HTMLDivElement>) => {
+      if (e.defaultPrevented || e.nativeEvent.isComposing || e.nativeEvent.keyCode === 229) return;
       if (e.key !== "Enter") return;
       const mod = isMac ? e.metaKey : e.ctrlKey;
       // ⌘/⌃+Enter commits multi-select and freeText alike — both use the
@@ -1169,6 +1172,7 @@ const AskUserQuestions = forwardRef<HTMLDivElement, AskUserQuestionsProps>(
                   // root handler catch ⌘/⌃+Enter for Continue —
                   // multi-select has its own Continue button as the
                   // primary submit affordance.
+                  if (e.nativeEvent.isComposing || e.nativeEvent.keyCode === 229) return;
                   if (e.key !== "Enter") return;
                   if (e.shiftKey) return; // Shift+Enter = newline
                   if (!isMulti) {
@@ -1351,6 +1355,7 @@ const AskUserQuestions = forwardRef<HTMLDivElement, AskUserQuestionsProps>(
                           // submits (caught by the root handler). Single-line:
                           // plain Enter submits like an input, so a newline is
                           // never inserted.
+                          if (e.nativeEvent.isComposing || e.nativeEvent.keyCode === 229) return;
                           if (e.key !== "Enter") return;
                           if (e.shiftKey || e.metaKey || e.ctrlKey) return;
                           if (!isFreeTextMultiline) {

@@ -85,7 +85,7 @@ export default function RevealDoc() {
         </p>
         <PresetDemo preset="Product" />
         <p className="text-site-body text-muted-foreground">
-          Slow data shows shadcn&apos;s <Code>Skeleton</Code>. Wrap it and the
+          Slow data shows <Code>Skeleton</Code>. Wrap it and the
           real block in <Code>reveal-swap</Code>, and add{" "}
           <Code>reveal-items</Code> to both for rows one by one.
         </p>

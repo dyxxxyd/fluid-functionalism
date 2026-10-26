@@ -420,13 +420,16 @@ export function useFluidHover<T extends HTMLElement>(
 
   const registerItem = useCallback(
     (index: number, element: HTMLElement | null) => {
+      const previous = itemsRef.current.get(index);
+      if (previous && previous !== element) {
+        itemRoRef.current?.unobserve(previous);
+        previous.removeAttribute(ACTIVE_ATTR);
+      }
       if (element) {
         itemsRef.current.set(index, element);
         getItemRo()?.observe(element);
         if (index === activeIndexRef.current) element.setAttribute(ACTIVE_ATTR, "");
       } else {
-        const previous = itemsRef.current.get(index);
-        if (previous) itemRoRef.current?.unobserve(previous);
         // The mark leaves with the element: a row that only moved to another
         // index (a filtering list re-ordering) must not carry it there.
         previous?.removeAttribute(ACTIVE_ATTR);
@@ -504,6 +507,7 @@ export function useFluidHover<T extends HTMLElement>(
 
   const handleClick = useCallback(
     (e: React.MouseEvent) => {
+      if (e.defaultPrevented) return;
       const target = e.target as Node | null;
       if (!target) return;
       // Inside an item: the item owns the click.

@@ -25,16 +25,23 @@ async function loadPdfjs(): Promise<PdfjsModule> {
 async function renderPdfFirstPage(file: File, targetWidth: number): Promise<string> {
   const pdfjs = await loadPdfjs();
   const buffer = await file.arrayBuffer();
-  const pdf = await pdfjs.getDocument({ data: buffer }).promise;
-  const page = await pdf.getPage(1);
-  const baseViewport = page.getViewport({ scale: 1 });
-  const scale = (targetWidth * 2) / baseViewport.width; // 2× for retina
-  const viewport = page.getViewport({ scale });
-  const canvas = document.createElement("canvas");
-  canvas.width = viewport.width;
-  canvas.height = viewport.height;
-  await page.render({ canvas, viewport }).promise;
-  return canvas.toDataURL("image/png");
+  const task = pdfjs.getDocument({ data: buffer });
+  try {
+    const pdf = await task.promise;
+    const page = await pdf.getPage(1);
+    const baseViewport = page.getViewport({ scale: 1 });
+    const scale = (targetWidth * 2) / baseViewport.width; // 2× for retina
+    const viewport = page.getViewport({ scale });
+    const canvas = document.createElement("canvas");
+    canvas.width = viewport.width;
+    canvas.height = viewport.height;
+    await page.render({ canvas, viewport }).promise;
+    return canvas.toDataURL("image/png");
+  } finally {
+    // The data URL is independent of PDF.js. Release its document and worker
+    // on success and failure, including a document that failed to load.
+    await task.destroy();
+  }
 }
 
 // ─── Object URLs ──────────────────────────────────────────────────────────
@@ -106,18 +113,19 @@ function FileThumbnail({ file, size, radius, className }: FileThumbnailProps) {
   // doesn't flash the spinner); a failure only counts for the file and size
   // it happened to.
   const [pdf, setPdf] = useState<{
+    file: File | null;
     url: string | null;
     failed: { file: File; size: number } | null;
-  }>({ url: null, failed: null });
+  }>({ file: null, url: null, failed: null });
   if (!isPdf && (pdf.url !== null || pdf.failed !== null)) {
-    setPdf({ url: null, failed: null });
+    setPdf({ file: null, url: null, failed: null });
   }
   useEffect(() => {
     if (!isPdf) return;
     let cancelled = false;
     renderPdfFirstPage(file, size)
       .then((url) => {
-        if (!cancelled) setPdf({ url, failed: null });
+        if (!cancelled) setPdf({ file, url, failed: null });
       })
       .catch(() => {
         if (!cancelled) setPdf((prev) => ({ ...prev, failed: { file, size } }));
@@ -126,7 +134,7 @@ function FileThumbnail({ file, size, radius, className }: FileThumbnailProps) {
       cancelled = true;
     };
   }, [file, isPdf, size]);
-  const pdfUrl = pdf.url;
+  const pdfUrl = pdf.file === file ? pdf.url : null;
   const pdfError = pdf.failed?.file === file && pdf.failed.size === size;
 
   const previewUrl = imageUrl ?? pdfUrl;

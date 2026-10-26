@@ -2,6 +2,7 @@
 // (lib/docs/api/<slug>.ts); tests/docs-markdown.test.ts checks that every
 // page with a PropsTable is listed here.
 import type { ApiTable } from "@/lib/docs/api/types";
+import { apiReference as dataTableApi } from "@/lib/docs/api/data-table";
 import { apiReference as accordionApi } from "@/lib/docs/api/accordion";
 import { apiReference as askUserQuestionsApi } from "@/lib/docs/api/ask-user-questions";
 import { apiReference as badgeApi } from "@/lib/docs/api/badge";
@@ -17,17 +18,21 @@ import { apiReference as comboboxApi } from "@/lib/docs/api/combobox";
 import { apiReference as commandMenuApi } from "@/lib/docs/api/command-menu";
 import { apiReference as datePickerApi } from "@/lib/docs/api/date-picker";
 import { apiReference as dialogApi } from "@/lib/docs/api/dialog";
+import { apiReference as drawerApi } from "@/lib/docs/api/drawer";
 import { apiReference as dropdownApi } from "@/lib/docs/api/dropdown";
 import { apiReference as fluidHoverApi } from "@/lib/docs/api/fluid-hover";
 import { apiReference as inputCopyApi } from "@/lib/docs/api/input-copy";
 import { apiReference as inputGroupApi } from "@/lib/docs/api/input-group";
 import { apiReference as inputMessageApi } from "@/lib/docs/api/input-message";
+import { apiReference as inputNumberApi } from "@/lib/docs/api/input-number";
 import { apiReference as radioGroupApi } from "@/lib/docs/api/radio-group";
 import { apiReference as revealApi } from "@/lib/docs/api/reveal";
 import { apiReference as scrollbarsApi } from "@/lib/docs/api/scrollbars";
 import { apiReference as selectApi } from "@/lib/docs/api/select";
 import { apiReference as sidebarApi } from "@/lib/docs/api/sidebar";
 import { apiReference as sizesApi } from "@/lib/docs/api/sizes";
+import { apiReference as skeletonApi } from "@/lib/docs/api/skeleton";
+import { apiReference as toastApi } from "@/lib/docs/api/toast";
 import { apiReference as sliderApi } from "@/lib/docs/api/slider";
 import { apiReference as switchApi } from "@/lib/docs/api/switch";
 import { apiReference as tableApi } from "@/lib/docs/api/table";
@@ -38,6 +43,7 @@ import { apiReference as thinkingStepsApi } from "@/lib/docs/api/thinking-steps"
 import { apiReference as tooltipApi } from "@/lib/docs/api/tooltip";
 
 export const API_REFERENCE: Record<string, ApiTable[]> = {
+  "data-table": dataTableApi,
   accordion: accordionApi,
   "ask-user-questions": askUserQuestionsApi,
   badge: badgeApi,
@@ -53,17 +59,20 @@ export const API_REFERENCE: Record<string, ApiTable[]> = {
   "command-menu": commandMenuApi,
   "date-picker": datePickerApi,
   dialog: dialogApi,
+  drawer: drawerApi,
   dropdown: dropdownApi,
   "fluid-hover": fluidHoverApi,
   "input-copy": inputCopyApi,
   "input-group": inputGroupApi,
   "input-message": inputMessageApi,
+  "input-number": inputNumberApi,
   "radio-group": radioGroupApi,
   reveal: revealApi,
   scrollbars: scrollbarsApi,
   select: selectApi,
   sidebar: sidebarApi,
   sizes: sizesApi,
+  skeleton: skeletonApi,
   slider: sliderApi,
   switch: switchApi,
   table: tableApi,
@@ -71,5 +80,6 @@ export const API_REFERENCE: Record<string, ApiTable[]> = {
   "tabs-subtle": tabsSubtleApi,
   "thinking-indicator": thinkingIndicatorApi,
   "thinking-steps": thinkingStepsApi,
+  toast: toastApi,
   tooltip: tooltipApi,
 };

@@ -21,15 +21,19 @@ import { useFluidHover, useRegisterFluidHoverItem } from "@/hooks/use-fluid-hove
 
 // ---------------------------------------------------------------------------
 // InputGroup stacks labelled text fields that share one fluid hover scope.
-// At rest a field has no fill and no visible ring. The field nearest the
-// pointer shows a faint fill and its ring; the focused field lifts to the
-// card surface. There is no separate highlight element: each field draws its
-// own state.
+// Borderless fields are invisible at rest; bordered fields keep their ring,
+// filled fields keep a muted fill, and underlined fields show only a bottom
+// border. The field nearest the pointer shows its hover chrome; focused
+// fields lift to the card surface except underlined fields, which stay clear.
+// There is no separate highlight element: each field draws its own state.
 // ---------------------------------------------------------------------------
+
+type InputGroupVariant = "bordered" | "borderless" | "filled" | "underlined";
 
 interface InputGroupContextValue {
   registerItem: (index: number, element: HTMLElement | null) => void;
   activeIndex: number | null;
+  variant: InputGroupVariant;
 }
 
 const InputGroupContext = createContext<InputGroupContextValue | null>(null);
@@ -43,21 +47,23 @@ function useInputGroup() {
 
 interface InputGroupProps extends HTMLAttributes<HTMLDivElement> {
   children: ReactNode;
+  /** Default appearance for every field. Individual fields can override it. */
+  variant?: InputGroupVariant;
   /** Pins the group's fields to one step of the size ladder (default 36px,
    *  compact 28px). Omitted, they follow the surrounding SizeProvider. */
   size?: SizeVariant;
 }
 
 const InputGroup = forwardRef<HTMLDivElement, InputGroupProps>(
-  ({ children, size, className, ...props }, ref) => {
+  ({ children, variant = "bordered", size, className, ...props }, ref) => {
     const containerRef = useRef<HTMLDivElement>(null);
 
     const { activeIndex, handlers, registerItem } =
       useFluidHover(containerRef);
 
     const contextValue = useMemo(
-      () => ({ registerItem, activeIndex }),
-      [registerItem, activeIndex]
+      () => ({ registerItem, activeIndex, variant }),
+      [registerItem, activeIndex, variant]
     );
 
     const group = (
@@ -96,6 +102,8 @@ interface InputFieldProps
   /** Keep the label for assistive tech but don't render it — for inline
    *  fields (a toolbar search) where the placeholder carries the meaning. */
   labelHidden?: boolean;
+  /** Overrides the surrounding InputGroup's variant for this field. */
+  variant?: InputGroupVariant;
   placeholder?: string;
   icon?: IconComponent;
   index: number;
@@ -111,6 +119,7 @@ const InputField = forwardRef<HTMLDivElement, InputFieldProps>(
     {
       label,
       labelHidden,
+      variant: variantProp,
       placeholder,
       icon: Icon,
       index,
@@ -119,13 +128,16 @@ const InputField = forwardRef<HTMLDivElement, InputFieldProps>(
       error,
       disabled,
       className,
+      onFocus,
+      onBlur,
       ...props
     },
     ref
   ) => {
     const internalRef = useRef<HTMLDivElement>(null);
     const inputRef = useRef<HTMLElement | null>(null);
-    const { registerItem, activeIndex } = useInputGroup();
+    const { registerItem, activeIndex, variant: groupVariant } = useInputGroup();
+    const variant = variantProp ?? groupVariant;
     const [isFocused, setIsFocused] = useState(false);
     const shape = useShape();
     const sizeClasses = useSize();
@@ -138,36 +150,37 @@ const InputField = forwardRef<HTMLDivElement, InputFieldProps>(
     const isActive = activeIndex === index;
     const labelActive = isActive || isFocused;
 
-    const handleFocus = () => {
-      setIsFocused(true);
-    };
-
-    const handleBlur = () => {
-      setIsFocused(false);
-    };
-
     // Input container classes. The first match wins: disabled, error,
-    // focused, hovered, rest. An error stays frameless at rest (the red label
-    // and message already carry it) and shows its red ring on hover or focus.
-    // Focus lifts the field to the card surface; hover only tints it.
+    // focused, hovered, rest. Bordered errors keep a red ring at rest; the
+    // quieter variants reveal it on hover or focus. Underlined fields stay
+    // transparent and use only their bottom border for every state.
+    const restBgClass = variant === "filled" ? "bg-muted/50" : "bg-transparent";
+    const restRingClass = variant === "bordered" ? "ring-border" : "ring-transparent";
     let bgClass: string;
-    let ringClass: string;
+    let edgeClass: string;
 
-    if (disabled) {
+    if (variant === "underlined") {
       bgClass = "bg-transparent";
-      ringClass = "ring-border";
+      edgeClass = disabled ? "border-border"
+        : error ? "border-destructive/50"
+        : isFocused ? "border-foreground"
+        : isActive ? "border-muted-foreground"
+        : "border-border";
+    } else if (disabled) {
+      bgClass = restBgClass;
+      edgeClass = variant === "filled" ? "ring-transparent" : "ring-border";
     } else if (error) {
-      bgClass = isFocused ? "bg-card" : isActive ? "bg-destructive-light/60" : "bg-transparent";
-      ringClass = isFocused || isActive ? "ring-destructive/50" : "ring-transparent";
+      bgClass = isFocused ? "bg-card" : isActive ? "bg-destructive-light/60" : restBgClass;
+      edgeClass = isFocused || isActive || variant === "bordered" ? "ring-destructive/50" : "ring-transparent";
     } else if (isFocused) {
       bgClass = "bg-card";
-      ringClass = "ring-border";
+      edgeClass = "ring-border";
     } else if (isActive) {
-      bgClass = "bg-muted/50";
-      ringClass = "ring-border";
+      bgClass = variant === "filled" ? "bg-muted" : "bg-muted/50";
+      edgeClass = "ring-border";
     } else {
-      bgClass = "bg-transparent";
-      ringClass = "ring-transparent";
+      bgClass = restBgClass;
+      edgeClass = restRingClass;
     }
 
     return (
@@ -194,8 +207,8 @@ const InputField = forwardRef<HTMLDivElement, InputFieldProps>(
           className={cn(
             labelHidden ? "sr-only" : "inline-grid",
             sizeClasses.text,
-            // One notch tighter than the ladder's control padding — the field
-            // ring is invisible at rest, so the roomier inset reads as a gap.
+            // Keep the same inset across variants so switching the chrome
+            // never moves the label relative to the field's text.
             !labelHidden && (compact ? "pl-2" : "pl-2.5")
           )}
         >
@@ -234,11 +247,12 @@ const InputField = forwardRef<HTMLDivElement, InputFieldProps>(
           className={cn(
             // Fixed height (was py-2 around the line box) so the field sits
             // exactly on the ladder's control height.
-            `flex items-center ${sizeClasses.gap} ${shape.input} ${
+            `flex items-center ${sizeClasses.gap} ${
               compact ? "px-2" : "px-2.5"
-            } ${sizeClasses.control} ring-1 transition-all duration-80`,
+            } ${sizeClasses.control} transition-all duration-80`,
+            variant === "underlined" ? "rounded-none border-b" : `${shape.input} ring-1`,
             bgClass,
-            ringClass
+            edgeClass
           )}
         >
           {/* The icon wakes with the field: muted → foreground and stroke
@@ -260,8 +274,14 @@ const InputField = forwardRef<HTMLDivElement, InputFieldProps>(
             type="text"
             value={value}
             onChange={(e) => onChange(e.target.value)}
-            onFocus={handleFocus}
-            onBlur={handleBlur}
+            onFocus={(event) => {
+              setIsFocused(true);
+              onFocus?.(event);
+            }}
+            onBlur={(event) => {
+              setIsFocused(false);
+              onBlur?.(event);
+            }}
             placeholder={placeholder}
             className={cn(
               "w-full rounded-none bg-transparent text-foreground placeholder:text-muted-foreground outline-none font-[inherit]",
@@ -294,4 +314,5 @@ const InputField = forwardRef<HTMLDivElement, InputFieldProps>(
 InputField.displayName = "InputField";
 
 export { InputGroup, InputField };
+export type { InputGroupVariant };
 export default InputGroup;

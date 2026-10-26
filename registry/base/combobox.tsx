@@ -555,49 +555,93 @@ ComboboxInput.displayName = "ComboboxInput";
 
 // ---------------------------------------------------------------------------
 // ComboboxChips — the multiple-selection field: one chip per selected item
-// ahead of the text input, wrapping onto new lines as they accumulate.
+// ahead of the text input. They wrap by default; collapseOnOverflow keeps
+// one row with a counter for the chips that do not fit.
 // Backspace in an empty input removes the last chip; ArrowLeft walks into
 // the chips, where Backspace/Delete removes the focused one.
 // ---------------------------------------------------------------------------
 
-type ComboboxChipsProps = ComboboxFieldProps;
+interface ComboboxChipsProps extends ComboboxFieldProps {
+  /** Keep one row, replacing chips that do not fit with a +N … counter.
+   *  Recalculates as the field or labels resize. @default false */
+  collapseOnOverflow?: boolean;
+}
 
-/** Springs the chips field's height to the measured chip row stack (plus
- *  `padY`, the field's vertical padding) as chips wrap and unwrap. The
- *  height lives in a MotionValue driving an inline style, and for a reason:
- *  the field must stay pinned at its old height through the reflow that
- *  wraps a chip, or its auto height lands on the new row before any spring
- *  can start and the growth snaps. First measure sets the pin; every later
- *  one springs it. Measured (offsetHeight + ResizeObserver), never
- *  `height: "auto"`: framer resolves "auto" from the element's *visual*
- *  (transformed) size, so under a scaled ancestor (the /demo card) the
- *  spring would overshoot. Layout metrics are transform-immune. */
-function useChipRowHeight(padY: number) {
+/** Keeps overflow chips mounted for measurement and primitive indices, but
+ *  removes them from layout, focus, and the accessibility tree. */
+const hiddenChipStyle = {
+  position: "absolute",
+  visibility: "hidden",
+  pointerEvents: "none",
+  top: 0,
+  left: 0,
+} as const;
+
+/** Measures layout widths, so the fit is stable under scaled previews too.
+ *  Reserve the input's minimum width and, when needed, the counter before
+ *  admitting a prefix of chips. Observing each chip also catches font and
+ *  label changes without relying on window resize. */
+function useChipRowHeight(
+  padY: number,
+  collapseOnOverflow: boolean,
+  values: readonly string[]
+) {
   const height = useMotionValue<number | "auto">("auto");
   const roRef = useRef<ResizeObserver | null>(null);
-  const padRef = useRef(padY);
-  useIsoLayoutEffect(() => {
-    padRef.current = padY;
-  });
+  const [visibleCount, setVisibleCount] = useState(values.length);
   const measure = useCallback(
     (el: HTMLDivElement | null) => {
       roRef.current?.disconnect();
       roRef.current = null;
       if (!el) return;
       const measure = () => {
-        if (el.offsetHeight <= 0) return;
-        const target = el.offsetHeight + padRef.current;
-        if (height.get() === "auto") height.set(target);
-        else if (height.get() !== target) animate(height, target, spring.fast);
+        if (el.offsetHeight > 0) {
+          const target = el.offsetHeight + padY;
+          if (height.get() === "auto") height.set(target);
+          else if (height.get() !== target) animate(height, target, spring.fast);
+        }
+        if (!collapseOnOverflow || values.length === 0 || el.clientWidth <= 0) return;
+        const selectedValues = new Set(values);
+        // popLayout retains a removed chip through its exit; it no longer
+        // takes a slot in the selection and must not enter the width budget.
+        const chips = Array.from(el.querySelectorAll<HTMLElement>("[data-combobox-chip]")).filter(
+          (chip) => selectedValues.has(chip.dataset.comboboxChipValue ?? "")
+        );
+        const counter = el.querySelector<HTMLElement>("[data-combobox-overflow]");
+        const input = el.querySelector<HTMLElement>("[data-combobox-input]");
+        if (!counter || !input) return;
+        const gap = parseFloat(getComputedStyle(el).columnGap) || 0;
+        const inputWidth = parseFloat(getComputedStyle(input).minWidth) || 24;
+        const allWidth = chips.reduce((width, chip) => width + chip.offsetWidth + gap, inputWidth);
+        let count = chips.length;
+        if (allWidth > el.clientWidth) {
+          let width = inputWidth + counter.offsetWidth + gap;
+          count = 0;
+          for (const chip of chips) {
+            width += chip.offsetWidth + gap;
+            if (width > el.clientWidth) break;
+            count++;
+          }
+        }
+        setVisibleCount((previous) => previous === count ? previous : count);
+        // A resize can hide the chip currently reached with the keyboard.
+        // Return focus to the input before making that chip inert.
+        if (chips.slice(count).some((chip) => chip.contains(document.activeElement))) {
+          el.querySelector<HTMLInputElement>("input")?.focus();
+        }
       };
       measure();
       const ro = new ResizeObserver(measure);
       ro.observe(el);
+      if (collapseOnOverflow) {
+        el.querySelectorAll<HTMLElement>("[data-combobox-chip], [data-combobox-overflow]").forEach((chip) => ro.observe(chip));
+      }
       roRef.current = ro;
     },
-    [height]
+    // A new selection mounts new chips, which must join the observer.
+    [height, padY, collapseOnOverflow, values]
   );
-  return { measure, height };
+  return { measure, height, visibleCount };
 }
 
 const ComboboxChips = forwardRef<HTMLInputElement, ComboboxChipsProps>(
@@ -609,7 +653,9 @@ const ComboboxChips = forwardRef<HTMLInputElement, ComboboxChipsProps>(
       placeholder = "Search…",
       error,
       clearable = false,
+      collapseOnOverflow = false,
       size,
+      onKeyDown,
       ...props
     },
     ref
@@ -619,10 +665,52 @@ const ComboboxChips = forwardRef<HTMLInputElement, ComboboxChipsProps>(
     const shape = useShape();
     const sizeClasses = useSize(size);
     const compact = sizeClasses.variant === "compact";
-    const { anchorRef, open, disabled, inputValue, values } = useComboboxContext();
-    const { measure: measureChipRows, height: chipRowsHeight } = useChipRowHeight(
-      compact ? 8 : 12
+    const { anchorRef, open, disabled, inputValue, values, itemsByValue } = useComboboxContext();
+    const { measure: measureChipRows, height: chipRowsHeight, visibleCount } = useChipRowHeight(
+      compact ? 8 : 12,
+      collapseOnOverflow,
+      values
     );
+    const hiddenCount = collapseOnOverflow ? Math.max(0, values.length - visibleCount) : 0;
+    const hiddenLabels = values.slice(visibleCount).map((value) => {
+      const item = itemsByValue.get(value);
+      return item ? itemLabel(item) : value;
+    }).join(", ");
+
+    // Hidden primitive chips retain their selection indices. Route keyboard
+    // chip navigation through the visible prefix so focus never lands on an
+    // inert chip; Backspace in the input still removes the actual last pick.
+    const handleCollapsedNavigation = (event: React.KeyboardEvent<HTMLElement> & {
+      preventBaseUIHandler: () => void;
+    }) => {
+      if (!collapseOnOverflow || hiddenCount === 0 || disabled) return;
+      const row = event.currentTarget.closest("[data-combobox-chip-row]");
+      if (!row) return;
+      const input = row.querySelector<HTMLInputElement>("input");
+      const previousKey = getComputedStyle(row).direction === "rtl" ? "ArrowRight" : "ArrowLeft";
+      const nextKey = previousKey === "ArrowLeft" ? "ArrowRight" : "ArrowLeft";
+      const inInput = event.currentTarget === input;
+      if (inInput && (event.key !== previousKey || input.selectionStart !== 0)) return;
+      const chip = event.currentTarget.closest<HTMLElement>("[data-combobox-chip]");
+      if (!inInput && (event.key === "Backspace" || event.key === "Delete")) {
+        event.preventDefault();
+        event.preventBaseUIHandler();
+        chip?.querySelector<HTMLButtonElement>("button")?.click();
+        return;
+      }
+      if (event.key !== previousKey && event.key !== nextKey) return;
+      event.preventDefault();
+      event.preventBaseUIHandler();
+      const index = inInput ? visibleCount : Number(chip?.dataset.comboboxChip);
+      const target = index + (event.key === previousKey ? -1 : 1);
+      if (target < 0 || target >= visibleCount) input?.focus();
+      else {
+        const nextChip = Array.from(row.querySelectorAll<HTMLElement>("[data-combobox-chip]")).find(
+          (element) => element.dataset.comboboxChipValue === values[target]
+        );
+        nextChip?.querySelector<HTMLElement>("[tabindex]")?.focus();
+      }
+    };
 
     return (
       <div className="flex flex-col gap-1">
@@ -666,8 +754,12 @@ const ComboboxChips = forwardRef<HTMLInputElement, ComboboxChipsProps>(
           )}
           <div
             ref={measureChipRows}
+            data-combobox-chip-row=""
             className={cn(
-              "relative flex min-w-0 flex-1 flex-wrap items-center gap-1",
+              "relative flex min-w-0 flex-1 items-center gap-1",
+              collapseOnOverflow
+                ? cn("flex-nowrap overflow-hidden", compact ? "h-5" : "h-6")
+                : "flex-wrap",
               // A chip leads the field: the row pulls left so the chip sits
               // an even distance from every edge. The offset lives here, not
               // on the container's padding — the container's transition-all
@@ -688,23 +780,29 @@ const ComboboxChips = forwardRef<HTMLInputElement, ComboboxChipsProps>(
                       once, so the field reflows immediately rather than
                       after the fade. */}
                   <AnimatePresence initial={false} mode="popLayout">
-                    {(selected ?? []).map((item) => {
+                    {(selected ?? []).map((item, index) => {
                       const label = itemLabel(item);
+                      const hidden = collapseOnOverflow && index >= visibleCount;
                       return (
                         <motion.span
                           key={itemValue(item)}
-                          layout
+                          layout={!collapseOnOverflow}
+                          data-combobox-chip={index}
+                          data-combobox-chip-value={itemValue(item)}
+                          aria-hidden={hidden || undefined}
+                          inert={hidden || undefined}
                           initial={{ opacity: 0, scale: 0.9 }}
                           animate={{ opacity: 1, scale: 1 }}
                           exit={{ opacity: 0, scale: 0.9, pointerEvents: "none", transition: spring.fast.exit }}
                           transition={spring.fast}
                           // Grow from the left edge, where the typed text
                           // just was — not from the middle of the chip.
-                          style={{ originX: 0 }}
+                          style={{ originX: 0, ...(hidden ? hiddenChipStyle : {}) }}
                           className="inline-flex max-w-full shrink-0"
                         >
                           <ComboboxPrimitive.Chip
                             aria-label={label}
+                            onKeyDown={handleCollapsedNavigation}
                             className={cn(
                               "inline-flex max-w-full shrink-0 items-center gap-0.5 bg-hover pl-2 pr-0.5 text-foreground outline-none",
                               shape.variant === "pill" ? "rounded-full" : "rounded-md",
@@ -732,9 +830,32 @@ const ComboboxChips = forwardRef<HTMLInputElement, ComboboxChipsProps>(
                       It never animates: chips slide, the field snaps.
                       Animating it read as the placeholder sliding in from
                       the right when the last chip went. */}
-                  <span className="flex min-w-6 flex-auto">
+                  {collapseOnOverflow && values.length > 0 && (
+                    <span
+                      data-combobox-overflow=""
+                      role="status"
+                      aria-label={hiddenCount ? `${hiddenCount} more selected: ${hiddenLabels}` : undefined}
+                      aria-hidden={!hiddenCount || undefined}
+                      title={hiddenCount ? hiddenLabels : undefined}
+                      style={hiddenCount ? undefined : hiddenChipStyle}
+                      className={cn(
+                        "inline-grid shrink-0 items-center bg-hover px-2 text-foreground tabular-nums whitespace-nowrap",
+                        shape.variant === "pill" ? "rounded-full" : "rounded-md",
+                        compact ? "h-5" : "h-6",
+                        typeClass("caption", compact ? "compact" : "default")
+                      )}
+                    >
+                      <span aria-hidden="true" className="invisible col-start-1 row-start-1">+{values.length} …</span>
+                      <span aria-hidden="true" className="col-start-1 row-start-1">+{hiddenCount} …</span>
+                    </span>
+                  )}
+                  <span data-combobox-input="" className={cn("flex min-w-6", collapseOnOverflow ? "flex-1 basis-6" : "flex-auto")}>
                     <ComboboxPrimitive.Input
                       ref={ref}
+                      onKeyDown={(event) => {
+                        onKeyDown?.(event);
+                        if (!event.defaultPrevented) handleCollapsedNavigation(event);
+                      }}
                       size={Math.max(1, inputValue.length + 1)}
                       placeholder={selected?.length ? undefined : placeholder}
                       aria-invalid={!!error || undefined}

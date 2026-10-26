@@ -31,7 +31,7 @@ Checked in this order; the first row that applies decides.
 
 | Found | Verdict |
 |---|---|
-| Installed FF components import one flavor's primitives | **that flavor**: every later install has to match what is already there. `input-group`, `color-picker`, and `ask-user-questions` import Base UI under both flavors, so they never count here |
+| Installed FF components import one flavor's primitives | **that flavor**: every later install has to match what is already there. `input-group`, `input-number`, `drawer`, `toast`, `color-picker`, and `ask-user-questions` import Base UI under both flavors, so they never count here |
 | Installed FF components import both | **mixed**: ask the user which side to consolidate on before installing more |
 | `@base-ui/react` in package.json, but no app code imports it and a shared item above is installed | The shared item brought it, so it doesn't count: read the rows below without it. If that leaves neither, the choice is **open**: Radix by default, but ask the user before the first flavored install, since a project that chose Base UI looks the same from its files |
 | only `@base-ui/react` in package.json | **base**: every flavored install uses the `base/` prefix |

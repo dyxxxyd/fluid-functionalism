@@ -54,6 +54,7 @@ function buildPlaygroundCode(o: {
   disabled: boolean;
   creatable: boolean;
   hideSelected: boolean;
+  collapseOnOverflow: boolean;
 }) {
   const Field = o.multiple ? "ComboboxChips" : "ComboboxInput";
   const root = [
@@ -80,6 +81,7 @@ function buildPlaygroundCode(o: {
     ...(o.variant !== "bordered" ? [`variant="${o.variant}"`] : []),
     ...(o.icon ? ["icon={Search}"] : []),
     ...(o.clearable ? ["clearable"] : []),
+    ...(o.collapseOnOverflow ? ["collapseOnOverflow"] : []),
     ...(o.error ? [`error="${COMBOBOX_COPY.error}"`] : []),
   ];
   const state = [
@@ -112,6 +114,7 @@ export function ComboboxPlayground({ children }: PlaygroundProps) {
   const [disabled, setDisabled] = useState(false);
   const [creatable, setCreatable] = useState(false);
   const [hideSelected, setHideSelected] = useState(false);
+  const [collapseOnOverflow, setCollapseOnOverflow] = useState(false);
 
   const [value, setValue] = useState("");
   const [values, setValues] = useState<string[]>(COMBOBOX_DEFAULT_VALUES);
@@ -119,7 +122,7 @@ export function ComboboxPlayground({ children }: PlaygroundProps) {
   // so a created row can join the list.
   const [items, setItems] = useState<readonly ComboboxItemData[]>(COMBOBOX_COMPONENTS);
 
-  const d = deriveCombobox({ multiple, variant, icon, clearable, error, disabled, creatable, hideSelected });
+  const d = deriveCombobox({ multiple, variant, icon, clearable, error, disabled, creatable, hideSelected, collapseOnOverflow });
   const code = buildPlaygroundCode({
     multiple,
     variant,
@@ -129,6 +132,7 @@ export function ComboboxPlayground({ children }: PlaygroundProps) {
     disabled,
     creatable,
     hideSelected: d.hideSelected,
+    collapseOnOverflow: d.collapseOnOverflow,
   });
 
   // ── Get code (presets) ─────────────────────────────────
@@ -142,6 +146,7 @@ export function ComboboxPlayground({ children }: PlaygroundProps) {
     disabled,
     creatable,
     hideSelected,
+    collapseOnOverflow,
     ...globals,
   });
   usePresetUrlSync(presetCode, COMBOBOX_DEFAULT_CODE, (raw) => {
@@ -156,6 +161,7 @@ export function ComboboxPlayground({ children }: PlaygroundProps) {
       setDisabled(p.disabled);
       setCreatable(p.creatable);
       setHideSelected(p.hideSelected);
+      setCollapseOnOverflow(p.collapseOnOverflow);
     }
   });
 
@@ -170,6 +176,7 @@ export function ComboboxPlayground({ children }: PlaygroundProps) {
     setDisabled(Math.random() > 0.9);
     setCreatable(Math.random() > 0.6);
     setHideSelected(Math.random() > 0.6);
+    setCollapseOnOverflow(Math.random() > 0.5);
     setValue("");
     setValues([]);
   };
@@ -220,7 +227,7 @@ export function ComboboxPlayground({ children }: PlaygroundProps) {
       hideSelected={d.hideSelected}
       disabled={disabled}
     >
-      <ComboboxChips {...fieldProps} />
+      <ComboboxChips {...fieldProps} collapseOnOverflow={d.collapseOnOverflow} />
       <ComboboxContent>
         {empty}
         {rows}
@@ -270,6 +277,13 @@ export function ComboboxPlayground({ children }: PlaygroundProps) {
       <PlayDivider />
       <PlaySection label="Field" />
       <div>
+        <Switch
+          label="Collapse overflow"
+          checked={d.collapseOnOverflow}
+          onToggle={() => setCollapseOnOverflow((v) => !v)}
+          disabled={!multiple}
+          className={PLAY_SWITCH}
+        />
         <PlayField label="Variant">
           <PlaySelect
             value={variant}

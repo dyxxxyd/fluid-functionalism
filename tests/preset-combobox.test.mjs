@@ -112,7 +112,22 @@ describe("combobox preset codec", () => {
     expect(back.preset.multiple).toBe(false);
     expect(back.preset.flavor).toBe("base");
     // Pin the literal string — update ONLY on a deliberate version bump.
-    expect(code).toMatchInlineSnapshot(`"bb8x"`);
+    expect(code).toMatchInlineSnapshot(`"bcHD"`);
+  });
+
+  it("a version-b code keeps overflow wrapping and its original globals", () => {
+    const back = decodeComboboxPreset("bb8x");
+    expect(back.ok).toBe(true);
+    expect(back.version).toBe("b");
+    expect(back.preset).toEqual({
+      ...DEFAULT_COMBOBOX_PRESET,
+      multiple: false,
+      variant: "borderless",
+      icon: true,
+      error: true,
+      flavor: "base",
+      collapseOnOverflow: false,
+    });
   });
 
   // Version "a" codes were published before creatable/hideSelected joined the
@@ -160,9 +175,20 @@ const MATRIX = [
   { hideSelected: true },
   { creatable: true, hideSelected: true, clearable: true },
   { multiple: false, hideSelected: true }, // derived off: single mode
+  { collapseOnOverflow: true },
+  { collapseOnOverflow: true, size: "compact", flavor: "base", icon: true, clearable: true },
+  { multiple: false, collapseOnOverflow: true },
 ];
 
 describe("combobox preset install generator", () => {
+  it("emits the collapse prop only for multiple selection", () => {
+    for (const multiple of [true, false]) {
+      const [file] = generateComboboxPresetFiles({
+        ...DEFAULT_COMBOBOX_PRESET, multiple, collapseOnOverflow: true,
+      });
+      expect(file.content.includes("        collapseOnOverflow\n")).toBe(multiple);
+    }
+  });
   for (const [i, partial] of MATRIX.entries()) {
     it(`matrix ${i} typechecks: ${JSON.stringify(partial)}`, () => {
       const diags = typecheckPreset({ ...DEFAULT_COMBOBOX_PRESET, ...partial });

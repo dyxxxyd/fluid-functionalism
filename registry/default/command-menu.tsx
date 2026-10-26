@@ -754,7 +754,7 @@ export interface CommandMenuInputProps
 
 const CommandMenuInput = forwardRef<HTMLInputElement, CommandMenuInputProps>(
   (
-    { className, placeholder = "Type a command or search…", icon, onKeyDown, ...props },
+    { className, placeholder = "Type a command or search…", icon, onKeyDown, onCompositionEnd, ...props },
     ref
   ) => {
     const icons = useIcons();
@@ -766,14 +766,20 @@ const CommandMenuInput = forwardRef<HTMLInputElement, CommandMenuInputProps>(
       useCommandMenu();
     const activeIndex = useSyncExternalStore(highlight.subscribe, highlight.get, () => null);
     const dialog = useContext(CommandMenuDialogContext);
+    const compositionEndAt = useRef<number | null>(null);
 
     const handleKeyDown = (e: ReactKeyboardEvent<HTMLInputElement>) => {
       onKeyDown?.(e);
       if (e.defaultPrevented) return;
-      // Keys inside an IME composition belong to the composer: Enter commits
-      // a candidate, the arrows pick one. (Safari reports the commit as
-      // keyCode 229 after compositionend.)
-      if (e.nativeEvent.isComposing || e.nativeEvent.keyCode === 229) return;
+      // Keys inside an IME composition belong to the composer. Safari can
+      // deliver the confirming Enter after compositionend, even with an
+      // earlier timestamp: keep that commit out of the command handler.
+      if (
+        e.nativeEvent.isComposing ||
+        (e.key === "Enter" &&
+          compositionEndAt.current !== null &&
+          Math.abs(e.timeStamp - compositionEndAt.current) < 50)
+      ) return;
       switch (e.key) {
         case "ArrowLeft":
         case "ArrowRight": {
@@ -868,6 +874,10 @@ const CommandMenuInput = forwardRef<HTMLInputElement, CommandMenuInputProps>(
           placeholder={placeholder}
           onChange={(e) => setQuery(e.target.value)}
           onKeyDown={handleKeyDown}
+          onCompositionEnd={(e) => {
+            compositionEndAt.current = e.timeStamp;
+            onCompositionEnd?.(e);
+          }}
           // rounded-none: the base :focus-visible rule hands focused elements
           // the shape radius, and a text input clips its caret to its corners.
           className={cn(

@@ -122,15 +122,19 @@ Install with `npx shadcn@latest add @fluid/<name>`. A second name means the comp
 | [ColorPicker](https://www.fluidfunctionalism.com/docs/color-picker) | `color-picker` · `base/color-picker` | HEX, RGB, HSL, and OKLCH formats with alpha, swatches, and eyedropper, inline or in a popover |
 | [Combobox](https://www.fluidfunctionalism.com/docs/combobox) | `combobox` · `base/combobox` | Type-to-filter field with keyboard highlight, fluid hover, chips for multiple selection, and a create-from-query row |
 | [CommandMenu](https://www.fluidfunctionalism.com/docs/command-menu) | `command-menu` · `base/command-menu` | Type to filter a list of actions, arrow through them, press Enter: groups, shortcut caps, suggestions, and a dialog shell on ⌘K |
+| [DataTable](https://www.fluidfunctionalism.com/docs/data-table) | `data-table` · `base/data-table` | Sort, filter, select, and paginate rows with TanStack Table v9 and Fluid hover |
 | [DatePicker](https://www.fluidfunctionalism.com/docs/date-picker) | `date-picker` · `base/date-picker` | Outline or ghost trigger for a date, a range, or a date and a time, with range presets and time slot lists that show each duration |
 | [Dialog](https://www.fluidfunctionalism.com/docs/dialog) | `dialog` · `base/dialog` | Modal with spring enter/exit and overlay in 3 widths, the largest a canvas for a sidebar |
+| [Drawer](https://www.fluidfunctionalism.com/docs/drawer) | `drawer` | Swipeable edge panel with four directions, snap points, and nested stacking; shared Base UI implementation |
 | [Dropdown](https://www.fluidfunctionalism.com/docs/dropdown) | `dropdown` · `base/dropdown` | Menu-style dropdown with fluid hover, animated selection, submenus that hold their row across the safe area, and an optional search field in the popup |
 | [InputCopy](https://www.fluidfunctionalism.com/docs/input-copy) | `input-copy` · `base/input-copy` | Read-only input with copy-to-clipboard and animated feedback |
 | [InputGroup](https://www.fluidfunctionalism.com/docs/input-group) | `input-group` | Input fields with fluid hover, animated labels, and validation |
 | [InputMessage](https://www.fluidfunctionalism.com/docs/input-message) | `input-message` · `base/input-message` | Chat-style composer with auto-resizing textarea, file drop, action slots, and a built-in send button |
+| [InputNumber](https://www.fluidfunctionalism.com/docs/input-number) | `input-number` | Numeric input with decimal steps, range limits, formatting, and fluid stepper hover |
 | [RadioGroup](https://www.fluidfunctionalism.com/docs/radio-group) | `radio-group` · `base/radio-group` | Radio buttons with fluid hover and animated selection |
 | [Select](https://www.fluidfunctionalism.com/docs/select) | `select` · `base/select` | Animated select with bordered/borderless variants, typeahead, and optional icons |
 | [Sidebar](https://www.fluidfunctionalism.com/docs/sidebar) | `sidebar` · `base/sidebar` | Composable app sidebar: drag its edge to resize, collapse it away or press `[` or `]`, and a drawer on mobile |
+| [Skeleton](https://www.fluidfunctionalism.com/docs/skeleton) | `skeleton` | Loading placeholders with Fluid shapes and reduced-motion support |
 | [Slider](https://www.fluidfunctionalism.com/docs/slider) | `slider` · `base/slider` | Spring-snapped thumb, step dots, range mode, and a click-to-edit value |
 | [Switch](https://www.fluidfunctionalism.com/docs/switch) | `switch` · `base/switch` | Toggle with animated thumb and label |
 | [Table](https://www.fluidfunctionalism.com/docs/table) | `table` | Data table with fluid hover on rows and semantic markup |
@@ -138,6 +142,7 @@ Install with `npx shadcn@latest add @fluid/<name>`. A second name means the comp
 | [TabsSubtle](https://www.fluidfunctionalism.com/docs/tabs-subtle) | `tabs-subtle` · `base/tabs-subtle` | Tab navigation with an animated pill indicator |
 | [ThinkingIndicator](https://www.fluidfunctionalism.com/docs/thinking-indicator) | `thinking-indicator` | Animated status indicator with morphing SVG and cycling text |
 | [ThinkingSteps](https://www.fluidfunctionalism.com/docs/thinking-steps) | `thinking-steps` · `base/thinking-steps` | Chain-of-thought display with sequential animation and collapsible steps |
+| [Toast](https://www.fluidfunctionalism.com/docs/toast) | `toast` · `base/toast` | Temporary notifications with actions, promise updates, and a swipeable stack |
 | [Tooltip](https://www.fluidfunctionalism.com/docs/tooltip) | `tooltip` · `base/tooltip` | Spring-based floating tooltip with configurable placement |
 
 ## Systems

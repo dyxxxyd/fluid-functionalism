@@ -23,7 +23,7 @@ const buttonVariants = cva(
     // button (or overflows) instead of squeezing it.
     "group relative isolate inline-flex items-center justify-center outline-none cursor-pointer select-none whitespace-nowrap",
     "transition-colors duration-80",
-    "disabled:opacity-50 disabled:pointer-events-none",
+    "disabled:opacity-50 disabled:pointer-events-none aria-disabled:opacity-50 aria-disabled:pointer-events-none",
     "focus-visible:ring-1 focus-visible:ring-[color:var(--focus-ring,#6B97FF)]",
   ],
   {
@@ -295,7 +295,17 @@ const Button = forwardRef<HTMLButtonElement, ButtonProps>(
         {...props}
       >
         {asChildElement
-          ? cloneElement(asChildElement, undefined, internals)
+          ? cloneElement(asChildElement as ReactElement<ButtonHTMLAttributes<HTMLButtonElement>>,
+              disabled || loading ? {
+                "aria-disabled": true,
+                tabIndex: -1,
+                ...(asChildElement.type === "button" ? { disabled: true } : {}),
+                onClickCapture: (event: React.MouseEvent<HTMLButtonElement>) => {
+                  event.preventDefault();
+                  event.stopPropagation();
+                },
+              } : undefined,
+              internals)
           : internals}
       </Comp>
     );

@@ -34,15 +34,19 @@ Systems first — their craft applies across every component below.
 - [ColorPicker](#color-picker)
 - [Combobox](#combobox)
 - [CommandMenu](#command-menu)
+- [DataTable](#data-table)
 - [DatePicker](#date-picker)
 - [Dialog](#dialog)
+- [Drawer](#drawer)
 - [Dropdown](#dropdown)
 - [InputCopy](#input-copy)
 - [InputGroup](#input-group)
 - [InputMessage](#input-message)
+- [InputNumber](#input-number)
 - [RadioGroup](#radio-group)
 - [Select](#select)
 - [Sidebar](#sidebar)
+- [Skeleton](#skeleton)
 - [Slider](#slider)
 - [Switch](#switch)
 - [Table](#table)
@@ -50,6 +54,7 @@ Systems first — their craft applies across every component below.
 - [TabsSubtle](#tabs-subtle)
 - [ThinkingIndicator](#thinking-indicator)
 - [ThinkingSteps](#thinking-steps)
+- [Toast](#toast)
 - [Tooltip](#tooltip)
 - [Queued message stack (queued-stack)](#queued-stack)
 - [App Sidebar (sidebar-app)](#sidebar-app)
@@ -138,7 +143,7 @@ Systems first — their craft applies across every component below.
 - 1 class on a page's container, like shadcn's `scroll-fade`. Pure CSS: no JavaScript, no hydration, nothing hidden on the server.
 - `reveal-landing` is for a page read once. The 1st child is the hero: its children rise 12px and scale in from 0.94 on first paint, 0.1s apart for 4 steps (the 5th onward arrives with the 4th). Every later child rises and scales in the same way with the scroll on a view() timeline, from when its top edge is 12px inside the viewport to 120px, so nothing starts moving at the very edge. Everything on screen at first paint belongs in the hero, product shot included: a later section that starts on screen sits half revealed, waiting for a scroll, instead of playing on load. For a grid, `reveal-scroll` on each card makes every card a scroll section of its own with the same values, while the section holding them stays still; wrap a card that already animates `transform` (a framer layout node), since the CSS animation would override it. A `reveal-scroll` nested in another follows it half a range later on the way in (72px to 180px by default) and leaves half a range sooner, so a card arrives and then its content; the Showcase wraps each tile and each tile's component this way. Every scroll section and `reveal-scroll` also plays a load step after the hero (from the 4th step, then a step per sibling for 4 steps, and a step later for nested content), so one already on screen at first paint arrives with the page; off screen, the step plays unseen and the scroll takes over. A view() timeline binds to the nearest scroll container and `overflow: hidden` makes one even if it never scrolls, so clip a revealed element's ancestors with `overflow: clip` or its animation never moves. Leaving at the top mirrors it: from when a section's bottom edge is 120px from the top of the viewport to 12px, it fades out, lifts 12px, and scales to 0.94 (the hero too). Product reveals have no exit.
 - `reveal-product` is for the app people come back to: every child fades in on first paint, 0.06s apart, with no rise, and nothing moves on scroll: an app's layout should feel like it was already there. Scroll reveals in an app are noise on the 10th visit.
-- Slow data in `reveal-product` waits on shadcn's Skeleton (installed with the item). Never swap a skeleton out and the data in on the same frame: the data starts at opacity 0, so the space blinks empty. `reveal-swap` stacks both in 1 grid cell: render the skeleton, then add the real block after it when the data lands, and the skeleton fades out as the block fades in. With `reveal-items` on both, each skeleton row hands over to its real row a step apart. Build the skeleton the size of the real block so nothing shifts, and keep Skeletons inside a block: a Skeleton that is itself an animated child loses its pulse. Skeletons in a preset, a `reveal-items` block, or a `reveal-swap` fade in over 250ms on an even ease-in-out curve before shadcn's pulse starts, so a placeholder arrives instead of popping in. Reduced motion keeps that fade and stops the pulse.
+- Slow data in `reveal-product` waits on Skeleton (installed with the item). Never swap a skeleton out and the data in on the same frame: the data starts at opacity 0, so the space blinks empty. `reveal-swap` stacks both in 1 grid cell: render the skeleton, then add the real block after it when the data lands, and the skeleton fades out as the block fades in. With `reveal-items` on both, each skeleton row hands over to its real row a step apart. Build the skeleton the size of the real block so nothing shifts, and keep Skeletons inside a block: a Skeleton that is itself an animated child loses its pulse. Skeletons in a preset, a `reveal-items` block, or a `reveal-swap` fade in over 250ms on an even ease-in-out curve before shadcn's pulse starts, so a placeholder arrives instead of popping in. Reduced motion keeps that fade and stops the pulse.
 - `reveal-items` on a block keeps the block still and brings its children in one by one, a step apart, for 8 steps: table rows, metrics, and a sidebar's items fill in in order when their data lands instead of all at once. Inside a preset it takes the preset's travel and step; outside one (a sidebar beside the preset) it fades like the product, 0.06s apart.
 - `-subtle` tones the gesture down: landing 8px and 0.98 scale, 0.06s steps, 8px to 60px of scroll; product 0.04s steps.
 - No new token: landing steps ride `spring.slow` (0.24s, bounce 0.12), the tier for large surfaces; product steps ride `spring.moderate` (0.16s, no bounce), since app blocks are panels and a fade has no travel for a bounce to act on. Both are written as CSS `linear()` in `--reveal-motion`, and only the `from` keyframe is set, so each block lands on its own styles.
@@ -319,10 +324,23 @@ Systems first — their craft applies across every component below.
 - CommandMenuDialog opens centered at its cap min(440px, 76dvh) and keeps that top edge — `top-[max(12dvh,calc(50dvh-220px))]` — so the field stays put while the rows under it filter down. It closes on Escape and on a pick (`closeOnSelect`), so no ✕ button is rendered.
 - Keyboard scrolling is done at the moment a move is decided, not in an effect: a keyboard move keeps its row at the CENTER of the viewport (as the ends allow) and the viewport travels on the same fast spring as the highlight so row and fill move together; a move that lands on the first row snaps to the top instead, as a query reset does, heading included. Offsets, never `scrollIntoView`, which would also scroll the page.
 - Arrows wrap at both ends — the list is the whole keyboard space, no field stop (unlike the combobox) — and skip disabled rows; the first enabled row is re-highlighted whenever the row set changes (detected by a NUL-joined values key, so an inline items literal doesn't reset it), so Enter always has a target as the query filters. Pointer leaving the list keeps the highlight where it was.
-- With CommandMenuTabs mounted, ← and → in the field switch tabs (wrapping) instead of moving the caret; presses modified with Shift, Alt, Ctrl or Meta keep their editing meaning, so Shift+Arrow still extends the selection. IME composition keys are left to the composer (including Safari's keyCode 229 commit). Escape closes the dialog shell, but inline it clears the query.
+- With CommandMenuTabs mounted, ← and → in the field switch tabs (wrapping) instead of moving the caret; presses modified with Shift, Alt, Ctrl or Meta keep their editing meaning, so Shift+Arrow still extends the selection. IME composition keys are left to the composer; a 50ms window around compositionend's event timestamp also catches Safari's out-of-order confirming Enter. Escape closes the dialog shell, but inline it clears the query.
 - Shortcut system: `"mod+k"` is ⌘K on a Mac, Ctrl+K elsewhere ("mod" matches either while listening); physical-key (`code`) fallback applies when `key` isn't a Latin letter/digit or when ⌥ is held, so an unmodified Dvorak "t" is never read as physical K; a bare key stays out of editable fields. Among mounted dialogs sharing a combo, an open one answers first (the press closes it), else the most recently mounted one whose `shortcutScope` holds focus.
 - The footer's Enter hint names the highlighted row's `action` (default: its label) so it reads as the thing Enter does ("Open Showcase") rather than a generic "Run"; it sits at the trailing edge so its changing width never moves the other hints, which follow the menu (tabs add ← →, a dialog adds Esc).
 - Suggested rows lead under their own heading while nothing is typed, and leave their original group so nothing is listed twice; the default filter matches every query word against label + description + keywords and never re-sorts, so rows don't move under the cursor as the query grows.
+
+<a id="data-table"></a>
+## DataTable
+
+- TanStack Table v9 features are registered once in dataTableFeatures, shared by the exported column and instance types; sorting, filtering, visibility, pagination, and selection use the same row pipeline.
+- Body rows pass their visible page index to Fluid Table, keeping one shared hover highlight behind the semantic table as sorting, filtering, and pagination change its rows.
+- Row selection is opt-in through options.enableRowSelection; its generated checkbox column cannot be hidden or sorted, and its header selects only eligible rows on the current page.
+- Selection uses native checkboxes, including an indeterminate header and disabled rows; check and mixed marks draw on spring.fast and retract with spring.fast.exit.
+- Sortable column headers cycle through TanStack sorting states, expose aria-sort on their header cells, and crossfade 3 glyphs in a fixed grid cell using the fast tier and its faster exit.
+- The Columns popup keeps multiple checkbox choices open and reuses Dropdown's fluid hover and merged selection backgrounds; columnLabels supplies readable names for function-rendered headers.
+- A size prop wraps the entire composition in SizeProvider, so table cells, toolbar controls, popup items, and pagination share the default or compact step.
+- Empty results span the visible leaf columns, including selection, and page navigation reads Page 0 of 0; the current page size stays in the selector even when absent from pageSizeOptions.
+- Controlled state and manual server modes pass through options; getRowId keeps selection attached to record IDs across data changes, and selection counts reflect filtered rows available in the current data.
 
 <a id="date-picker"></a>
 ## DatePicker
@@ -349,6 +367,17 @@ Systems first — their craft applies across every component below.
 - `position="top"` anchors the panel 12dvh from the top instead of centering, so a panel whose height follows its content (a command menu) keeps its top edge still.
 - `container` retargets the portal and switches overlay + panel from `fixed` to `absolute`, scoping the dialog to a positioned, overflow-hidden region — usually paired with `modal={false}` (e.g. a docs preview).
 - `showCloseButton` (default true) renders the corner ✕ as a ghost icon Button; drop it when the content has its own way out, e.g. a command menu that closes on Escape and on a pick.
+
+<a id="drawer"></a>
+## Drawer
+
+- One shared Base UI Drawer implementation for both primitive flavors, following shadcn/ui's Base Drawer composition. It owns gestures, snap points, focus trapping, Escape and outside dismissal, scroll lock, and focus restoration.
+- The popup enters on a CSS linear() curve generated from spring.moderate and exits with spring.moderate.exit (0.12s). CSS transitions leave Base UI in control of its swipe transforms and unmount lifecycle, including closes made by changing the controlled open prop.
+- Swipe direction chooses the anchored edge: down is the bottom, up is the top, and left/right are side panels. Like shadcn's Maia/Mira styles, every drawer floats 8px from the viewport with all four corners rounded; --drawer-inset can override that gap. Vertical drawers size to their content up to calc(100dvh - 6rem); side panels span between the top and bottom gaps, with a width of 75% on small screens or 24rem from the sm breakpoint. Ordinary h-*, max-h-*, and w-* classes can override the size.
+- Snap points use Base UI's native snap offset in the vertical transform. Controlled snapPoint and onSnapPointChange use the same values as snapPoints; a full snap point publishes data-expanded for styling.
+- Nested parents scale by 0.05 per open child and peek by 1rem. Swipe progress reverses that stack transform directly with no transition while the nested drawer is being dragged. The overshoot bleed defaults to transparent so it never paints over the floating gap; --drawer-bleed-background can set a fill for a flush drawer.
+- The popup sits 4 surface levels above its substrate, capped at 8, and re-provides that level to children. Corners follow ShapeProvider; title and description follow SizeProvider and the shared type scale.
+- Reduced motion is CSS-based and works without a MotionConfig provider: opening and closing keep the opacity fade at the resting transform instead of sliding offscreen. The registry also positions body relatively so the absolute iOS Safari overlay covers scrolled pages.
 
 <a id="dropdown"></a>
 ## Dropdown
@@ -380,8 +409,10 @@ Systems first — their craft applies across every component below.
 ## InputGroup
 
 - A field lights up when it is the hover-nearest item OR focused (`labelActive = isActive || isFocused`): its leading icon shifts muted→foreground and stroke-width 1.5→2 over 80ms.
-- State chrome is a precedence ladder: disabled → transparent/ring-border; error → transparent at rest, bg-destructive-light/60 on hover-active, bg-card when focused, with ring-destructive/50 only while focused or hover-active; focused → bg-card + ring-border; hover-active → bg-muted/50; rest → fully transparent with invisible ring.
-- The label sits one notch tighter (pl-2.5, compact pl-2) than the ladder's control padding because "the field ring is invisible at rest, so the roomier inset reads as a gap".
+- InputGroup variant is inherited by every field, with an optional InputField override. The default bordered variant keeps ring-border; borderless stays transparent with an invisible ring at rest; filled keeps bg-muted/50 with an invisible ring; underlined stays transparent with square corners and only a bottom border.
+- Underlined fields never gain a surrounding ring or fill: their bottom border shifts border-border to border-muted-foreground on hover and border-foreground on focus; errors use border-destructive/50 even at rest, while disabled fields keep border-border.
+- For bordered, borderless, and filled fields, state chrome is a precedence ladder: disabled keeps the resting fill and ring (borderless retains ring-border); error keeps the resting fill, bg-destructive-light/60 on hover-active, bg-card when focused, with ring-destructive/50 on bordered fields or while focused or hover-active; focused uses bg-card + ring-border; hover-active uses bg-muted/50 (bg-muted for filled) + ring-border.
+- The label keeps the same inset across variants (pl-2.5, compact pl-2), so switching the chrome never moves it relative to the field's text.
 - The label stacks an invisible semibold layer under the visible one in one grid cell, reserving the bold width so weight changes never shift layout.
 - Mousedown anywhere on the input container (icon, padding) focuses the input — preserving the old one-big-label behavior — while clicks on the input itself are left alone so caret placement isn't disturbed.
 - The input container uses a fixed ladder control height (rather than py-2 around the line box) so the field sits exactly on the 36px / 28px size steps. On touch screens the text steps up to 16px inside that same height, so iOS Safari never zooms the page on focus and the row doesn't move.
@@ -401,6 +432,18 @@ Systems first — their craft applies across every component below.
 - History recall is readline-style: plain ArrowUp only when the caret is on the first line, ArrowDown on the last, so multi-line editing still works; the in-progress draft is stashed and restored when walking past the newest entry, and real typing exits history mode.
 - The placeholder suggestion is a real overlay, not the native placeholder, so a Tab keycap can render inline after the text; its typography mirrors the textarea's step exactly "so it sits where typed text will", long suggestions truncate on one flex line so the chip is never cut, and an sr-only hint joins the textarea's aria-describedby. Tab fills without sending; Shift+Tab still moves focus back.
 - Suggestions are a listbox that never steals focus: ↓ enters/descends, ↑ walks back up and out, Enter or click fills the composer; the highlighted row is tracked via aria-activedescendant and shares the same sliding fluid-hover overlay as the pointer. While nothing is highlighted the first row shows a ↓ keycap hint in the slot where the active row shows ↵.
+
+<a id="input-number"></a>
+## InputNumber
+
+- NumberField owns numeric parsing, partial editing text, decimal stepping, press-and-hold and the hidden numeric form value. The public API reports number or null; it does not expose stringMode or custom formatter/parser callbacks.
+- The field follows useSize(size): 36px default or 28px compact, with sizeClasses.field keeping editable text at 16px on touch screens so iOS Safari does not zoom on focus.
+- The two stacked stepper buttons share one useFluidHover scope and one FluidHoverHighlight. Disabled and read-only buttons are excluded from the nearest-item hover, and hidden controls leave arrow-key stepping available.
+- Bordered, borderless, filled and underlined match InputGroup. Focus uses bg-card + ring-border with no extra outline; underlined stays transparent and uses border-foreground. Focus takes precedence over hover. Chrome transitions in spring.fast.duration; stepper hover uses spring.fast and spring.fast.exit.
+- The controls sit 2px inside the field and use nestedRadius(shape.bgRadius, 2), so their hover corners stay concentric in both rounded and pill shapes.
+- Intl.NumberFormat formats and parses locale-aware numbers, currencies and percentages. Grouping is off by default, precision overrides fraction digits, and partial text stays visible until blur normalizes it.
+- Wheel stepping is opt-in and requires focus. Arrow keys and buttons use step, Alt keeps that step, and Shift takes ten steps. External value or range updates do not emit onChange.
+- Native attributes and ref reach the editable input, while className and style belong to the outer field. Prefix and suffix clicks focus the input without intercepting buttons, links or other editable content.
 
 <a id="radio-group"></a>
 ## RadioGroup
@@ -438,6 +481,16 @@ Systems first — their craft applies across every component below.
 - Active backgrounds are keyed per level so the selection GLIDES when it moves instead of remounting; a rect change on the SAME row (reflow from a sibling collapsing) snaps rather than springing, and hover tracking freezes across every scope while any sidebar-anchored popup is open.
 - There is deliberately no icon-rail collapsed mode (`collapsible` is only "offcanvas" | "none"): the docs argue icon rails make "every destination take a hover, a beat, a tooltip" and section labels collapse to a divider — collapsed means gone, and `peek="hover"` floats the REAL sidebar, labels and all, instead.
 - The avatar remains a consumer-owned ReactNode, but image examples apply a 1px inset pure-black/pure-white 10% outline; at 20px this is the difference between a pale portrait reading as a circle and dissolving into the row surface.
+
+<a id="skeleton"></a>
+## Skeleton
+
+- The shadcn Skeleton composition stays one div with data-slot=skeleton, so existing reveal-swap and reveal-items layouts keep their loading handoff.
+- Dimensions come from caller classes or inline styles. Match the real content footprint so loading does not shift the surrounding layout.
+- The neutral bg-accent fill uses the current theme, and corners follow ShapeProvider through shape.bg. A rounded-full class can override the shape for avatars.
+- The standard animate-pulse opacity cycle stops under prefers-reduced-motion with motion-reduce:animate-none; no application motion provider is required.
+- Each placeholder is aria-hidden by default. The surrounding region owns aria-busy and its accessible loading message, avoiding an announcement for every decorative bar.
+- Native div props and the ref are forwarded, and caller classes merge last so explicit dimensions, color, and corner overrides win.
 
 <a id="slider"></a>
 ## Slider
@@ -517,6 +570,18 @@ Systems first — their craft applies across every component below.
 - A panel that is already open at mount SNAPs (duration 0) to its first measured pixel target instead of springing — the auto→pixel hand-off would otherwise animate on load; later opens spring normally with `bounce: 0` because "pure height looks better without overshoot".
 - Each step's icon column is a fixed 14px cell with a 1px connector line stretching from below the icon to the step's bottom; `isLast` hides the line so the rail terminates cleanly.
 - Source badges enter with a blur(4px)→0 + scale 0.85→1 + fade on spring.moderate, staggerable via per-badge `delay` (docs use 0.05s increments); step images use the same blur-in without the scale, plus a 1px inset pure-black/pure-white 10% outline so screenshots keep a visible edge on either theme.
+
+<a id="toast"></a>
+## Toast
+
+- Base UI owns the manager, accessible announcements, F6 focus navigation, paused timers, and swipe dismissal. Toaster mounts one provider and renderer for the chosen manager; mount it once per manager.
+- The default viewport sits 16px from the bottom-right on desktop and stretches between 16px side insets on narrow screens, capped at max-w-sm.
+- Collapsed notifications peek 12px apart and shrink 0.05 per depth step from a bottom origin. Hover or keyboard focus expands the stack into measured heights with 12px gaps and reveals each message.
+- Transforms and opacity enter on spring.moderate through a generated CSS linear() spring. Dismissals use the 0.12s moderate exit, with the primitive retaining swipe transforms and its transition lifecycle.
+- Reduced motion keeps opacity transitions and removes animated travel and depth scaling. Loading icons also stop rotating, independently of an application MotionConfig.
+- Surface level is min(current substrate + 2, 8), re-provided to children. Container corners follow ShapeProvider; padding is 16px default and 12px compact, and text and icons follow SizeProvider.
+- Status glyphs match Banner: default uses the icon set outline info mark; info, success, warning, and error use the same filled shapes and status colors, with a background-colored cutout. Light and dark status tokens ship with the item. Loading keeps a rotating icon; custom unknown types have no icon. Glyphs are 20px default and 16px compact, while text and surfaces stay neutral.
+- Actions and close controls use Fluid buttons and preserve Base UI render composition. Manager updates and promise transitions reuse one toast ID instead of adding another notification for each state.
 
 <a id="tooltip"></a>
 ## Tooltip

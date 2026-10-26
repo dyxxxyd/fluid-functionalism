@@ -66,7 +66,7 @@ export const FF_PARTS = [
 /** Single-source items that import @base-ui/react under both flavors, so a
  *  Radix project that installs one gets Base UI code that says nothing
  *  about its flavor. Never flavor evidence. */
-export const SHARED_BASE_UI = ["ask-user-questions", "color-picker", "input-group"];
+export const SHARED_BASE_UI = ["ask-user-questions", "color-picker", "drawer", "input-group", "input-number", "toast"];
 
 /** Lowest major each requirement accepts. */
 export const REQUIRED_MAJOR = { react: 19, tailwindcss: 4, motion: 12 };

@@ -345,6 +345,30 @@ function parseHex(input: string): { r: number; g: number; b: number; a: number }
   return null;
 }
 
+const COLOR_NUMBER = "[+-]?(?:\\d+(?:\\.\\d*)?|\\.\\d+)(?:e[+-]?\\d+)?";
+const COLOR_CHANNEL = new RegExp(`^(${COLOR_NUMBER})(%)?$`, "i");
+const COLOR_ANGLE = new RegExp(`^(${COLOR_NUMBER})(deg|grad|rad|turn)?$`, "i");
+
+function parseChannel(token: string, percentScale = 1): number {
+  const match = COLOR_CHANNEL.exec(token);
+  if (!match) return NaN;
+  const value = Number(match[1]);
+  return Number.isFinite(value) ? (match[2] ? value / 100 * percentScale : value) : NaN;
+}
+
+function parseHue(token: string): number {
+  const match = COLOR_ANGLE.exec(token);
+  if (!match) return NaN;
+  const value = Number(match[1]);
+  if (!Number.isFinite(value)) return NaN;
+  switch (match[2]?.toLowerCase()) {
+    case "turn": return (value % 1) * 360;
+    case "grad": return (value % 400) * 0.9;
+    case "rad": return (value % (2 * Math.PI)) * 180 / Math.PI;
+    default: return value % 360;
+  }
+}
+
 // Reads the four formats the panel emits: hex, rgb()/rgba(), hsl()/hsla(),
 // oklch(). Commas, spaces and "/" all separate parts, and alpha takes 0..1 or
 // a percentage. Pure string work with no DOM, so it is safe during render and
@@ -358,13 +382,13 @@ function parseColor(input: string): { r: number; g: number; b: number; a: number
   const rgbM = s.match(/^rgba?\(\s*([^)]+)\)$/i);
   if (rgbM) {
     const parts = rgbM[1].split(/[\s,/]+/).filter(Boolean);
-    if (parts.length < 3) return null;
-    const r = parseFloat(parts[0]);
-    const g = parseFloat(parts[1]);
-    const b = parseFloat(parts[2]);
+    if (parts.length < 3 || parts.length > 4) return null;
+    const r = parseChannel(parts[0], 255);
+    const g = parseChannel(parts[1], 255);
+    const b = parseChannel(parts[2], 255);
     let a = 1;
     if (parts[3] !== undefined) {
-      a = parts[3].endsWith("%") ? parseFloat(parts[3]) / 100 : parseFloat(parts[3]);
+      a = parseChannel(parts[3]);
     }
     if ([r, g, b, a].some(Number.isNaN)) return null;
     return { r: clamp255(r), g: clamp255(g), b: clamp255(b), a: clamp01(a) };
@@ -372,13 +396,13 @@ function parseColor(input: string): { r: number; g: number; b: number; a: number
   const hslM = s.match(/^hsla?\(\s*([^)]+)\)$/i);
   if (hslM) {
     const parts = hslM[1].split(/[\s,/]+/).filter(Boolean);
-    if (parts.length < 3) return null;
-    const h = parseFloat(parts[0]);
-    const sat = parts[1].endsWith("%") ? parseFloat(parts[1]) / 100 : parseFloat(parts[1]);
-    const l = parts[2].endsWith("%") ? parseFloat(parts[2]) / 100 : parseFloat(parts[2]);
+    if (parts.length < 3 || parts.length > 4) return null;
+    const h = parseHue(parts[0]);
+    const sat = parseChannel(parts[1]);
+    const l = parseChannel(parts[2]);
     let a = 1;
     if (parts[3] !== undefined) {
-      a = parts[3].endsWith("%") ? parseFloat(parts[3]) / 100 : parseFloat(parts[3]);
+      a = parseChannel(parts[3]);
     }
     if ([h, sat, l, a].some(Number.isNaN)) return null;
     const rgb = hslToRgb(h, clamp01(sat), clamp01(l));
@@ -387,13 +411,14 @@ function parseColor(input: string): { r: number; g: number; b: number; a: number
   const oklchM = s.match(/^oklch\(\s*([^)]+)\)$/i);
   if (oklchM) {
     const parts = oklchM[1].split(/[\s,/]+/).filter(Boolean);
-    if (parts.length < 3) return null;
-    const L = parts[0].endsWith("%") ? parseFloat(parts[0]) / 100 : parseFloat(parts[0]);
-    const C = parseFloat(parts[1]);
-    const H = parseFloat(parts[2]);
+    if (parts.length < 3 || parts.length > 4) return null;
+    const L = parseChannel(parts[0]);
+    // CSS Color 4 defines 100% OKLCH chroma as 0.4.
+    const C = parseChannel(parts[1], 0.4);
+    const H = parseHue(parts[2]);
     let a = 1;
     if (parts[3] !== undefined) {
-      a = parts[3].endsWith("%") ? parseFloat(parts[3]) / 100 : parseFloat(parts[3]);
+      a = parseChannel(parts[3]);
     }
     if ([L, C, H, a].some(Number.isNaN)) return null;
     const rgb = oklchToRgb(clamp01(L), Math.max(0, C), H);

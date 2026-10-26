@@ -149,6 +149,25 @@ const [values, setValues] = useState<string[]>(["next", "astro"]);
   </ComboboxContent>
 </Combobox>`;
 
+const collapsedCode = `import {
+  Combobox, ComboboxChips, ComboboxContent,
+  ComboboxList, ComboboxItem, ComboboxEmpty,
+} from "./components";
+
+<Combobox multiple items={frameworks} defaultValue={frameworks.map((item) => item.value)}>
+  <ComboboxChips collapseOnOverflow placeholder="Add frameworks…" className="w-[360px] max-w-full" />
+  <ComboboxContent>
+    <ComboboxEmpty>No framework found.</ComboboxEmpty>
+    <ComboboxList>
+      {(item) => (
+        <ComboboxItem key={item.value} value={item.value}>
+          {item.label}
+        </ComboboxItem>
+      )}
+    </ComboboxList>
+  </ComboboxContent>
+</Combobox>`;
+
 const creatableCode = `import {
   Combobox, ComboboxChips, ComboboxContent,
   ComboboxList, ComboboxItem, ComboboxEmpty,
@@ -377,6 +396,23 @@ export default function ComboboxDoc() {
         <ComponentPreview code={multipleCode} minHeightClass="min-h-[160px]">
           <Combobox multiple items={FRAMEWORKS} value={stack} onValueChange={setStack}>
             <ComboboxChips placeholder="Add frameworks…" className="w-[360px] max-w-full" />
+            <ComboboxContent>
+              <ComboboxEmpty>No framework found.</ComboboxEmpty>
+              <ComboboxList>{frameworkRows}</ComboboxList>
+            </ComboboxContent>
+          </Combobox>
+        </ComponentPreview>
+      </DocSection>
+
+      <DocSection title="Collapse overflow">
+        <p className="text-site-body text-muted-foreground">
+          <code>collapseOnOverflow</code> keeps the field on one line. Picks
+          that do not fit become a <code>+N …</code> counter, with room left
+          for typing. Hover the counter to read the hidden labels.
+        </p>
+        <ComponentPreview code={collapsedCode} minHeightClass="min-h-[160px]">
+          <Combobox multiple items={FRAMEWORKS} defaultValue={FRAMEWORKS.map((item) => item.value)}>
+            <ComboboxChips collapseOnOverflow placeholder="Add frameworks…" className="w-[360px] max-w-full" />
             <ComboboxContent>
               <ComboboxEmpty>No framework found.</ComboboxEmpty>
               <ComboboxList>{frameworkRows}</ComboboxList>

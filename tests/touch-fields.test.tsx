@@ -1,8 +1,7 @@
 // @vitest-environment jsdom
 /**
- * Fields on touch screens and iOS Safari: the copy fallbacks select the
- * whole value even where select() only moves the caret, at 16px so iOS
- * doesn't zoom into them, and InputMessage merges a consumer's
+ * Copy controls use the Clipboard API without selecting a temporary field
+ * when access is unavailable or denied. InputMessage merges a consumer's
  * textareaProps.className with the field's own classes instead of letting
  * it replace them (which dropped the 16px touch size with everything else).
  */
@@ -38,53 +37,56 @@ window.matchMedia ??= ((query: string) =>
     dispatchEvent: () => false,
   }) as MediaQueryList) as typeof window.matchMedia;
 
-describe("copy fallbacks on iOS", () => {
-  const select = Object.getOwnPropertyDescriptor(HTMLTextAreaElement.prototype, "select")!;
-  const execCommand = Object.getOwnPropertyDescriptor(document, "execCommand");
+const value = "npx shadcn@latest add @fluid/input-copy";
+
+describe.each([
+  ["InputCopy", (onCopy: () => void) => render(<InputCopy value={value} onCopy={onCopy} />)],
+  ["CopyPromptButton", (onCopy: () => void) => render(<CopyPromptButton prompt={value} onCopy={onCopy} />)],
+] as const)("%s clipboard writes", (name, mount) => {
   const clipboard = Object.getOwnPropertyDescriptor(navigator, "clipboard");
-  let copied: { text: string; fontSize: string } | null;
+  const writeText = vi.fn<(text: string) => Promise<void>>();
 
   beforeEach(() => {
-    copied = null;
-    // No async Clipboard API, as on an http:// LAN address.
+    writeText.mockReset().mockResolvedValue(undefined);
     Object.defineProperty(navigator, "clipboard", {
       configurable: true,
-      value: { writeText: () => Promise.reject(new Error("insecure context")) },
-    });
-    // iOS Safari: select() puts the caret at the end and selects nothing.
-    HTMLTextAreaElement.prototype.select = function (this: HTMLTextAreaElement) {
-      this.setSelectionRange(this.value.length, this.value.length);
-    };
-    // "Copy" whatever the script-made textarea has selected.
-    document.execCommand = vi.fn(() => {
-      const field = document.body.querySelector(":scope > textarea") as HTMLTextAreaElement;
-      copied = {
-        text: field.value.slice(field.selectionStart, field.selectionEnd),
-        fontSize: field.style.fontSize,
-      };
-      return true;
+      value: { writeText },
     });
   });
 
   afterEach(() => {
-    Object.defineProperty(HTMLTextAreaElement.prototype, "select", select);
-    if (execCommand) Object.defineProperty(document, "execCommand", execCommand);
-    else Reflect.deleteProperty(document, "execCommand");
+    vi.restoreAllMocks();
     if (clipboard) Object.defineProperty(navigator, "clipboard", clipboard);
-    else delete (navigator as { clipboard?: unknown }).clipboard;
+    else Reflect.deleteProperty(navigator, "clipboard");
   });
 
-  const value = "npx shadcn@latest add @fluid/input-copy";
-  it.each([
-    ["InputCopy", () => render(<InputCopy value={value} />)],
-    ["CopyPromptButton", () => render(<CopyPromptButton prompt={value} />)],
-  ])("%s copies the whole value from a 16px field", async (_name, mount) => {
-    const { container } = mount();
+  it("copies the whole value and reports success", async () => {
+    const onCopy = vi.fn();
+    const { container } = mount(onCopy);
+    const button = container.querySelector("button")!;
     await act(async () => {
-      fireEvent.click(container.querySelector("button")!);
-      await new Promise((resolve) => setTimeout(resolve, 0));
+      fireEvent.click(button);
     });
-    expect(copied).toEqual({ text: value, fontSize: "16px" });
+    expect(writeText).toHaveBeenCalledExactlyOnceWith(value);
+    expect(onCopy).toHaveBeenCalledOnce();
+    expect(button.getAttribute("aria-label") ?? button.textContent).toContain("Copied");
+  });
+
+  it.each(["denied", "unavailable"] as const)("handles %s clipboard access without selecting a field", async (failure) => {
+    if (failure === "denied") writeText.mockRejectedValue(new Error("permission denied"));
+    else Reflect.deleteProperty(navigator, "clipboard");
+    const select = vi.spyOn(HTMLTextAreaElement.prototype, "select");
+    const onCopy = vi.fn();
+    const { container } = mount(onCopy);
+    const button = container.querySelector("button")!;
+    await act(async () => {
+      fireEvent.click(button);
+    });
+    expect(select).not.toHaveBeenCalled();
+    expect(onCopy).not.toHaveBeenCalled();
+    expect(button.getAttribute("aria-label") ?? button.textContent).not.toContain("Copied");
+    if (name === "InputCopy") expect(button.getAttribute("aria-label")).toBe("Copy failed");
+    expect(document.body.querySelector("textarea")).toBeNull();
   });
 });
 

@@ -71,40 +71,14 @@ const InputCopy = forwardRef<HTMLDivElement, InputCopyProps>(
       tooltipWasVisibleRef.current = tooltipVisibleRef.current;
     }, []);
 
-    // execCommand fallback for when the async Clipboard API is unavailable or
-    // denied (insecure context, permissions policy) — copies via a temporary
-    // off-screen textarea.
-    const copyViaExecCommand = useCallback(() => {
-      const textarea = document.createElement("textarea");
-      textarea.value = value;
-      textarea.setAttribute("readonly", "");
-      textarea.style.position = "fixed";
-      textarea.style.opacity = "0";
-      // 16px: iOS Safari zooms the page into a focused field set smaller,
-      // and select() can focus this one.
-      textarea.style.fontSize = "16px";
-      document.body.appendChild(textarea);
-      textarea.select();
-      // iOS Safari's select() only moves the caret to the end; the explicit
-      // range is what selects the text there, so the copy isn't empty.
-      textarea.setSelectionRange(0, textarea.value.length);
-      let ok = false;
-      try {
-        ok = document.execCommand("copy");
-      } catch {
-        ok = false;
-      }
-      document.body.removeChild(textarea);
-      return ok;
-    }, [value]);
-
     const handleCopy = useCallback(async () => {
       if (disabled) return;
       let ok = true;
       try {
         await navigator.clipboard.writeText(value);
       } catch {
-        ok = copyViaExecCommand();
+        // Clipboard access can be unavailable or denied by the browser.
+        ok = false;
       }
       setStatus(ok ? "copied" : "error");
       setCopyCount((c) => c + 1);
@@ -121,7 +95,7 @@ const InputCopy = forwardRef<HTMLDivElement, InputCopyProps>(
         setStatus("idle");
         setTooltipState("suppressed");
       }, 2000);
-    }, [value, disabled, onCopy, copyViaExecCommand]);
+    }, [value, disabled, onCopy]);
 
     const handleTooltipOpenChange = useCallback((open: boolean) => {
       tooltipVisibleRef.current = open;

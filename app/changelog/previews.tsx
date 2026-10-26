@@ -31,6 +31,7 @@ export const SHOWCASE_PREVIEW_SLUGS = new Set([
   "command-menu",
   "date-picker",
   "dialog",
+  "drawer",
   "dropdown",
   "input-copy",
   "input-group",
@@ -38,6 +39,7 @@ export const SHOWCASE_PREVIEW_SLUGS = new Set([
   "radio-group",
   "select",
   "sidebar",
+  "skeleton",
   "slider",
   "switch",
   "table",
@@ -45,6 +47,7 @@ export const SHOWCASE_PREVIEW_SLUGS = new Set([
   "tabs-subtle",
   "thinking-indicator",
   "thinking-steps",
+  "toast",
   "tooltip",
 ]);
 

@@ -106,6 +106,17 @@ const TRACK_INSET = (THUMB_SIZE - TRACK_BG_HEIGHT) / 2;
 // Helpers
 // ---------------------------------------------------------------------------
 
+function snapToStep(value: number, min: number, max: number, step: number): number {
+  const snapped = Math.round((value - min) / step) * step + min;
+  const decimals = (n: number) => {
+    const [coefficient, exponent = "0"] = String(n).split("e");
+    return Math.max(0, (coefficient.split(".")[1]?.length ?? 0) - Number(exponent));
+  };
+  const places = Math.max(decimals(min), decimals(step));
+  const rounded = places <= 100 ? Number(snapped.toFixed(places)) : snapped;
+  return Math.max(min, Math.min(max, rounded));
+}
+
 // Value → the thumb's left offset in layout px. Thumb centers land
 // THUMB_SIZE / 2 in from each end, the same inset the pill's end caps, step
 // dots and hover bar measure from.
@@ -145,8 +156,7 @@ function pixelToValue(
   if (usable <= 0) return min;
   const raw = (px / usable) * (max - min) + min;
   if (stepValues) return stepValues[nearestStepIndex(raw, stepValues)];
-  const snapped = Math.round((raw - min) / step) * step + min;
-  return Math.max(min, Math.min(max, snapped));
+  return snapToStep(raw, min, max, step);
 }
 
 // The primitive and the per-thumb math both take arrays; a single value
@@ -222,7 +232,7 @@ function ValueDisplay({
         const clamped = Math.max(min, Math.min(max, parsed));
         const snapped = stepValues
           ? stepValues[nearestStepIndex(clamped, stepValues)]
-          : Math.round((clamped - min) / step) * step + min;
+          : snapToStep(clamped, min, max, step);
         onCommitEdit(index, snapped);
       } else {
         onCancelEdit();
@@ -266,6 +276,8 @@ function ValueDisplay({
                 onChange={(e) => setInputValue(e.target.value)}
                 onBlur={() => commitEdit(index)}
                 onKeyDown={(e) => {
+                  if (e.nativeEvent.isComposing || e.nativeEvent.keyCode === 229) return;
+                  if (e.key === "Enter" || e.key === "Escape") e.preventDefault();
                   if (e.key === "Enter") commitEdit(index);
                   if (e.key === "Escape") onCancelEdit();
                 }}
@@ -536,10 +548,7 @@ const CompactSlider = forwardRef<HTMLDivElement, SliderEngineProps>(
         const rawVal = usable > 0 ? (clampedPx / usable) * (max - min) + min : min;
         const snappedVal = stepValues
           ? stepValues[nearestStepIndex(rawVal, stepValues)]
-          : Math.max(
-              min,
-              Math.min(max, Math.round((rawVal - min) / step) * step + min)
-            );
+          : snapToStep(rawVal, min, max, step);
         const snappedPercent = max === min ? 0 : (snappedVal - min) / (max - min);
         const snappedX = THUMB_SIZE / 2 + snappedPercent * usable;
 
@@ -836,10 +845,13 @@ const CompactSlider = forwardRef<HTMLDivElement, SliderEngineProps>(
 
     const handleCommitEdit = useCallback(
       (index: number, v: number) => {
-        emitChange(index, v);
+        const bounded = isRange
+          ? index === 0 ? Math.min(v, values[1]) : Math.max(v, values[0])
+          : v;
+        emitChange(index, bounded);
         setEditingIndex(null);
       },
-      [emitChange]
+      [emitChange, isRange, values]
     );
 
     const handleCancelEdit = useCallback(() => {
@@ -861,8 +873,8 @@ const CompactSlider = forwardRef<HTMLDivElement, SliderEngineProps>(
             : Array.from(
                 { length: Math.round((max - min) / step) + 1 },
                 (_, i) => {
-                  const v = min + i * step;
-                  const percent = (v - min) / (max - min);
+                  const v = snapToStep(min + i * step, min, max, step);
+                  const percent = max === min ? 0 : (v - min) / (max - min);
                   return { value: v, percent };
                 }
               )
@@ -1314,11 +1326,11 @@ const ComfortableSlider = forwardRef<HTMLDivElement, SliderComfortableProps>(
     );
 
     const pipSteps = useMemo(
-      () => Array.from(
+      () => variant === "pips" ? Array.from(
         { length: Math.round((max - min) / step) + 1 },
-        (_, i) => min + i * step
-      ),
-      [min, max, step]
+        (_, i) => snapToStep(min + i * step, min, max, step)
+      ) : [],
+      [variant, min, max, step]
     );
     const pipCount = pipSteps.length;
 
@@ -1394,7 +1406,7 @@ const ComfortableSlider = forwardRef<HTMLDivElement, SliderComfortableProps>(
           snappedVal = pipSteps[index];
         } else {
           const raw = min + (clamped / w) * (max - min);
-          snappedVal = Math.max(min, Math.min(max, Math.round((raw - min) / step) * step + min));
+          snappedVal = snapToStep(raw, min, max, step);
         }
         const snappedPercent = max === min ? 0 : (snappedVal - min) / (max - min);
         const snappedX = snappedPercent * w;
@@ -1446,8 +1458,7 @@ const ComfortableSlider = forwardRef<HTMLDivElement, SliderComfortableProps>(
           return pipSteps[index];
         } else {
           const raw = min + (clamped / rect.width) * (max - min);
-          const snapped = Math.round((raw - min) / step) * step + min;
-          return Math.max(min, Math.min(max, snapped));
+          return snapToStep(raw, min, max, step);
         }
       },
       [variant, pipSteps, pipCount, min, max, step]

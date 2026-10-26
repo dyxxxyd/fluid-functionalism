@@ -379,6 +379,62 @@ for (const flavor of flavors) {
     return flips === 2 ? { verdict: "PASS", detail } : { verdict: "FAIL", detail: `${flips} toggles in 2 clicks: ${detail}` };
   });
 
+  await run("drawer: floating insets and content height", flavor, async () => {
+    await go("/docs/drawer");
+    const sizes = [];
+    for (const direction of ["down", "up", "left", "right"]) {
+      await page.getByRole("button", { name: `Open ${direction} drawer`, exact: true }).click();
+      const popup = page.locator('[data-slot="drawer-popup"]');
+      await popup.waitFor({ state: "visible" });
+      await popup.evaluate(async (el) => {
+        for (let i = 0; i < 3; i++) await new Promise(requestAnimationFrame);
+        await Promise.all(el.getAnimations().map((animation) => animation.finished));
+      });
+      const box = await popup.evaluate((el) => {
+        const rect = el.getBoundingClientRect();
+        const viewport = el.closest('[data-slot="drawer-viewport"]').getBoundingClientRect();
+        const style = getComputedStyle(el);
+        return {
+          top: rect.top - viewport.top, bottom: viewport.bottom - rect.bottom,
+          left: rect.left - viewport.left, right: viewport.right - rect.right,
+          height: rect.height, viewportHeight: innerHeight,
+          corners: [style.borderTopLeftRadius, style.borderTopRightRadius, style.borderBottomLeftRadius, style.borderBottomRightRadius].map(Number.parseFloat),
+          bleed: getComputedStyle(el, "::after").backgroundColor,
+        };
+      });
+      const closeTo = (value, expected) => Math.abs(value - expected) < 1;
+      const side = direction === "left" || direction === "right";
+      const inset = side
+        ? closeTo(box.top, 8) && closeTo(box.bottom, 8) && closeTo(box[direction], 8)
+        : closeTo(box.left, 8) && closeTo(box.right, 8) && closeTo(box[direction === "up" ? "top" : "bottom"], 8);
+      if (!inset || box.corners.some((radius) => radius <= 0) || box.bleed !== "rgba(0, 0, 0, 0)") {
+        return { verdict: "FAIL", detail: `${direction}: expected 8px insets, four rounded corners and transparent bleed; ${JSON.stringify(box)}` };
+      }
+      if (!side && box.height >= box.viewportHeight / 2) {
+        return { verdict: "FAIL", detail: `${direction}: short content fills ${box.height}px of a ${box.viewportHeight}px viewport` };
+      }
+      sizes.push(`${direction} ${Math.round(box.height)}px`);
+      await page.keyboard.press("Escape");
+      await popup.waitFor({ state: "detached" });
+    }
+    return { verdict: "PASS", detail: `8px insets; ${sizes.join(", ")}` };
+  });
+
+  await run("drawer: homepage showcase", flavor, async () => {
+    await go("/");
+    const link = page.getByRole("link", { name: "View Drawer documentation", exact: true });
+    if (await link.count() !== 1) return { verdict: "FAIL", detail: "Drawer card is missing from the homepage" };
+    const card = page.locator(".bento-card-border").filter({ has: link });
+    await card.getByRole("button", { name: "Open right drawer", exact: true }).click();
+    const popup = page.getByRole("dialog", { name: "Project settings", exact: true });
+    await popup.waitFor({ state: "visible" });
+    await popup.getByRole("button", { name: "Done", exact: true }).click();
+    await popup.waitFor({ state: "detached" });
+    await link.click();
+    await page.waitForURL("**/docs/drawer");
+    return { verdict: "PASS", detail: "Bento card opens the drawer and links to its docs" };
+  });
+
   await context.close();
 }
 await browser.close();

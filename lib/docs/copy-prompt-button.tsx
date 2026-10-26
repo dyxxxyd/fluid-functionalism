@@ -98,33 +98,12 @@ export function CopyPromptButton({
   }, []);
 
   const handleCopy = useCallback(async () => {
-    let ok = true;
     try {
       await navigator.clipboard.writeText(prompt);
     } catch {
-      // Clipboard API unavailable or denied: fall back to execCommand on an
-      // off-screen textarea, same as InputCopy.
-      const textarea = document.createElement("textarea");
-      textarea.value = prompt;
-      textarea.setAttribute("readonly", "");
-      textarea.style.position = "fixed";
-      textarea.style.opacity = "0";
-      // 16px: iOS Safari zooms the page into a focused field set smaller,
-      // and select() can focus this one.
-      textarea.style.fontSize = "16px";
-      document.body.appendChild(textarea);
-      textarea.select();
-      // iOS Safari's select() only moves the caret to the end; the explicit
-      // range is what selects the text there, so the copy isn't empty.
-      textarea.setSelectionRange(0, textarea.value.length);
-      try {
-        ok = document.execCommand("copy");
-      } catch {
-        ok = false;
-      }
-      document.body.removeChild(textarea);
+      // Clipboard access can be unavailable or denied by the browser.
+      return;
     }
-    if (!ok) return;
     onCopy?.();
     setCopied(true);
     if (timeoutRef.current) clearTimeout(timeoutRef.current);

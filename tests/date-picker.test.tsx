@@ -209,6 +209,42 @@ const flavors = [
 describe.each(flavors)("%s flavor", (_name, mod) => {
   const { DatePicker } = mod;
 
+  it("keeps an empty end-time list safe to navigate at the last minute of the day", () => {
+    const onTimeRangeChange = vi.fn();
+    const errors: unknown[] = [];
+    const capture = (event: ErrorEvent) => { errors.push(event.error); event.preventDefault(); };
+    window.addEventListener("error", capture);
+    try {
+      const { getByRole } = render(
+        <DatePicker timeRange={{ start: "23:59", end: "23:59" }}
+          onTimeRangeChange={onTimeRangeChange} hourCycle={24} />,
+      );
+      const input = getByRole("combobox", { name: "End time" });
+      fireEvent.focus(input);
+      fireEvent.keyDown(input, { key: "ArrowDown" });
+      fireEvent.keyDown(input, { key: "ArrowUp" });
+      fireEvent.keyDown(input, { key: "Enter" });
+      expect(errors).toEqual([]);
+      expect(onTimeRangeChange).not.toHaveBeenCalled();
+      expect(input.hasAttribute("aria-activedescendant")).toBe(false);
+    } finally {
+      window.removeEventListener("error", capture);
+    }
+  });
+
+  it("keeps the time draft while an IME owns Enter", () => {
+    const onTimeChange = vi.fn();
+    const { getByRole } = render(<DatePicker time="11:00" onTimeChange={onTimeChange} />);
+    const input = getByRole("combobox", { name: "Time" });
+    fireEvent.focus(input);
+    fireEvent.change(input, { target: { value: "12:30" } });
+    fireEvent.keyDown(input, { key: "Enter", isComposing: true });
+    fireEvent.keyDown(input, { key: "Enter", keyCode: 229 });
+    expect(onTimeChange).not.toHaveBeenCalled();
+    fireEvent.keyDown(input, { key: "Enter" });
+    expect(onTimeChange).toHaveBeenCalledExactlyOnceWith("12:30");
+  });
+
   it.each([undefined, "en-US"])("hydrates across different default locales with locale=%s", async (locale) => {
     let defaultLocale = "en-US";
     const formatter = new Proxy(Intl.DateTimeFormat, {

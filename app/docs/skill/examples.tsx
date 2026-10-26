@@ -131,8 +131,8 @@ function GenericCopy({ copied, onCopy }: { copied: boolean; onCopy: () => void }
  *  the visitor's clipboard. A stand-in `writeText` swallows the one write of
  *  `value` this click makes, whenever InputCopy gets to it, and passes any
  *  other write through; it steps aside after that write, or after 1s. With
- *  no async Clipboard API, InputCopy would fall back to execCommand, which
- *  nothing can intercept, so the click is skipped. */
+ *  no async Clipboard API, the click is skipped because the success demo
+ *  requires a write to intercept. */
 function clickWithoutClipboard(button: HTMLElement | null, value: string) {
   const clipboard = navigator.clipboard;
   if (!button || !clipboard) return;

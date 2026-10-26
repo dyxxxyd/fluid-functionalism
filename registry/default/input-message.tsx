@@ -787,7 +787,7 @@ const InputMessage = forwardRef<HTMLDivElement, InputMessageProps>(
 
     const handleKeyDown = useCallback(
       (e: ReactKeyboardEvent<HTMLTextAreaElement>) => {
-        if (e.nativeEvent.isComposing) return;
+        if (e.nativeEvent.isComposing || e.nativeEvent.keyCode === 229) return;
 
         // Suggested prompts: plain ArrowDown moves the highlight into / down
         // the list, ArrowUp walks it back up (then out, returning to plain

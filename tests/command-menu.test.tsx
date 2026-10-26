@@ -295,8 +295,36 @@ describe("CommandMenu", () => {
     const input = getByRole("combobox") as HTMLInputElement;
     fireEvent.keyDown(input, { key: "Enter", isComposing: true });
     expect(onSelect).not.toHaveBeenCalled();
-    fireEvent.keyDown(input, { key: "Enter", keyCode: 229 });
+  });
+
+  it.each([-5, 5])("ignores an IME commit whose timestamp is %d ms from compositionend", (offset) => {
+    const onSelect = vi.fn();
+    const onCompositionEnd = vi.fn();
+    const { getByRole } = render(
+      <CommandMenu items={ITEMS} onSelect={onSelect}>
+        <CommandMenuInput onCompositionEnd={onCompositionEnd} />
+        <CommandMenuList />
+      </CommandMenu>
+    );
+    const input = getByRole("combobox");
+    const compositionEnd = createEvent.compositionEnd(input, { data: "あ" });
+    Object.defineProperty(compositionEnd, "timeStamp", { value: 100 });
+    fireEvent(input, compositionEnd);
+    expect(onCompositionEnd).toHaveBeenCalledOnce();
+
+    // Safari can deliver the confirming keydown after compositionend, with
+    // isComposing already false and a timestamp on either side of the end.
+    const commit = createEvent.keyDown(input, { key: "Enter", isComposing: false });
+    Object.defineProperty(commit, "timeStamp", { value: 100 + offset });
+    fireEvent(input, commit);
     expect(onSelect).not.toHaveBeenCalled();
+    expect(commit.defaultPrevented).toBe(false);
+
+    // A later Enter still runs the highlighted command.
+    const enter = createEvent.keyDown(input, { key: "Enter" });
+    Object.defineProperty(enter, "timeStamp", { value: 150 });
+    fireEvent(input, enter);
+    expect(onSelect).toHaveBeenCalledExactlyOnceWith(expect.objectContaining({ value: "new" }));
   });
 
   it("group headings get ids without spaces", () => {

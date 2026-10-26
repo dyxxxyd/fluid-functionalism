@@ -186,7 +186,7 @@ The stack read tells you which of these are already done. Skip those.
    from what the project already uses: installed FF components first, then
    `@base-ui/react` in `package.json` → `base/` names everywhere;
    `@radix-ui/react-*` (or nothing yet) → bare names. `input-group`,
-   `color-picker`, and `ask-user-questions` import Base UI under both
+   `input-number`, `drawer`, `toast`, `color-picker`, and `ask-user-questions` import Base UI under both
    flavors, so they never count as evidence. Never mix flavors in
    one project — dependencies follow the flavor you pick, so a Base UI
    dialog pulls in the Base UI button.
@@ -339,8 +339,8 @@ written down. In order of reach:
   wrap or compose instead. Edits are lost on the next `--overwrite` install
   and drift the app away from the system.
 - Components built on a flavored one (AskUserQuestions, ColorPicker,
-  CommandMenu, InputCopy, InputMessage, and the blocks) also take the `base/`
-  prefix. Single-source items (badge, card, table, input-group, chat-message,
+  CommandMenu, InputCopy, InputMessage, Toast, and the blocks) also take the `base/`
+  prefix. Single-source items (badge, card, table, drawer, skeleton, input-group, input-number, chat-message,
   thinking-indicator, the libs and hooks) have one name for both kinds of
   project.
 - The registry expects Tailwind CSS v4, React 19, and `motion` (imported as

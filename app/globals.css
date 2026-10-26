@@ -337,6 +337,11 @@ html, body {
    white-space-collapse + text-wrap-mode), which silently un-truncates every
    <p> that asks for it — CardDescription among them. */
 @layer base {
+  /* iOS Safari positions the Drawer backdrop against the scrolled body. */
+  body {
+    position: relative;
+  }
+
   h1, h2, h3 {
     text-wrap: balance;
   }

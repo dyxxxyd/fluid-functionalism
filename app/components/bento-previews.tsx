@@ -10,6 +10,8 @@ import { fontWeights } from "@/lib/font-weight";
 import { useNarrowFrame } from "@/lib/use-narrow-frame";
 import { SizeProvider } from "@/lib/size-context";
 import { ChatMessage } from "@/registry/default/chat-message";
+import { Skeleton } from "@/registry/default/skeleton";
+import { Toaster, createToastManager } from "@/registry/default/toast";
 import {
   ACCORDION_ITEMS,
   BADGE_ITEMS,
@@ -80,6 +82,10 @@ import {
   DialogDescription,
   DialogClose,
 } from "@/registry/radix/dialog";
+import {
+  Drawer, DrawerTrigger, DrawerContent, DrawerHeader, DrawerFooter,
+  DrawerTitle, DrawerDescription, DrawerClose,
+} from "@/components/ui/drawer";
 import { Dropdown } from "@/components/flavored/dropdown";
 import { MenuItem } from "@/registry/default/menu-item";
 import { InputCopy } from "@/registry/default/input-copy";
@@ -333,6 +339,51 @@ function DialogPreview() {
         </DialogFooter>
       </DialogContent>
     </Dialog>
+  );
+}
+
+function DrawerPreview() {
+  return (
+    <div className="flex flex-wrap justify-center gap-2">
+      {(["down", "up", "left", "right"] as const).map((direction) => (
+        <Drawer key={direction} swipeDirection={direction} showSwipeHandle>
+          <DrawerTrigger render={<Button variant="secondary" size="sm" />}>
+            Open {direction} drawer
+          </DrawerTrigger>
+          <DrawerContent>
+            <DrawerHeader>
+              <DrawerTitle>Project settings</DrawerTitle>
+              <DrawerDescription>Manage the details for your project.</DrawerDescription>
+            </DrawerHeader>
+            <div className="flex-1 overflow-y-auto p-4">Your project is ready to share.</div>
+            <DrawerFooter><DrawerClose render={<Button />}>Done</DrawerClose></DrawerFooter>
+          </DrawerContent>
+        </Drawer>
+      ))}
+    </div>
+  );
+}
+
+function SkeletonPreview() {
+  return (
+    <div role="status" aria-label="Loading profile" aria-busy="true" className="flex w-full max-w-xs items-center gap-4">
+      <Skeleton className="size-12 shrink-0 rounded-full" />
+      <div className="flex flex-1 flex-col gap-2">
+        <Skeleton className="h-4 w-3/4" />
+        <Skeleton className="h-4 w-full" />
+        <Skeleton className="h-4 w-1/2" />
+      </div>
+    </div>
+  );
+}
+
+function ToastPreview() {
+  const [manager] = useState(() => createToastManager());
+  return (
+    <>
+      <Button variant="secondary" onClick={() => manager.add({ title: "Changes saved", description: "Your project is up to date.", type: "success" })}>Show toast</Button>
+      <Toaster toastManager={manager} />
+    </>
   );
 }
 
@@ -940,11 +991,13 @@ export const previewMap: Record<string, React.FC> = {
   "command-menu": CommandMenuPreview,
   "date-picker": DatePickerPreview,
   dialog: DialogPreview,
+  drawer: DrawerPreview,
   dropdown: DropdownPreview,
   "input-copy": InputCopyPreview,
   "input-group": InputGroupPreview,
   "radio-group": RadioGroupPreview,
   select: SelectPreview,
+  skeleton: SkeletonPreview,
   slider: SliderPreview,
   switch: SwitchPreview,
   table: TablePreview,
@@ -952,5 +1005,6 @@ export const previewMap: Record<string, React.FC> = {
   "tabs-subtle": TabsSubtlePreview,
   "thinking-indicator": ThinkingIndicatorPreview,
   "thinking-steps": ThinkingStepsPreview,
+  toast: ToastPreview,
   tooltip: TooltipPreview,
 };

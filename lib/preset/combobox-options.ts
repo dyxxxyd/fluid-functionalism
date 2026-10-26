@@ -6,7 +6,7 @@
 // Codec compat rules (same as shadcn's preset codec):
 //   1. Never reorder existing value arrays — only append.
 //   2. Every field's DEFAULT sits at index 0.
-//   3. Only append new fields at the END of COMBOBOX_PRESET_FIELDS.
+//   3. Append fields within a version; preserve old tables on layout changes.
 //   4. Stay under 53 bits total (JS safe-integer limit).
 // tests/preset-combobox.test.mjs enforces 2 and 4 and pins 1/3 with a golden.
 // ---------------------------------------------------------------------------
@@ -37,6 +37,8 @@ export interface ComboboxPlayState {
   creatable: boolean;
   /** Multiple only: picked items leave the list. */
   hideSelected: boolean;
+  /** Keep one chip row with a counter for picks that do not fit. */
+  collapseOnOverflow: boolean;
 }
 
 export type ComboboxPreset = ComboboxPlayState & PresetGlobals;
@@ -50,6 +52,7 @@ export const DEFAULT_COMBOBOX_STATE: ComboboxPlayState = {
   disabled: false,
   creatable: false,
   hideSelected: false,
+  collapseOnOverflow: false,
 };
 
 export const DEFAULT_COMBOBOX_PRESET: ComboboxPreset = {
@@ -79,7 +82,7 @@ const COMBOBOX_PRESET_FIELDS_A: readonly PresetField[] = [
 
 /** Version "b" (2026-09-08): creatable + hideSelected, ahead of the globals
  *  so the tail keeps the sidebar's layout. A layout change, hence the bump. */
-export const COMBOBOX_PRESET_FIELDS: readonly PresetField[] = [
+const COMBOBOX_PRESET_FIELDS_B: readonly PresetField[] = [
   { key: "multiple", values: [true, false], bits: 1 },
   { key: "variant", values: ["bordered", "borderless"], bits: 2 },
   { key: "icon", values: [false, true], bits: 1 },
@@ -91,14 +94,22 @@ export const COMBOBOX_PRESET_FIELDS: readonly PresetField[] = [
   ...GLOBAL_FIELDS,
 ];
 
+/** Version "c": one-row chips, keeping the global fields at the tail.
+ *  Preserve the earlier tables so published codes retain their meaning. */
+export const COMBOBOX_PRESET_FIELDS: readonly PresetField[] = [
+  ...COMBOBOX_PRESET_FIELDS_B.slice(0, -GLOBAL_FIELDS.length),
+  { key: "collapseOnOverflow", values: [false, true], bits: 1 },
+  ...GLOBAL_FIELDS,
+];
+
 // ── Registration (tag "b") ──────────────────────────────────────────────────
 
 export const COMBOBOX_PRESET_DEF: PresetComponentDef = {
   tag: "b",
   label: "Combobox",
   docsPath: "/docs/combobox",
-  versions: { a: COMBOBOX_PRESET_FIELDS_A, b: COMBOBOX_PRESET_FIELDS },
-  currentVersion: "b",
+  versions: { a: COMBOBOX_PRESET_FIELDS_A, b: COMBOBOX_PRESET_FIELDS_B, c: COMBOBOX_PRESET_FIELDS },
+  currentVersion: "c",
   defaults: DEFAULT_COMBOBOX_PRESET as unknown as PresetComponentDef["defaults"],
   installable: true,
 };
@@ -131,7 +142,10 @@ export const COMBOBOX_DEFAULT_CODE = encodeComboboxPreset({});
  *  hiding picked rows needs chips to deselect from, so it only applies in
  *  multiple mode. */
 export function deriveCombobox(p: ComboboxPlayState) {
-  return { hideSelected: p.multiple && p.hideSelected };
+  return {
+    hideSelected: p.multiple && p.hideSelected,
+    collapseOnOverflow: p.multiple && p.collapseOnOverflow,
+  };
 }
 
 /** How a created row becomes an item: the typed label, slugged as its value. */

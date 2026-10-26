@@ -376,15 +376,14 @@ describe("editable fields carry the touch size", () => {
 
   it("finds the fields", () => {
     expect(fields.length).toBeGreaterThan(10);
-    expect(created.length).toBeGreaterThan(0);
   });
 
   it.each(fields)("%s carries the touch size in its className", (_where, ok) => {
     expect(ok).toBe(true);
   });
 
-  // The copy fallbacks build a textarea in script: 16px so iOS doesn't zoom
-  // into it, and an explicit range because iOS select() selects nothing.
+  // Check script-made fields when present. The Clipboard API no longer
+  // needs a temporary textarea, so having none is also valid.
   it.each(created)("%s sizes and selects its script-made field for iOS", (_where, source) => {
     expect(source).toContain('style.fontSize = "16px"');
     expect(source).toContain("setSelectionRange(0, ");

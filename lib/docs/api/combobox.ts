@@ -32,6 +32,7 @@ export const inputProps: PropDef[] = [
 ];
 
 export const chipsProps: PropDef[] = [
+  { name: "collapseOnOverflow", type: "boolean", default: "false", description: "Keep one row and replace chips that do not fit with +N …. Recalculates when the field or labels resize; reserves room for typing. Hidden picks stay selected." },
   { name: "variant", type: '"bordered" | "borderless"', default: '"bordered"', description: "Same field ladder as ComboboxInput." },
   { name: "icon", type: "IconComponent", description: "Leading icon inside the field." },
   { name: "placeholder", type: "string", default: '"Search…"', description: "Shown while nothing is selected or typed." },

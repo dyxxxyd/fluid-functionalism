@@ -26,16 +26,20 @@ behavior they extend.
 | [ColorPicker](https://www.fluidfunctionalism.com/docs/color-picker) | `color-picker` · `base/color-picker` | HEX, RGB, HSL, and OKLCH formats with alpha, swatches, and eyedropper, inline or in a popover | [ColorPicker](craft.md#color-picker) |
 | [Combobox](https://www.fluidfunctionalism.com/docs/combobox) | `combobox` · `base/combobox` | Type-to-filter field with keyboard highlight, fluid hover, chips for multiple selection, and a create-from-query row | [Combobox](craft.md#combobox) |
 | [CommandMenu](https://www.fluidfunctionalism.com/docs/command-menu) | `command-menu` · `base/command-menu` | Type to filter a list of actions, arrow through them, press Enter: groups, shortcut caps, suggestions, and a dialog shell on ⌘K | [CommandMenu](craft.md#command-menu) |
+| [DataTable](https://www.fluidfunctionalism.com/docs/data-table) | `data-table` · `base/data-table` | TanStack Table v9 with sorting, filtering, pagination, selection, and column visibility | [DataTable](craft.md#data-table) |
 | [DatePicker](https://www.fluidfunctionalism.com/docs/date-picker) | `date-picker` · `base/date-picker` | Field or ghost trigger (`variant`) for a date or a range, with optional `presets`, and editable `time` / `timeRange` fields whose slot lists show each duration; each segment opens its own popover | [DatePicker](craft.md#date-picker) |
 | [Dialog](https://www.fluidfunctionalism.com/docs/dialog) | `dialog` · `base/dialog` | Modal with spring enter/exit and overlay in 3 widths, the largest a canvas for a sidebar | [Dialog](craft.md#dialog) |
+| [Drawer](https://www.fluidfunctionalism.com/docs/drawer) | `drawer` | Swipeable edge panel with four directions, snap points, and nested stacking; shared Base UI implementation | [Drawer](craft.md#drawer) |
 | [Dropdown](https://www.fluidfunctionalism.com/docs/dropdown) | `dropdown` · `base/dropdown` | Menu-style dropdown with fluid hover, animated selection, and an optional search field in the popup | [Dropdown](craft.md#dropdown) |
 | [FileThumbnail](https://www.fluidfunctionalism.com/docs/input-message) | `file-thumbnail` | Read-only square preview of a File: images object-cover, PDFs render their first page | [InputMessage](craft.md#input-message) |
 | [InputCopy](https://www.fluidfunctionalism.com/docs/input-copy) | `input-copy` · `base/input-copy` | Read-only input with copy-to-clipboard and animated check feedback | [InputCopy](craft.md#input-copy) |
 | [InputGroup](https://www.fluidfunctionalism.com/docs/input-group) | `input-group` | Input fields with fluid hover, animated labels, and validation | [InputGroup](craft.md#input-group) |
 | [InputMessage](https://www.fluidfunctionalism.com/docs/input-message) | `input-message` · `base/input-message` | Chat-style composer with auto-resizing textarea, file drop, action slots, and a built-in send button | [InputMessage](craft.md#input-message) |
+| [InputNumber](https://www.fluidfunctionalism.com/docs/input-number) | `input-number` | Numeric input with decimal steps, range limits, formatting, and fluid stepper hover | [InputNumber](craft.md#input-number) |
 | [RadioGroup](https://www.fluidfunctionalism.com/docs/radio-group) | `radio-group` · `base/radio-group` | Radio buttons with fluid hover and animated selection | [RadioGroup](craft.md#radio-group) |
 | [Select](https://www.fluidfunctionalism.com/docs/select) | `select` · `base/select` | Animated select with bordered/borderless variants, typeahead, and optional icons | [Select](craft.md#select) |
 | [Sidebar](https://www.fluidfunctionalism.com/docs/sidebar) | `sidebar` · `base/sidebar` | Composable app sidebar: drag its edge to resize, collapse it away or press `[` or `]`, and a drawer on mobile | [Sidebar](craft.md#sidebar) |
+| [Skeleton](https://www.fluidfunctionalism.com/docs/skeleton) | `skeleton` | Loading placeholders for avatars, text, cards, forms, and tables, with Fluid shapes and reduced-motion support | [Skeleton](craft.md#skeleton) |
 | [Slider](https://www.fluidfunctionalism.com/docs/slider) | `slider` · `base/slider` | Spring-snapped thumb, step dots, range mode, and a click-to-edit value | [Slider](craft.md#slider) |
 | [Switch](https://www.fluidfunctionalism.com/docs/switch) | `switch` · `base/switch` | Toggle with animated thumb and label | [Switch](craft.md#switch) |
 | [Table](https://www.fluidfunctionalism.com/docs/table) | `table` | Data table with fluid hover on rows and semantic markup | [Table](craft.md#table) |
@@ -43,6 +47,7 @@ behavior they extend.
 | [TabsSubtle](https://www.fluidfunctionalism.com/docs/tabs-subtle) | `tabs-subtle` · `base/tabs-subtle` | Tab navigation with an animated pill indicator | [TabsSubtle](craft.md#tabs-subtle) |
 | [ThinkingIndicator](https://www.fluidfunctionalism.com/docs/thinking-indicator) | `thinking-indicator` | Animated status indicator with morphing SVG and cycling text | [ThinkingIndicator](craft.md#thinking-indicator) |
 | [ThinkingSteps](https://www.fluidfunctionalism.com/docs/thinking-steps) | `thinking-steps` · `base/thinking-steps` | Chain-of-thought display with sequential animation and collapsible steps | [ThinkingSteps](craft.md#thinking-steps) |
+| [Toast](https://www.fluidfunctionalism.com/docs/toast) | `toast` · `base/toast` | Temporary notifications with status icons, actions, promise updates, and a swipeable stack | [Toast](craft.md#toast) |
 | [Tooltip](https://www.fluidfunctionalism.com/docs/tooltip) | `tooltip` · `base/tooltip` | Spring-based floating tooltip with configurable placement | [Tooltip](craft.md#tooltip) |
 | [MobileDrawer](https://www.fluidfunctionalism.com/docs/sidebar) | `mobile-drawer` · `base/mobile-drawer` | Slide-in navigation drawer with scrim, focus trap, and scroll lock | [Sidebar](craft.md#sidebar) |
 

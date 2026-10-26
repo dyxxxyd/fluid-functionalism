@@ -100,7 +100,7 @@ import { spring } from "@/lib/springs";
       "1 class on a page's container, like shadcn's `scroll-fade`. Pure CSS: no JavaScript, no hydration, nothing hidden on the server.",
       "`reveal-landing` is for a page read once. The 1st child is the hero: its children rise 12px and scale in from 0.94 on first paint, 0.1s apart for 4 steps (the 5th onward arrives with the 4th). Every later child rises and scales in the same way with the scroll on a view() timeline, from when its top edge is 12px inside the viewport to 120px, so nothing starts moving at the very edge. Everything on screen at first paint belongs in the hero, product shot included: a later section that starts on screen sits half revealed, waiting for a scroll, instead of playing on load. For a grid, `reveal-scroll` on each card makes every card a scroll section of its own with the same values, while the section holding them stays still; wrap a card that already animates `transform` (a framer layout node), since the CSS animation would override it. A `reveal-scroll` nested in another follows it half a range later on the way in (72px to 180px by default) and leaves half a range sooner, so a card arrives and then its content; the Showcase wraps each tile and each tile's component this way. Every scroll section and `reveal-scroll` also plays a load step after the hero (from the 4th step, then a step per sibling for 4 steps, and a step later for nested content), so one already on screen at first paint arrives with the page; off screen, the step plays unseen and the scroll takes over. A view() timeline binds to the nearest scroll container and `overflow: hidden` makes one even if it never scrolls, so clip a revealed element's ancestors with `overflow: clip` or its animation never moves. Leaving at the top mirrors it: from when a section's bottom edge is 120px from the top of the viewport to 12px, it fades out, lifts 12px, and scales to 0.94 (the hero too). Product reveals have no exit.",
       "`reveal-product` is for the app people come back to: every child fades in on first paint, 0.06s apart, with no rise, and nothing moves on scroll: an app's layout should feel like it was already there. Scroll reveals in an app are noise on the 10th visit.",
-      "Slow data in `reveal-product` waits on shadcn's Skeleton (installed with the item). Never swap a skeleton out and the data in on the same frame: the data starts at opacity 0, so the space blinks empty. `reveal-swap` stacks both in 1 grid cell: render the skeleton, then add the real block after it when the data lands, and the skeleton fades out as the block fades in. With `reveal-items` on both, each skeleton row hands over to its real row a step apart. Build the skeleton the size of the real block so nothing shifts, and keep Skeletons inside a block: a Skeleton that is itself an animated child loses its pulse. Skeletons in a preset, a `reveal-items` block, or a `reveal-swap` fade in over 250ms on an even ease-in-out curve before shadcn's pulse starts, so a placeholder arrives instead of popping in. Reduced motion keeps that fade and stops the pulse.",
+      "Slow data in `reveal-product` waits on Skeleton (installed with the item). Never swap a skeleton out and the data in on the same frame: the data starts at opacity 0, so the space blinks empty. `reveal-swap` stacks both in 1 grid cell: render the skeleton, then add the real block after it when the data lands, and the skeleton fades out as the block fades in. With `reveal-items` on both, each skeleton row hands over to its real row a step apart. Build the skeleton the size of the real block so nothing shifts, and keep Skeletons inside a block: a Skeleton that is itself an animated child loses its pulse. Skeletons in a preset, a `reveal-items` block, or a `reveal-swap` fade in over 250ms on an even ease-in-out curve before shadcn's pulse starts, so a placeholder arrives instead of popping in. Reduced motion keeps that fade and stops the pulse.",
       "`reveal-items` on a block keeps the block still and brings its children in one by one, a step apart, for 8 steps: table rows, metrics, and a sidebar's items fill in in order when their data lands instead of all at once. Inside a preset it takes the preset's travel and step; outside one (a sidebar beside the preset) it fades like the product, 0.06s apart.",
       "`-subtle` tones the gesture down: landing 8px and 0.98 scale, 0.06s steps, 8px to 60px of scroll; product 0.04s steps.",
       "No new token: landing steps ride `spring.slow` (0.24s, bounce 0.12), the tier for large surfaces; product steps ride `spring.moderate` (0.16s, no bounce), since app blocks are panels and a fade has no travel for a bounce to act on. Both are written as CSS `linear()` in `--reveal-motion`, and only the `from` keyframe is set, so each block lands on its own styles.",
@@ -789,6 +789,44 @@ export function EventWhen() {
       "name: string. Submits the value with a native form (hidden input, ISO 8601 local: 2026-10-21, 2026-10-21T11:00, or two joined by / for a range or a time range). id: the date trigger's id, for <label htmlFor>. aria-label: names the group, read before the date. className: classes on the group.",
     ],
   },
+  "drawer": {
+    craft: [
+      "One shared Base UI Drawer implementation for both primitive flavors, following shadcn/ui's Base Drawer composition. It owns gestures, snap points, focus trapping, Escape and outside dismissal, scroll lock, and focus restoration.",
+      "The popup enters on a CSS linear() curve generated from spring.moderate and exits with spring.moderate.exit (0.12s). CSS transitions leave Base UI in control of its swipe transforms and unmount lifecycle, including closes made by changing the controlled open prop.",
+      "Swipe direction chooses the anchored edge: down is the bottom, up is the top, and left/right are side panels. Like shadcn's Maia/Mira styles, every drawer floats 8px from the viewport with all four corners rounded; --drawer-inset can override that gap. Vertical drawers size to their content up to calc(100dvh - 6rem); side panels span between the top and bottom gaps, with a width of 75% on small screens or 24rem from the sm breakpoint. Ordinary h-*, max-h-*, and w-* classes can override the size.",
+      "Snap points use Base UI's native snap offset in the vertical transform. Controlled snapPoint and onSnapPointChange use the same values as snapPoints; a full snap point publishes data-expanded for styling.",
+      "Nested parents scale by 0.05 per open child and peek by 1rem. Swipe progress reverses that stack transform directly with no transition while the nested drawer is being dragged. The overshoot bleed defaults to transparent so it never paints over the floating gap; --drawer-bleed-background can set a fill for a flush drawer.",
+      "The popup sits 4 surface levels above its substrate, capped at 8, and re-provides that level to children. Corners follow ShapeProvider; title and description follow SizeProvider and the shared type scale.",
+      "Reduced motion is CSS-based and works without a MotionConfig provider: opening and closing keep the opacity fade at the resting transform instead of sliding offscreen. The registry also positions body relatively so the absolute iOS Safari overlay covers scrolled pages.",
+    ],
+    usage: `import {
+  Drawer, DrawerTrigger, DrawerContent, DrawerHeader,
+  DrawerFooter, DrawerTitle, DrawerDescription, DrawerClose,
+} from "@/components/ui/drawer";
+import { Button } from "@/components/ui/button";
+
+<Drawer showSwipeHandle>
+  <DrawerTrigger render={<Button variant="tertiary" />}>Open drawer</DrawerTrigger>
+  <DrawerContent>
+    <DrawerHeader>
+      <DrawerTitle>Project settings</DrawerTitle>
+      <DrawerDescription>Manage the details for your project.</DrawerDescription>
+    </DrawerHeader>
+    <div className="flex-1 overflow-y-auto p-4">Your content</div>
+    <DrawerFooter><DrawerClose render={<Button />}>Done</DrawerClose></DrawerFooter>
+  </DrawerContent>
+</Drawer>`,
+    props: [
+      "open / defaultOpen: boolean (default false). Controlled or initial state. onOpenChange: (open, eventDetails) => void. onOpenChangeComplete: (open) => void.",
+      'swipeDirection: "down" | "up" | "left" | "right" (default "down"). Edge and swipe dismissal direction. showSwipeHandle: boolean (default false). Show the visual grip.',
+      'modal: boolean | "trap-focus" (default true). Overlay, scroll lock, and focus trap; false keeps the page interactive. disablePointerDismissal: boolean (default false). Keep outside interaction from dismissing.',
+      "snapPoints: (number | string)[]. Vertical heights as viewport fractions, pixels, or px/rem strings. snapPoint / defaultSnapPoint: number | string | null. onSnapPointChange: (point, eventDetails) => void. snapToSequentialPoints: boolean (default false).",
+      "DrawerContent className / style: popup styles or state callbacks. Use h-*/max-h-* for vertical sizing, w-*/max-w-* for side sizing. container: portal target; positioning still uses the viewport. initialFocus / finalFocus: Base UI focus targets. ref: popup element.",
+      "DrawerContent --drawer-inset: CSS length (default 8px). Gap from viewport edges. --drawer-bleed-background: CSS color (default transparent). Set these with arbitrary-property classes or style.",
+      "DrawerTrigger / DrawerClose render: ReactElement or render function for composing with Button. Header/Footer accept div props; Title/Description name and describe the dialog. Portal, Overlay, and SwipeHandle are also exported.",
+    ],
+    flavorNote: "Drawer uses one shared Base UI implementation in both primitive flavors. Install @fluid/drawer for either project.",
+  },
   "dialog": {
     craft: [
       "Enters and exits on the slow tier: panel fades and scales 0.97\u21921 on a spring (0.24s, bounce 0.12); the exit is a quicker plain tween (0.16s) so a dismissal reads crisp and final rather than replaying the entrance in reverse.",
@@ -907,8 +945,10 @@ const [view, setView] = useState(0);
   "input-group": {
     craft: [
       "A field lights up when it is the hover-nearest item OR focused (`labelActive = isActive || isFocused`): its leading icon shifts muted\u2192foreground and stroke-width 1.5\u21922 over 80ms.",
-      "State chrome is a precedence ladder: disabled \u2192 transparent/ring-border; error \u2192 transparent at rest, bg-destructive-light/60 on hover-active, bg-card when focused, with ring-destructive/50 only while focused or hover-active; focused \u2192 bg-card + ring-border; hover-active \u2192 bg-muted/50; rest \u2192 fully transparent with invisible ring.",
-      "The label sits one notch tighter (pl-2.5, compact pl-2) than the ladder's control padding because \"the field ring is invisible at rest, so the roomier inset reads as a gap\".",
+      "InputGroup variant is inherited by every field, with an optional InputField override. The default bordered variant keeps ring-border; borderless stays transparent with an invisible ring at rest; filled keeps bg-muted/50 with an invisible ring; underlined stays transparent with square corners and only a bottom border.",
+      "Underlined fields never gain a surrounding ring or fill: their bottom border shifts border-border to border-muted-foreground on hover and border-foreground on focus; errors use border-destructive/50 even at rest, while disabled fields keep border-border.",
+      "For bordered, borderless, and filled fields, state chrome is a precedence ladder: disabled keeps the resting fill and ring (borderless retains ring-border); error keeps the resting fill, bg-destructive-light/60 on hover-active, bg-card when focused, with ring-destructive/50 on bordered fields or while focused or hover-active; focused uses bg-card + ring-border; hover-active uses bg-muted/50 (bg-muted for filled) + ring-border.",
+      "The label keeps the same inset across variants (pl-2.5, compact pl-2), so switching the chrome never moves it relative to the field's text.",
       "The label stacks an invisible semibold layer under the visible one in one grid cell, reserving the bold width so weight changes never shift layout.",
       "Mousedown anywhere on the input container (icon, padding) focuses the input \u2014 preserving the old one-big-label behavior \u2014 while clicks on the input itself are left alone so caret placement isn't disturbed.",
       "The input container uses a fixed ladder control height (rather than py-2 around the line box) so the field sits exactly on the 36px / 28px size steps. On touch screens the text steps up to 16px inside that same height, so iOS Safari never zooms the page on focus and the row doesn't move.",
@@ -928,6 +968,8 @@ const [value, setValue] = useState("");
 </InputGroup>`,
     props: [
       "InputGroup children: ReactNode. One or more InputField children.",
+      'InputGroup variant: "bordered" | "borderless" | "filled" | "underlined" (default "bordered"). Default appearance for every field.',
+      'InputField variant: "bordered" | "borderless" | "filled" | "underlined". Overrides the surrounding InputGroup variant.',
       "index: number. Position of the field within the group (required for fluid hover).",
       "label: string. Label text above the input.",
       "labelHidden: boolean (default false). Keep the label for assistive tech but do not render it.",
@@ -938,6 +980,50 @@ const [value, setValue] = useState("");
       "error: string. Error message shown below the input.",
       "disabled: boolean (default false). Disables the input.",
     ],
+  },
+  "input-number": {
+    craft: [
+      "NumberField owns numeric parsing, partial editing text, decimal stepping, press-and-hold and the hidden numeric form value. The public API reports number or null; it does not expose stringMode or custom formatter/parser callbacks.",
+      "The field follows useSize(size): 36px default or 28px compact, with sizeClasses.field keeping editable text at 16px on touch screens so iOS Safari does not zoom on focus.",
+      "The two stacked stepper buttons share one useFluidHover scope and one FluidHoverHighlight. Disabled and read-only buttons are excluded from the nearest-item hover, and hidden controls leave arrow-key stepping available.",
+      "Bordered, borderless, filled and underlined match InputGroup. Focus uses bg-card + ring-border with no extra outline; underlined stays transparent and uses border-foreground. Focus takes precedence over hover. Chrome transitions in spring.fast.duration; stepper hover uses spring.fast and spring.fast.exit.",
+      "The controls sit 2px inside the field and use nestedRadius(shape.bgRadius, 2), so their hover corners stay concentric in both rounded and pill shapes.",
+      "Intl.NumberFormat formats and parses locale-aware numbers, currencies and percentages. Grouping is off by default, precision overrides fraction digits, and partial text stays visible until blur normalizes it.",
+      "Wheel stepping is opt-in and requires focus. Arrow keys and buttons use step, Alt keeps that step, and Shift takes ten steps. External value or range updates do not emit onChange.",
+      "Native attributes and ref reach the editable input, while className and style belong to the outer field. Prefix and suffix clicks focus the input without intercepting buttons, links or other editable content.",
+    ],
+    usage: `"use client";
+
+import { useState } from "react";
+import { InputNumber } from "@/components/ui/input-number";
+
+function Quantity() {
+  const [value, setValue] = useState<number | null>(3);
+  return <InputNumber aria-label="Quantity" value={value}
+    onChange={setValue} min={0} max={10} step={0.5} />;
+}`,
+    props: [
+      "value: number | null. Controlled value; null displays an empty field.",
+      "defaultValue: number. Initial uncontrolled value.",
+      "onChange: (value: number | null) => void. Numeric changes; clearing reports null.",
+      "min / max: number (default safe integer bounds). Limits for numeric changes.",
+      "step: number (default 1). Positive step amount; Shift takes ten steps.",
+      "precision: number. Fixed decimal places from 0 to 20; overrides format fraction digits.",
+      "format: Intl.NumberFormatOptions (default useGrouping false, maximumFractionDigits 20). Number, currency, percent or unit formatting and parsing.",
+      "locale: Intl.LocalesArgument (default runtime locale). Display and parsing locale.",
+      "controls: boolean (default true). Show increment/decrement buttons.",
+      "changeOnWheel: boolean (default false). Wheel stepping while hovering the focused input.",
+      'variant: "bordered" | "borderless" | "filled" | "underlined" (default "bordered"). Field appearance.',
+      'size: "default" | "compact" (default SizeProvider). Pin the control to 36px or 28px.',
+      'status: "error" | "warning". Validation appearance; error sets aria-invalid.',
+      "prefix / suffix: ReactNode. Leading and trailing content inside the field.",
+      "disabled / readOnly: boolean (default false). Prevent value changes; readOnly permits focus and selection.",
+      "required: boolean (default false). Require a value for form validation.",
+      "name / form: string. Native form submission uses the unformatted value.",
+      "className / style: string / CSSProperties. Outer field styling.",
+      "ref: Ref<HTMLInputElement>. Editable input for focus, blur and selection. Native input attributes and event handlers are forwarded.",
+    ],
+    flavorNote: "Single-source component using Base UI NumberField in either flavor, like InputGroup. Uses JavaScript numbers and Intl.NumberFormat; arbitrary precision strings and formatter/parser callbacks are omitted.",
   },
   "input-message": {
     craft: [
@@ -1096,6 +1182,32 @@ import {
     flavorNote:
       "Both flavors install sidebar.tsx plus sidebar-core.tsx and sidebar-menu.tsx; import everything from @/components/ui/sidebar. SidebarMenuButton accepts render={<Link href=... />} (Base UI) or asChild (Radix) for custom elements.",
   },
+  skeleton: {
+    craft: [
+      "The shadcn Skeleton composition stays one div with data-slot=skeleton, so existing reveal-swap and reveal-items layouts keep their loading handoff.",
+      "Dimensions come from caller classes or inline styles. Match the real content footprint so loading does not shift the surrounding layout.",
+      "The neutral bg-accent fill uses the current theme, and corners follow ShapeProvider through shape.bg. A rounded-full class can override the shape for avatars.",
+      "The standard animate-pulse opacity cycle stops under prefers-reduced-motion with motion-reduce:animate-none; no application motion provider is required.",
+      "Each placeholder is aria-hidden by default. The surrounding region owns aria-busy and its accessible loading message, avoiding an announcement for every decorative bar.",
+      "Native div props and the ref are forwarded, and caller classes merge last so explicit dimensions, color, and corner overrides win.",
+    ],
+    usage: `import { Skeleton } from "@/components/ui/skeleton";
+
+<div role="status" aria-label="Loading profile" aria-busy="true"
+  className="flex w-full max-w-sm items-center gap-4">
+  <Skeleton className="size-12 shrink-0 rounded-full" />
+  <div className="flex flex-1 flex-col gap-2">
+    <Skeleton className="h-4 w-3/4" />
+    <Skeleton className="h-4 w-1/2" />
+  </div>
+</div>`,
+    props: [
+      "className: string. Placeholder dimensions and optional shape or color overrides, merged after the defaults.",
+      "style: CSSProperties. Dynamic dimensions and other inline styles.",
+      "aria-hidden: boolean (default true). Hide decorative placeholders; put aria-busy and a loading label on the surrounding region.",
+      "ref: Ref<HTMLDivElement>. Access the placeholder element. Other native div attributes are forwarded.",
+    ],
+  },
   slider: {
     craft: [
       "One component, two ladder steps: default size renders the pips/scrubber design, compact the dense one; any compact-only prop (array value, `steps`, `showSteps`, `showValue`, `valuePosition`, track/fill styling, thumb colors) forces the compact engine regardless of size \"so no capability is ever lost\".",
@@ -1156,6 +1268,52 @@ const [checked, setChecked] = useState(false);
       "onToggle: () => void. Called when the switch is toggled.",
       "disabled: boolean (default false). Disables the switch.",
       "size: \"default\" | \"compact\" (default from SizeProvider). Pins the switch to one step of the size ladder.",
+    ],
+  },
+  "data-table": {
+    craft: [
+      "TanStack Table v9 features are registered once in dataTableFeatures, shared by the exported column and instance types; sorting, filtering, visibility, pagination, and selection use the same row pipeline.",
+      "Body rows pass their visible page index to Fluid Table, keeping one shared hover highlight behind the semantic table as sorting, filtering, and pagination change its rows.",
+      "Row selection is opt-in through options.enableRowSelection; its generated checkbox column cannot be hidden or sorted, and its header selects only eligible rows on the current page.",
+      "Selection uses native checkboxes, including an indeterminate header and disabled rows; check and mixed marks draw on spring.fast and retract with spring.fast.exit.",
+      "Sortable column headers cycle through TanStack sorting states, expose aria-sort on their header cells, and crossfade 3 glyphs in a fixed grid cell using the fast tier and its faster exit.",
+      "The Columns popup keeps multiple checkbox choices open and reuses Dropdown's fluid hover and merged selection backgrounds; columnLabels supplies readable names for function-rendered headers.",
+      "A size prop wraps the entire composition in SizeProvider, so table cells, toolbar controls, popup items, and pagination share the default or compact step.",
+      "Empty results span the visible leaf columns, including selection, and page navigation reads Page 0 of 0; the current page size stays in the selector even when absent from pageSizeOptions.",
+      "Controlled state and manual server modes pass through options; getRowId keeps selection attached to record IDs across data changes, and selection counts reflect filtered rows available in the current data.",
+    ],
+    usage: `import {
+  DataTable, DataTableColumnHeader, type DataTableColumnDef,
+} from "@/components/ui/data-table";
+
+type Person = { id: string; name: string };
+const columns: DataTableColumnDef<Person>[] = [{
+  accessorKey: "name",
+  header: ({ column }) => <DataTableColumnHeader column={column} title="Name" />,
+}];
+const data = [{ id: "alice", name: "Alice" }, { id: "bob", name: "Bob" }];
+
+<DataTable columns={columns} data={data} searchColumn="name"
+  columnLabels={{ name: "Name" }}
+  options={{ getRowId: (row) => row.id, enableRowSelection: true }} />`,
+    props: [
+      "columns: DataTableColumnDef<TData>[]. TanStack v9 column definitions with custom header and cell renderers.",
+      "data: TData[]. Rows, or the fetched page in manual server mode.",
+      "options: Omit<DataTableOptions<TData>, columns | data>. TanStack initialState, state/on*Change, getRowId, enableRowSelection (default false), and manual query modes.",
+      "searchColumn / searchPlaceholder: string. Column ID to filter and placeholder (default Filter rows...). Omit searchColumn to hide the filter.",
+      "columnLabels: Record<string, string>. Accessible search and visibility-menu labels for columns.",
+      "showColumnToggle / showPagination: boolean (default true). Show column visibility and pagination controls; hiding pagination does not disable it.",
+      "pageSizeOptions: number[] (default [10, 20, 30, 40, 50]). Page size choices; the current size is always included.",
+      "emptyState / caption: ReactNode / string (default No results. / Data table). Empty content and a visually hidden table name.",
+      "size: default | compact (default SizeProvider). Pins the table and controls to the same size step.",
+      "children: (table: DataTableInstance<TData>) => ReactNode. Extra toolbar filters or selection actions.",
+      "className / ref / native div attributes. Applied to the outer layout.",
+      "DataTableContent: table, emptyState, caption, className, native div attributes. Render the scrolling semantic table separately.",
+      "DataTableColumnHeader: column, title, className. Sort a column and show its current direction.",
+      "DataTablePagination: table, pageSizeOptions. Page controls, page size, and filtered selection count.",
+      "DataTableViewOptions: table, columnLabels. Checkbox menu for hideable leaf columns.",
+      "useDataTable(options: DataTableOptions<TData>): DataTableInstance<TData>. Own state locally or pass controlled state and manual server options.",
+      "dataTableFeatures / DataTableFeatures. Shared TanStack v9 features and type for createColumnHelper<DataTableFeatures, TData>().",
     ],
   },
   "table": {
@@ -1331,6 +1489,40 @@ const [selected, setSelected] = useState(0);
       "ThinkingStepDetails.summary / details: string / string[]. Collapsed label and the detail lines rendered inside the nested accordion.",
     ],
   },
+  toast: {
+    craft: [
+      "Base UI owns the manager, accessible announcements, F6 focus navigation, paused timers, and swipe dismissal. Toaster mounts one provider and renderer for the chosen manager; mount it once per manager.",
+      "The default viewport sits 16px from the bottom-right on desktop and stretches between 16px side insets on narrow screens, capped at max-w-sm.",
+      "Collapsed notifications peek 12px apart and shrink 0.05 per depth step from a bottom origin. Hover or keyboard focus expands the stack into measured heights with 12px gaps and reveals each message.",
+      "Transforms and opacity enter on spring.moderate through a generated CSS linear() spring. Dismissals use the 0.12s moderate exit, with the primitive retaining swipe transforms and its transition lifecycle.",
+      "Reduced motion keeps opacity transitions and removes animated travel and depth scaling. Loading icons also stop rotating, independently of an application MotionConfig.",
+      "Surface level is min(current substrate + 2, 8), re-provided to children. Container corners follow ShapeProvider; padding is 16px default and 12px compact, and text and icons follow SizeProvider.",
+      "Status glyphs match Banner: default uses the icon set outline info mark; info, success, warning, and error use the same filled shapes and status colors, with a background-colored cutout. Light and dark status tokens ship with the item. Loading keeps a rotating icon; custom unknown types have no icon. Glyphs are 20px default and 16px compact, while text and surfaces stay neutral.",
+      "Actions and close controls use Fluid buttons and preserve Base UI render composition. Manager updates and promise transitions reuse one toast ID instead of adding another notification for each state.",
+    ],
+    usage: `import { Toaster, toast } from "@/components/ui/toast";
+import { Button } from "@/components/ui/button";
+
+// Mount one Toaster near the root, inside your Fluid providers.
+<Toaster />
+
+<Button onClick={() => toast.add({
+  title: "Event created",
+  description: "Your team can now view the event.",
+  type: "success",
+})}>Create event</Button>`,
+    props: [
+      "Toaster toastManager: ReturnType<typeof createToastManager> (default toast). Mount one toaster per manager. children can read that provider with useToastManager().",
+      "Toaster timeout: number (default 5000ms, 0 disables auto-dismiss). limit: number (default 3). viewportProps: Base UI viewport props including className, style, label, and ref. container: portal target.",
+      "toast.add({ title, description, type, id, timeout, priority, actionProps, onClose, onRemove, data }): string. Returns an ID; reusing one updates its toast and refreshes its timer.",
+      "type: default | info | success | warning | error | loading | string (default default). Status colors and filled glyphs match Banner; loading uses a spinner, and custom unknown types have no icon. priority: low (polite, default) or high (urgent). actionProps: native button props, including children and onClick.",
+      "toast.update(id, options | updater): void. Update an existing notification. toast.close(id?): void. Dismiss one notification, or all when the ID is omitted.",
+      "toast.promise(promise, { loading, success, error }): Promise<Value>. Each state is a string or options object; success/error may be callbacks. The returned promise preserves rejection, so handle errors at the call site.",
+      "Composition: ToastProvider, ToastPortal, ToastViewport, Toast, ToastContent, ToastTitle, ToastDescription, ToastAction, ToastClose. DOM parts forward refs, native props, state className/style callbacks, and Base UI render props. Toast requires a toast object and accepts swipeDirection (default down/right).",
+      "createToastManager(): isolated global manager. useToastManager(): provider-local reactive toasts and manager methods. ToasterProps and ToastProps are exported.",
+    ],
+    flavorNote: "Toast uses Base UI in both flavors; its Fluid buttons follow the chosen install flavor. Use @fluid/base/toast in a Base UI project.",
+  },
   "tooltip": {
     craft: [
       "Enters on the fast tier (0.08s spring) with a 4px slide toward the trigger from the chosen side (top\u2192y:4, bottom\u2192y:-4, left\u2192x:4, right\u2192x:-4) and fades out on the quicker 0.06s exit tween; default `sideOffset` is 8.",
@@ -1370,7 +1562,7 @@ const [selected, setSelected] = useState(0);
       "CommandMenuDialog opens centered at its cap min(440px, 76dvh) and keeps that top edge \u2014 `top-[max(12dvh,calc(50dvh-220px))]` \u2014 so the field stays put while the rows under it filter down. It closes on Escape and on a pick (`closeOnSelect`), so no \u2715 button is rendered.",
       "Keyboard scrolling is done at the moment a move is decided, not in an effect: a keyboard move keeps its row at the CENTER of the viewport (as the ends allow) and the viewport travels on the same fast spring as the highlight so row and fill move together; a move that lands on the first row snaps to the top instead, as a query reset does, heading included. Offsets, never `scrollIntoView`, which would also scroll the page.",
       "Arrows wrap at both ends \u2014 the list is the whole keyboard space, no field stop (unlike the combobox) \u2014 and skip disabled rows; the first enabled row is re-highlighted whenever the row set changes (detected by a NUL-joined values key, so an inline items literal doesn't reset it), so Enter always has a target as the query filters. Pointer leaving the list keeps the highlight where it was.",
-      "With CommandMenuTabs mounted, \u2190 and \u2192 in the field switch tabs (wrapping) instead of moving the caret; presses modified with Shift, Alt, Ctrl or Meta keep their editing meaning, so Shift+Arrow still extends the selection. IME composition keys are left to the composer (including Safari's keyCode 229 commit). Escape closes the dialog shell, but inline it clears the query.",
+      "With CommandMenuTabs mounted, \u2190 and \u2192 in the field switch tabs (wrapping) instead of moving the caret; presses modified with Shift, Alt, Ctrl or Meta keep their editing meaning, so Shift+Arrow still extends the selection. IME composition keys are left to the composer; a 50ms window around compositionend's event timestamp also catches Safari's out-of-order confirming Enter. Escape closes the dialog shell, but inline it clears the query.",
       "Shortcut system: `\"mod+k\"` is \u2318K on a Mac, Ctrl+K elsewhere (\"mod\" matches either while listening); physical-key (`code`) fallback applies when `key` isn't a Latin letter/digit or when \u2325 is held, so an unmodified Dvorak \"t\" is never read as physical K; a bare key stays out of editable fields. Among mounted dialogs sharing a combo, an open one answers first (the press closes it), else the most recently mounted one whose `shortcutScope` holds focus.",
       "The footer's Enter hint names the highlighted row's `action` (default: its label) so it reads as the thing Enter does (\"Open Showcase\") rather than a generic \"Run\"; it sits at the trailing edge so its changing width never moves the other hints, which follow the menu (tabs add \u2190 \u2192, a dialog adds Esc).",
       "Suggested rows lead under their own heading while nothing is typed, and leave their original group so nothing is listed twice; the default filter matches every query word against label + description + keywords and never re-sorts, so rows don't move under the cursor as the query grows.",

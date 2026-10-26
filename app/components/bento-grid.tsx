@@ -21,8 +21,9 @@ import { cn } from "@/lib/utils";
  * half row: the last small then spans the full row there (and goes back to
  * one column at xl). Adding a card or changing a gridSize breaks the xl
  * equation — rebalance before shipping or the bottom rows develop holes.
+ * Full-row galleries follow those bands without changing their balance.
  */
-const displayOrder: { slug: string; side?: "right" }[] = [
+const displayOrder: { slug: string; side?: "right"; fullRow?: boolean }[] = [
   { slug: "input-message" },                  // band 1 · medium left
   { slug: "thinking-indicator" },
   { slug: "command-menu", side: "right" },    // band 2 · large right
@@ -52,6 +53,9 @@ const displayOrder: { slug: string; side?: "right" }[] = [
   { slug: "badge" },
   { slug: "calendar", side: "right" },        // band 12 · medium right
   { slug: "date-picker" },
+  { slug: "skeleton" },
+  { slug: "toast" },
+  { slug: "drawer", fullRow: true },          // four-direction gallery
 ];
 
 /** Stage padding overrides, by slug (the default is px-6 py-16). */
@@ -109,14 +113,14 @@ const sizeClasses: Record<string, string> = {
 
 export function BentoGrid({ components }: BentoGridProps) {
   const componentMap = new Map(components.map((c) => [c.slug, c]));
-  const ordered = displayOrder.flatMap(({ slug, side }) => {
+  const ordered = displayOrder.flatMap(({ slug, side, fullRow }) => {
     const entry = componentMap.get(slug);
-    return entry ? [{ entry, side }] : [];
+    return entry ? [{ entry, side, fullRow }] : [];
   });
   const cols = useGridCols();
   const { isNew } = useReleaseMarks();
   // An odd number of smalls leaves a half row at md: the last one fills it.
-  const smalls = ordered.filter(({ entry }) => (entry.gridSize ?? "small") === "small");
+  const smalls = ordered.filter(({ entry, fullRow }) => !fullRow && (entry.gridSize ?? "small") === "small");
   const wideAtMd = smalls.length % 2 === 1 ? smalls[smalls.length - 1]?.entry.slug : undefined;
 
   return (
@@ -131,7 +135,7 @@ export function BentoGrid({ components }: BentoGridProps) {
           : undefined
       }
     >
-      {ordered.map(({ entry: c, side }) => {
+      {ordered.map(({ entry: c, side, fullRow }) => {
         const Preview = previewMap[c.slug];
         if (!Preview) return null;
         // The wrapper is the grid item and the reveal-scroll section. The
@@ -143,6 +147,7 @@ export function BentoGrid({ components }: BentoGridProps) {
             className={cn(
               "reveal-scroll flex",
               sizeClasses[c.gridSize ?? "small"],
+              fullRow && "md:col-span-2 xl:col-span-3",
               side === "right" && "xl:col-start-2",
               c.slug === wideAtMd && "md:col-span-2 xl:col-span-1"
             )}

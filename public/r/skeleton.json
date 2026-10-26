@@ -1,0 +1,21 @@
+{
+  "$schema": "https://ui.shadcn.com/schema/registry-item.json",
+  "name": "skeleton",
+  "title": "Skeleton",
+  "description": "Loading placeholders based on shadcn/ui Skeleton, with Fluid shapes, forwarded refs, and reduced-motion support. Set dimensions with utility classes for avatars, text, cards, forms, and tables.",
+  "registryDependencies": [
+    "utils",
+    "https://www.fluidfunctionalism.com/r/shape-context.json"
+  ],
+  "files": [
+    {
+      "path": "registry/default/skeleton.tsx",
+      "content": "\"use client\";\n\n// Based on shadcn/ui's Skeleton: https://ui.shadcn.com/docs/components/base/skeleton\nimport { forwardRef, type ComponentPropsWithoutRef } from \"react\";\nimport { cn } from \"@/lib/utils\";\nimport { useShape } from \"@/lib/shape-context\";\n\ntype SkeletonProps = ComponentPropsWithoutRef<\"div\">;\n\n// The parent loading region owns the announcement. Decorative placeholders\n// stay out of the accessibility tree and stop pulsing with reduced motion.\nconst Skeleton = forwardRef<HTMLDivElement, SkeletonProps>(({ className, ...props }, ref) => {\n  const shape = useShape();\n  return (\n    <div\n      ref={ref}\n      data-slot=\"skeleton\"\n      aria-hidden=\"true\"\n      className={cn(\"animate-pulse bg-accent motion-reduce:animate-none\", shape.bg, className)}\n      {...props}\n    />\n  );\n});\nSkeleton.displayName = \"Skeleton\";\n\nexport { Skeleton };\nexport type { SkeletonProps };\n",
+      "type": "registry:ui"
+    }
+  ],
+  "categories": [
+    "components"
+  ],
+  "type": "registry:ui"
+}

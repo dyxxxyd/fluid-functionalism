@@ -24,8 +24,7 @@ const itemNames = new Set(registry.items.map((item) => item.name));
 
 // Deps that intentionally stay plain names and resolve from the default
 // shadcn registry (ui.shadcn.com) instead of being URL-rewritten.
-// `skeleton` is shadcn's own Skeleton, which the reveal item builds on.
-const SHADCN_DEFAULT_DEPS = new Set(["utils", "skeleton"]);
+const SHADCN_DEFAULT_DEPS = new Set(["utils"]);
 
 describe("dual-flavour slugs", () => {
   it.each(DUAL_FLAVOR_SLUGS)("%s has a Radix and a Base UI source file", (slug) => {
@@ -243,6 +242,9 @@ describe("shipped CSS variables reach installers", () => {
     /^--anchor-/, // Base UI popup positioning
     /^--available-/, // Base UI popup available-size
     /^--scroll-area-thumb-/, // Base UI ScrollArea thumb metrics
+    /^--drawer-(height|frontmost-height|swipe-movement-[xy]|swipe-progress|swipe-strength|snap-point-offset)$/, // Base UI Drawer gesture and size metrics
+    /^--nested-drawers$/, // Base UI Drawer stack depth
+    /^--toast-(index|offset-y|height|frontmost-height|swipe-movement-[xy])$/, // Base UI Toast stack and gesture metrics
   ];
 
   /** Custom-property names defined by a payload's cssVars + css blocks. */

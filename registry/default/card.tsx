@@ -60,6 +60,8 @@ interface CardGroupContextValue {
 
 const CardGroupContext = createContext<CardGroupContextValue | null>(null);
 
+const isDisabledCard = (element: HTMLElement) => element.getAttribute("aria-disabled") === "true";
+
 // ── Per-card context ─────────────────────────────────────
 // Lets the compositional parts (title, header, footer…) adapt to the card
 // they're inside without threading props: the title reads `emphasized` to
@@ -126,7 +128,7 @@ const CardGroup = forwardRef<HTMLDivElement, CardGroupProps>(
     const axis = columns > 1 ? "xy" : "y";
     // A card grid has generous whitespace, so a gap click only routes when it
     // lands within a hand's width of the highlighted card.
-    const hover = useFluidHover(containerRef, { axis, gapClick: { maxDistance: 16 } });
+    const hover = useFluidHover(containerRef, { axis, gapClick: { maxDistance: 16 }, isItemDisabled: isDisabledCard });
     const {
       activeIndex,
       handlers,
@@ -830,8 +832,7 @@ CardImage.displayName = "CardImage";
 // Functionalism doesn't use eyebrows, a card starts with its title. Kept so
 // existing code keeps compiling.
 
-/** @deprecated No eyebrows: a card starts with its title. */
-const CardEyebrow = forwardRef<HTMLSpanElement, HTMLAttributes<HTMLSpanElement>>(
+const CardEyebrowImpl = forwardRef<HTMLSpanElement, HTMLAttributes<HTMLSpanElement>>(
   ({ className, ...props }, ref) => {
     const compact = useSize().variant === "compact";
     return (
@@ -850,7 +851,10 @@ const CardEyebrow = forwardRef<HTMLSpanElement, HTMLAttributes<HTMLSpanElement>>
   }
 );
 
-CardEyebrow.displayName = "CardEyebrow";
+CardEyebrowImpl.displayName = "CardEyebrow";
+
+/** @deprecated No eyebrows: a card starts with its title. */
+const CardEyebrow = CardEyebrowImpl;
 
 // ── CardFeature ──────────────────────────────────────────
 // FF addition: an icon + title + description row, for feature lists inside

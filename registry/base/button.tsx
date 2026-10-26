@@ -9,6 +9,7 @@ import {
   type ReactNode,
 } from "react";
 import { Button as ButtonPrimitive } from "@base-ui/react/button";
+import { useRender } from "@base-ui/react/use-render";
 import { cva, type VariantProps } from "class-variance-authority";
 import type { IconComponent } from "@/lib/icon-context";
 import { cn } from "@/lib/utils";
@@ -23,7 +24,7 @@ const buttonVariants = cva(
     // button (or overflows) instead of squeezing it.
     "group relative isolate inline-flex items-center justify-center outline-none cursor-pointer select-none whitespace-nowrap",
     "transition-colors duration-80",
-    "disabled:opacity-50 disabled:pointer-events-none",
+    "disabled:opacity-50 disabled:pointer-events-none aria-disabled:opacity-50 aria-disabled:pointer-events-none",
     "focus-visible:ring-1 focus-visible:ring-[color:var(--focus-ring,#6B97FF)]",
   ],
   {
@@ -180,6 +181,10 @@ const Button = forwardRef<HTMLButtonElement, ButtonProps>(
       className?: string;
       style?: React.CSSProperties;
       ref?: React.Ref<HTMLButtonElement>;
+      onClickCapture?: React.MouseEventHandler<HTMLButtonElement>;
+      "aria-disabled"?: boolean;
+      tabIndex?: number;
+      disabled?: boolean;
     }>;
     const asChildElement =
       render && isValidElement(render)
@@ -293,20 +298,29 @@ const Button = forwardRef<HTMLButtonElement, ButtonProps>(
       className
     );
 
-    if (asChildElement) {
-      const childProps = asChildElement.props;
-      return cloneElement(
-        asChildElement,
-        // oxlint-disable-next-line react/refs -- Forward the caller's ref without reading its current value.
-        {
-          ...props,
-          ref,
-          className: cn(rootClassName, childProps.className),
-          style: { ...style, ...childProps.style },
-        },
-        internals
-      );
-    }
+    // useRender composes the element's refs and event handlers without
+    // adding button semantics to a link. A capture guard also blocks the
+    // link's own handler and native navigation while disabled or loading.
+    const blocked = disabled || loading;
+    const slotted = useRender({
+      enabled: asChildElement !== null,
+      ref,
+      render: asChildElement ? cloneElement(asChildElement, {
+        className: cn(rootClassName, asChildElement.props.className),
+        style: { ...style, ...asChildElement.props.style },
+        ...(blocked ? {
+          "aria-disabled": true,
+          tabIndex: -1,
+          ...(asChildElement.type === "button" ? { disabled: true } : {}),
+          onClickCapture: (event: React.MouseEvent<HTMLButtonElement>) => {
+            event.preventDefault();
+            event.stopPropagation();
+          },
+        } : {}),
+      }, internals) : undefined,
+      props: blocked ? omit(props, ["onClick", "onClickCapture"]) : props,
+    });
+    if (asChildElement) return slotted;
 
     return (
       <ButtonPrimitive

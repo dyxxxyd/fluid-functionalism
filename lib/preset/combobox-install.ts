@@ -84,6 +84,7 @@ function comboboxDemoFile(p: ComboboxPreset): string {
   if (p.variant !== "bordered") fieldProps.push(`variant="${p.variant}"`);
   if (p.icon) fieldProps.push("icon={SearchIcon}");
   if (p.clearable) fieldProps.push("clearable");
+  if (d.collapseOnOverflow) fieldProps.push("collapseOnOverflow");
   if (p.error) fieldProps.push(`error=${JSON.stringify(COMBOBOX_COPY.error)}`);
   fieldProps.push(`className="w-[280px] max-w-full"`);
   l.push(`      <${Field}`);

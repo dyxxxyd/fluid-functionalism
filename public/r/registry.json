@@ -1391,6 +1391,41 @@
       ]
     },
     {
+      "name": "drawer",
+      "type": "registry:ui",
+      "title": "Drawer",
+      "description": "Swipeable floating edge panel based on shadcn/ui's Base UI Drawer, with 8px viewport insets, four directions, snap points, nested stacking, and modal or non-modal behavior. Uses Fluid spring tokens, shapes, typography, and surface elevation. Shared across primitive flavors.",
+      "dependencies": [
+        "@base-ui/react@^1.9.0",
+        "motion"
+      ],
+      "registryDependencies": [
+        "utils",
+        "https://www.fluidfunctionalism.com/r/springs.json",
+        "https://www.fluidfunctionalism.com/r/font-weight.json",
+        "https://www.fluidfunctionalism.com/r/shape-context.json",
+        "https://www.fluidfunctionalism.com/r/size-context.json",
+        "https://www.fluidfunctionalism.com/r/surface-context.json",
+        "https://www.fluidfunctionalism.com/r/surface-classes.json"
+      ],
+      "files": [
+        {
+          "path": "registry/default/drawer.tsx",
+          "type": "registry:ui"
+        }
+      ],
+      "css": {
+        "@layer base": {
+          "body": {
+            "position": "relative"
+          }
+        }
+      },
+      "categories": [
+        "components"
+      ]
+    },
+    {
       "name": "dialog",
       "type": "registry:ui",
       "title": "Dialog",
@@ -1566,6 +1601,45 @@
         }
       ],
       "docs": "Docs & live playground: https://www.fluidfunctionalism.com/docs/input-group. Craft notes, the color, layout and motion decisions to keep when you change it: https://github.com/mickadesign/fluid-functionalism/blob/main/skills/fluid-functionalism/references/craft.md#input-group.",
+      "categories": [
+        "components"
+      ]
+    },
+    {
+      "name": "input-number",
+      "type": "registry:ui",
+      "title": "Input Number",
+      "description": "Numeric input with decimal steps, range limits, locale-aware formatting, validation states, and fluid stepper hover. Follows the shared size and shape systems.",
+      "dependencies": [
+        "@base-ui/react@^1.9.0",
+        "class-variance-authority"
+      ],
+      "registryDependencies": [
+        "utils",
+        "https://www.fluidfunctionalism.com/r/springs.json",
+        "https://www.fluidfunctionalism.com/r/font-weight.json",
+        "https://www.fluidfunctionalism.com/r/shape-context.json",
+        "https://www.fluidfunctionalism.com/r/size-context.json",
+        "https://www.fluidfunctionalism.com/r/icon-context.json",
+        "https://www.fluidfunctionalism.com/r/use-fluid-hover.json",
+        "https://www.fluidfunctionalism.com/r/tokens.json",
+        "https://www.fluidfunctionalism.com/r/type-scale.json"
+      ],
+      "cssVars": {
+        "light": {
+          "warning": "#F59E0B"
+        },
+        "dark": {
+          "warning": "#FCD34D"
+        }
+      },
+      "files": [
+        {
+          "path": "registry/default/input-number.tsx",
+          "type": "registry:ui"
+        }
+      ],
+      "docs": "Docs & live examples: https://www.fluidfunctionalism.com/docs/input-number. Craft notes: https://github.com/mickadesign/fluid-functionalism/blob/main/skills/fluid-functionalism/references/craft.md#input-number.",
       "categories": [
         "components"
       ]
@@ -1848,6 +1922,39 @@
         }
       ],
       "docs": "Docs & live playground: https://www.fluidfunctionalism.com/docs/carousel-dots. Craft notes, the color, layout and motion decisions to keep when you change it: https://github.com/mickadesign/fluid-functionalism/blob/main/skills/fluid-functionalism/references/craft.md#carousel-dots.",
+      "categories": [
+        "components"
+      ]
+    },
+    {
+      "name": "data-table",
+      "type": "registry:ui",
+      "title": "DataTable",
+      "description": "TanStack Table v9 with sorting, filtering, pagination, row selection, column visibility, and Fluid table hover. Includes composable column headers, view options, pagination, and a useDataTable hook.",
+      "dependencies": [
+        "@tanstack/react-table@^9.3.1",
+        "motion"
+      ],
+      "registryDependencies": [
+        "utils",
+        "https://www.fluidfunctionalism.com/r/table.json",
+        "https://www.fluidfunctionalism.com/r/button.json",
+        "https://www.fluidfunctionalism.com/r/input-group.json",
+        "https://www.fluidfunctionalism.com/r/dropdown.json",
+        "https://www.fluidfunctionalism.com/r/select.json",
+        "https://www.fluidfunctionalism.com/r/icon-context.json",
+        "https://www.fluidfunctionalism.com/r/springs.json",
+        "https://www.fluidfunctionalism.com/r/size-context.json",
+        "https://www.fluidfunctionalism.com/r/tokens.json",
+        "https://www.fluidfunctionalism.com/r/type-scale.json"
+      ],
+      "files": [
+        {
+          "path": "registry/default/data-table.tsx",
+          "type": "registry:ui"
+        }
+      ],
+      "docs": "Docs & live examples: https://www.fluidfunctionalism.com/docs/data-table. Craft notes: https://github.com/mickadesign/fluid-functionalism/blob/main/skills/fluid-functionalism/references/craft.md#data-table.",
       "categories": [
         "components"
       ]
@@ -2185,6 +2292,25 @@
       ]
     },
     {
+      "name": "skeleton",
+      "type": "registry:ui",
+      "title": "Skeleton",
+      "description": "Loading placeholders based on shadcn/ui Skeleton, with Fluid shapes, forwarded refs, and reduced-motion support. Set dimensions with utility classes for avatars, text, cards, forms, and tables.",
+      "registryDependencies": [
+        "utils",
+        "https://www.fluidfunctionalism.com/r/shape-context.json"
+      ],
+      "files": [
+        {
+          "path": "registry/default/skeleton.tsx",
+          "type": "registry:ui"
+        }
+      ],
+      "categories": [
+        "components"
+      ]
+    },
+    {
       "name": "slider",
       "type": "registry:ui",
       "title": "Slider",
@@ -2363,7 +2489,7 @@
       "title": "Reveal",
       "description": "Page reveals in 1 class, on the existing spring tiers: slow for landing, moderate for product. .reveal-landing for a page read once: the hero rises and scales in on load, later sections do on scroll, and every section leaves the same way at the top; .reveal-scroll makes a deeper element, like a grid card, a section of its own. .reveal-product for the app: blocks fade in on load, nothing on scroll. Each has a -subtle step. For slow data, .reveal-swap crossfades shadcn's Skeleton into the real block and .reveal-items brings rows in one by one. Pure CSS; reduced motion keeps the fades and drops the rest.",
       "registryDependencies": [
-        "skeleton"
+        "https://www.fluidfunctionalism.com/r/skeleton.json"
       ],
       "css": {
         "@keyframes reveal-preset": {
@@ -3174,6 +3300,49 @@
       "categories": [
         "components"
       ]
+    },
+    {
+      "name": "toast",
+      "type": "registry:ui",
+      "title": "Toast",
+      "description": "Temporary notifications based on shadcn/ui Base UI Toast: a global manager, status icons, actions, promise updates, hover-expanded stacking, and swipe dismissal. Uses Fluid springs, shapes, typography, and surface elevation.",
+      "dependencies": [
+        "@base-ui/react@^1.9.0",
+        "motion"
+      ],
+      "registryDependencies": [
+        "utils",
+        "https://www.fluidfunctionalism.com/r/button.json",
+        "https://www.fluidfunctionalism.com/r/springs.json",
+        "https://www.fluidfunctionalism.com/r/font-weight.json",
+        "https://www.fluidfunctionalism.com/r/shape-context.json",
+        "https://www.fluidfunctionalism.com/r/size-context.json",
+        "https://www.fluidfunctionalism.com/r/icon-context.json",
+        "https://www.fluidfunctionalism.com/r/surface-context.json",
+        "https://www.fluidfunctionalism.com/r/surface-classes.json",
+        "https://www.fluidfunctionalism.com/r/tokens.json"
+      ],
+      "files": [
+        {
+          "path": "registry/default/toast.tsx",
+          "type": "registry:ui"
+        }
+      ],
+      "categories": [
+        "components"
+      ],
+      "cssVars": {
+        "light": {
+          "info": "#3B82F6",
+          "success": "#22C55E",
+          "warning": "#F59E0B"
+        },
+        "dark": {
+          "info": "#93C5FD",
+          "success": "#86EFAC",
+          "warning": "#FCD34D"
+        }
+      }
     },
     {
       "name": "tooltip",

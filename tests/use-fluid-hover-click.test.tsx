@@ -125,6 +125,49 @@ function setup(
 }
 
 describe("useFluidHover: gap clicks land on the highlighted row", () => {
+  it("leaves a cancelled gap click alone", () => {
+    const onClick = vi.fn();
+    function CancelledList() {
+      const ref = useRef<HTMLDivElement>(null);
+      const hover = useFluidHover(ref);
+      useEffect(() => hover.setActiveIndex(0), [hover.setActiveIndex]);
+      return <div ref={ref} onClick={(event) => {
+        event.preventDefault();
+        hover.handlers.onClick(event);
+      }}>
+        <Row index={0} registerItem={hover.registerItem} onClick={onClick} />
+        <span data-testid="gap">Gap</span>
+      </div>;
+    }
+    const { getByTestId } = render(<CancelledList />);
+    fireEvent.click(getByTestId("gap"));
+    expect(onClick).not.toHaveBeenCalled();
+  });
+
+  it("unobserves and unmarks an element replaced at the same index", () => {
+    const unobserve = vi.fn();
+    vi.stubGlobal("ResizeObserver", class {
+      observe() {}
+      unobserve = unobserve;
+      disconnect() {}
+    });
+    try {
+      let api!: Api;
+      const { getByTestId } = render(<List expose={(value) => { api = value; }} rows={[() => {}]} />);
+      const original = getByTestId("row-0");
+      const replacement = document.createElement("div");
+      getByTestId("list").append(replacement);
+      act(() => api.setActiveIndex(0));
+      act(() => api.registerItem(0, replacement));
+      expect(unobserve).toHaveBeenCalledWith(original);
+      expect(original.hasAttribute(ACTIVE_ATTR)).toBe(false);
+      expect(replacement.hasAttribute(ACTIVE_ATTR)).toBe(true);
+    } finally {
+      cleanup();
+      vi.unstubAllGlobals();
+    }
+  });
+
   it("a click between rows activates the highlighted row", () => {
     const { getByTestId, clicks, highlight } = setup();
     highlight(1);

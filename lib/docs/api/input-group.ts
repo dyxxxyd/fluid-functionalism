@@ -4,10 +4,12 @@ import type { ApiTable, PropDef } from "@/lib/docs/api/types";
 
 export const groupProps: PropDef[] = [
   { name: "children", type: "ReactNode", description: "InputField children." },
+  { name: "variant", type: '"bordered" | "borderless" | "filled" | "underlined"', default: '"bordered"', description: "Default field appearance: a visible border, invisible chrome at rest, a muted fill, or only a bottom border." },
 ];
 
 export const fieldProps: PropDef[] = [
   { name: "label", type: "string", description: "Label text above the input." },
+  { name: "variant", type: '"bordered" | "borderless" | "filled" | "underlined"', default: "InputGroup variant", description: "Overrides the group's appearance for this field." },
   { name: "labelHidden", type: "boolean", default: "false", description: "Keep the label for assistive tech but don't render it — for inline fields (a toolbar search) where the placeholder carries the meaning." },
   { name: "index", type: "number", description: "Position index within the group." },
   { name: "value", type: "string", description: "Controlled input value." },

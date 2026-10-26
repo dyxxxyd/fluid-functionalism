@@ -507,8 +507,13 @@ function TimeField({
   };
 
   const onKeyDown = (e: KeyboardEvent<HTMLInputElement>) => {
+    if (e.nativeEvent.isComposing || e.nativeEvent.keyCode === 229) return;
     if (e.key === "ArrowDown" || e.key === "ArrowUp") {
       e.preventDefault();
+      if (slots.length === 0) {
+        setActiveIndex(null);
+        return;
+      }
       if (!open) {
         openList();
         return;
@@ -539,7 +544,8 @@ function TimeField({
     }
   };
 
-  const activeId = activeIndex !== null && open ? `${listId}-${activeIndex}` : undefined;
+  const activeId = activeIndex !== null && slots[activeIndex] && open
+    ? `${listId}-${activeIndex}` : undefined;
   // The field sizes through invisible copies in the same grid cell: its own
   // text (or placeholder) and the list's longest times, so it fits any font
   // and keeps one width whichever time is picked.
