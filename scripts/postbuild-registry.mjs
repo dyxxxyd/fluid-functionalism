@@ -40,7 +40,7 @@ import { pathToFileURL } from "node:url";
 import { DUAL_FLAVOR_SLUGS } from "../lib/dual-flavor-slugs.mjs";
 
 const REGISTRY_DIR = new URL("../public/r", import.meta.url).pathname;
-export const BASE_URL = "https://www.fluidfunctionalism.com/r";
+export const BASE_URL = "https://raw.githubusercontent.com/dyxxxyd/fluid-functionalism/linkstart/public/r";
 
 // Single source of truth lives in lib/dual-flavor-slugs.mjs.
 const DUAL_FLAVOR_ITEMS = new Set(DUAL_FLAVOR_SLUGS);
@@ -248,9 +248,9 @@ export async function processRegistry(registryDir = REGISTRY_DIR) {
       // synthetic fixtures that aren't in registry.json).
       const flavourClone =
         !DUAL_FLAVOR_ITEMS.has(baseName) &&
-        (FLAVORED_SINGLE_SOURCE.has(baseName) ||
-          (Array.isArray(data.registryDependencies) &&
-            data.registryDependencies.some((dep) => DUAL_FLAVOR_ITEMS.has(dep))))
+          (FLAVORED_SINGLE_SOURCE.has(baseName) ||
+            (Array.isArray(data.registryDependencies) &&
+              data.registryDependencies.some((dep) => DUAL_FLAVOR_ITEMS.has(dep))))
           ? JSON.parse(JSON.stringify(data))
           : null;
 
