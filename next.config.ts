@@ -5,6 +5,8 @@ import type { NextConfig } from "next";
 const acceptsMarkdown = [{ type: "header" as const, key: "accept", value: "(.*)text/markdown(.*)" }];
 
 const nextConfig: NextConfig = {
+  // Local preview tools can use the loopback IP instead of localhost.
+  allowedDevOrigins: ["127.0.0.1"],
   // The root layout reads content/changelog/ on every route (the site's New
   // and Updated markers, lib/changelog/load.ts). File tracing only finds
   // those files for /changelog itself, so every route ships them explicitly.
