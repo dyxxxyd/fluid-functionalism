@@ -9,11 +9,11 @@
   ],
   "registryDependencies": [
     "utils",
-    "https://www.fluidfunctionalism.com/r/springs.json",
-    "https://www.fluidfunctionalism.com/r/omit.json",
-    "https://www.fluidfunctionalism.com/r/font-weight.json",
-    "https://www.fluidfunctionalism.com/r/size-context.json",
-    "https://www.fluidfunctionalism.com/r/tokens.json"
+    "https://raw.githubusercontent.com/dyxxxyd/fluid-functionalism/linkstart/public/r/springs.json",
+    "https://raw.githubusercontent.com/dyxxxyd/fluid-functionalism/linkstart/public/r/omit.json",
+    "https://raw.githubusercontent.com/dyxxxyd/fluid-functionalism/linkstart/public/r/font-weight.json",
+    "https://raw.githubusercontent.com/dyxxxyd/fluid-functionalism/linkstart/public/r/size-context.json",
+    "https://raw.githubusercontent.com/dyxxxyd/fluid-functionalism/linkstart/public/r/tokens.json"
   ],
   "files": [
     {

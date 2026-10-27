@@ -4,7 +4,7 @@
   "title": "useKeyboardNavGate",
   "description": "Gates a popup's keyboard focus ring on keyboard use: seeded at open from the focused element's :focus-visible state, then earned by navigation keys inside the popup.",
   "registryDependencies": [
-    "https://www.fluidfunctionalism.com/r/popup.json"
+    "https://raw.githubusercontent.com/dyxxxyd/fluid-functionalism/linkstart/public/r/popup.json"
   ],
   "files": [
     {

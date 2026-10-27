@@ -10,19 +10,19 @@
   ],
   "registryDependencies": [
     "utils",
-    "https://www.fluidfunctionalism.com/r/omit.json",
-    "https://www.fluidfunctionalism.com/r/springs.json",
-    "https://www.fluidfunctionalism.com/r/font-weight.json",
-    "https://www.fluidfunctionalism.com/r/shape-context.json",
-    "https://www.fluidfunctionalism.com/r/size-context.json",
-    "https://www.fluidfunctionalism.com/r/icon-context.json",
-    "https://www.fluidfunctionalism.com/r/popup.json",
-    "https://www.fluidfunctionalism.com/r/use-keyboard-nav-gate.json",
-    "https://www.fluidfunctionalism.com/r/use-fluid-hover.json",
-    "https://www.fluidfunctionalism.com/r/button.json",
-    "https://www.fluidfunctionalism.com/r/tooltip.json",
-    "https://www.fluidfunctionalism.com/r/tokens.json",
-    "https://www.fluidfunctionalism.com/r/type-scale.json"
+    "https://raw.githubusercontent.com/dyxxxyd/fluid-functionalism/linkstart/public/r/omit.json",
+    "https://raw.githubusercontent.com/dyxxxyd/fluid-functionalism/linkstart/public/r/springs.json",
+    "https://raw.githubusercontent.com/dyxxxyd/fluid-functionalism/linkstart/public/r/font-weight.json",
+    "https://raw.githubusercontent.com/dyxxxyd/fluid-functionalism/linkstart/public/r/shape-context.json",
+    "https://raw.githubusercontent.com/dyxxxyd/fluid-functionalism/linkstart/public/r/size-context.json",
+    "https://raw.githubusercontent.com/dyxxxyd/fluid-functionalism/linkstart/public/r/icon-context.json",
+    "https://raw.githubusercontent.com/dyxxxyd/fluid-functionalism/linkstart/public/r/popup.json",
+    "https://raw.githubusercontent.com/dyxxxyd/fluid-functionalism/linkstart/public/r/use-keyboard-nav-gate.json",
+    "https://raw.githubusercontent.com/dyxxxyd/fluid-functionalism/linkstart/public/r/use-fluid-hover.json",
+    "https://raw.githubusercontent.com/dyxxxyd/fluid-functionalism/linkstart/public/r/button.json",
+    "https://raw.githubusercontent.com/dyxxxyd/fluid-functionalism/linkstart/public/r/tooltip.json",
+    "https://raw.githubusercontent.com/dyxxxyd/fluid-functionalism/linkstart/public/r/tokens.json",
+    "https://raw.githubusercontent.com/dyxxxyd/fluid-functionalism/linkstart/public/r/type-scale.json"
   ],
   "files": [
     {

@@ -8,10 +8,10 @@
   ],
   "registryDependencies": [
     "utils",
-    "https://www.fluidfunctionalism.com/r/omit.json",
-    "https://www.fluidfunctionalism.com/r/shape-context.json",
-    "https://www.fluidfunctionalism.com/r/use-touch-primary.json",
-    "https://www.fluidfunctionalism.com/r/tokens.json"
+    "https://raw.githubusercontent.com/dyxxxyd/fluid-functionalism/linkstart/public/r/omit.json",
+    "https://raw.githubusercontent.com/dyxxxyd/fluid-functionalism/linkstart/public/r/shape-context.json",
+    "https://raw.githubusercontent.com/dyxxxyd/fluid-functionalism/linkstart/public/r/use-touch-primary.json",
+    "https://raw.githubusercontent.com/dyxxxyd/fluid-functionalism/linkstart/public/r/tokens.json"
   ],
   "files": [
     {

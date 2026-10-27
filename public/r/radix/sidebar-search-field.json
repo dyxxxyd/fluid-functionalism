@@ -4,10 +4,10 @@
   "title": "Sidebar Search Field",
   "description": "Header search on the menu rows' rhythm: leading icon on the rows' 16px axis, text on the 32px axis, and a hover-revealed keystroke chip at the trailing edge.",
   "registryDependencies": [
-    "https://www.fluidfunctionalism.com/r/size-context.json",
-    "https://www.fluidfunctionalism.com/r/icon-context.json",
-    "https://www.fluidfunctionalism.com/r/radix/sidebar.json",
-    "https://www.fluidfunctionalism.com/r/type-scale.json"
+    "https://raw.githubusercontent.com/dyxxxyd/fluid-functionalism/linkstart/public/r/size-context.json",
+    "https://raw.githubusercontent.com/dyxxxyd/fluid-functionalism/linkstart/public/r/icon-context.json",
+    "https://raw.githubusercontent.com/dyxxxyd/fluid-functionalism/linkstart/public/r/radix/sidebar.json",
+    "https://raw.githubusercontent.com/dyxxxyd/fluid-functionalism/linkstart/public/r/type-scale.json"
   ],
   "files": [
     {

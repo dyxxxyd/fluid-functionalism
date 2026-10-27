@@ -7,9 +7,9 @@
     "motion"
   ],
   "registryDependencies": [
-    "https://www.fluidfunctionalism.com/r/shape-context.json",
-    "https://www.fluidfunctionalism.com/r/size-context.json",
-    "https://www.fluidfunctionalism.com/r/icon-context.json"
+    "https://raw.githubusercontent.com/dyxxxyd/fluid-functionalism/linkstart/public/r/shape-context.json",
+    "https://raw.githubusercontent.com/dyxxxyd/fluid-functionalism/linkstart/public/r/size-context.json",
+    "https://raw.githubusercontent.com/dyxxxyd/fluid-functionalism/linkstart/public/r/icon-context.json"
   ],
   "files": [
     {

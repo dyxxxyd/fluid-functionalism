@@ -4,7 +4,7 @@
   "title": "Typography",
   "description": "The type scale and prose styles in one install. size-context brings the 6 roles, typeClass(), and the --fs-* / --lh-* tokens; the prose styles set rendered markdown and rich-text editors (Tiptap works as is) in those roles: wrap content in .typeset, and h1 is display in bold, h2 title, h3 to h6 subtitle, paragraphs body in the muted color, figcaption and code caption. Zero specificity inside @layer components, so any utility wins; .not-typeset opts a subtree out; spacing only above elements, so streamed content never reflows. Add .typeset-compact for the compact step.",
   "registryDependencies": [
-    "https://www.fluidfunctionalism.com/r/size-context.json"
+    "https://raw.githubusercontent.com/dyxxxyd/fluid-functionalism/linkstart/public/r/size-context.json"
   ],
   "css": {
     "@layer components": {

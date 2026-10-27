@@ -5,7 +5,7 @@
   "description": "The main region's topbar: h-12 with the trigger that hides while the rail peeks and fades back in at its settled spot after a pin.",
   "registryDependencies": [
     "utils",
-    "https://www.fluidfunctionalism.com/r/radix/sidebar.json"
+    "https://raw.githubusercontent.com/dyxxxyd/fluid-functionalism/linkstart/public/r/radix/sidebar.json"
   ],
   "files": [
     {

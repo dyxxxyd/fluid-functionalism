@@ -4,7 +4,7 @@
   "title": "Size Context",
   "description": "React context provider for the two-step size ladder (36px default, 28px compact). Controls control heights, text, icon, and padding scale across all Fluid Functionalism components, and ships the six-role type scale (size + leading per role) with its class map.",
   "registryDependencies": [
-    "https://www.fluidfunctionalism.com/r/type-scale.json"
+    "https://raw.githubusercontent.com/dyxxxyd/fluid-functionalism/linkstart/public/r/type-scale.json"
   ],
   "files": [
     {

@@ -4,7 +4,7 @@
   "title": "Reveal",
   "description": "Page reveals in 1 class, on the existing spring tiers: slow for landing, moderate for product. .reveal-landing for a page read once: the hero rises and scales in on load, later sections do on scroll, and every section leaves the same way at the top; .reveal-scroll makes a deeper element, like a grid card, a section of its own. .reveal-product for the app: blocks fade in on load, nothing on scroll. Each has a -subtle step. For slow data, .reveal-swap crossfades shadcn's Skeleton into the real block and .reveal-items brings rows in one by one. Pure CSS; reduced motion keeps the fades and drops the rest.",
   "registryDependencies": [
-    "https://www.fluidfunctionalism.com/r/skeleton.json"
+    "https://raw.githubusercontent.com/dyxxxyd/fluid-functionalism/linkstart/public/r/skeleton.json"
   ],
   "css": {
     "@keyframes reveal-preset": {

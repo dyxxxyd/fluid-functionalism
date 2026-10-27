@@ -9,13 +9,13 @@
   ],
   "registryDependencies": [
     "utils",
-    "https://www.fluidfunctionalism.com/r/font-weight.json",
-    "https://www.fluidfunctionalism.com/r/shape-context.json",
-    "https://www.fluidfunctionalism.com/r/icon-context.json",
-    "https://www.fluidfunctionalism.com/r/use-fluid-hover.json",
-    "https://www.fluidfunctionalism.com/r/size-context.json",
-    "https://www.fluidfunctionalism.com/r/tokens.json",
-    "https://www.fluidfunctionalism.com/r/type-scale.json"
+    "https://raw.githubusercontent.com/dyxxxyd/fluid-functionalism/linkstart/public/r/font-weight.json",
+    "https://raw.githubusercontent.com/dyxxxyd/fluid-functionalism/linkstart/public/r/shape-context.json",
+    "https://raw.githubusercontent.com/dyxxxyd/fluid-functionalism/linkstart/public/r/icon-context.json",
+    "https://raw.githubusercontent.com/dyxxxyd/fluid-functionalism/linkstart/public/r/use-fluid-hover.json",
+    "https://raw.githubusercontent.com/dyxxxyd/fluid-functionalism/linkstart/public/r/size-context.json",
+    "https://raw.githubusercontent.com/dyxxxyd/fluid-functionalism/linkstart/public/r/tokens.json",
+    "https://raw.githubusercontent.com/dyxxxyd/fluid-functionalism/linkstart/public/r/type-scale.json"
   ],
   "files": [
     {

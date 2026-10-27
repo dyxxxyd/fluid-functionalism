@@ -8,8 +8,8 @@
   ],
   "registryDependencies": [
     "utils",
-    "https://www.fluidfunctionalism.com/r/springs.json",
-    "https://www.fluidfunctionalism.com/r/tokens.json"
+    "https://raw.githubusercontent.com/dyxxxyd/fluid-functionalism/linkstart/public/r/springs.json",
+    "https://raw.githubusercontent.com/dyxxxyd/fluid-functionalism/linkstart/public/r/tokens.json"
   ],
   "files": [
     {

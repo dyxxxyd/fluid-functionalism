@@ -5,16 +5,16 @@
   "description": "A complete app shell: workspace header with the peek cross-fade, search on the menu rows' rhythm with a hover-revealed shortcut chip, collapsible sections with label actions and badges, a user footer, and an inset topbar whose trigger fades back in at its settled position after a pin.",
   "registryDependencies": [
     "utils",
-    "https://www.fluidfunctionalism.com/r/icon-context.json",
-    "https://www.fluidfunctionalism.com/r/size-context.json",
-    "https://www.fluidfunctionalism.com/r/sidebar.json",
-    "https://www.fluidfunctionalism.com/r/tooltip.json",
-    "https://www.fluidfunctionalism.com/r/dropdown.json",
-    "https://www.fluidfunctionalism.com/r/sidebar-workspace-header.json",
-    "https://www.fluidfunctionalism.com/r/sidebar-user-footer.json",
-    "https://www.fluidfunctionalism.com/r/sidebar-search-field.json",
-    "https://www.fluidfunctionalism.com/r/sidebar-inset-topbar.json",
-    "https://www.fluidfunctionalism.com/r/type-scale.json"
+    "https://raw.githubusercontent.com/dyxxxyd/fluid-functionalism/linkstart/public/r/icon-context.json",
+    "https://raw.githubusercontent.com/dyxxxyd/fluid-functionalism/linkstart/public/r/size-context.json",
+    "https://raw.githubusercontent.com/dyxxxyd/fluid-functionalism/linkstart/public/r/sidebar.json",
+    "https://raw.githubusercontent.com/dyxxxyd/fluid-functionalism/linkstart/public/r/tooltip.json",
+    "https://raw.githubusercontent.com/dyxxxyd/fluid-functionalism/linkstart/public/r/dropdown.json",
+    "https://raw.githubusercontent.com/dyxxxyd/fluid-functionalism/linkstart/public/r/sidebar-workspace-header.json",
+    "https://raw.githubusercontent.com/dyxxxyd/fluid-functionalism/linkstart/public/r/sidebar-user-footer.json",
+    "https://raw.githubusercontent.com/dyxxxyd/fluid-functionalism/linkstart/public/r/sidebar-search-field.json",
+    "https://raw.githubusercontent.com/dyxxxyd/fluid-functionalism/linkstart/public/r/sidebar-inset-topbar.json",
+    "https://raw.githubusercontent.com/dyxxxyd/fluid-functionalism/linkstart/public/r/type-scale.json"
   ],
   "files": [
     {

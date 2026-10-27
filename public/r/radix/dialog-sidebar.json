@@ -5,16 +5,16 @@
   "description": "A settings dialog: the xl Dialog as a canvas, a non-collapsing Sidebar of sections down its left edge, and a scrolling panel of controls — switches, selects, and an input group. Below the sm breakpoint a Select takes over navigation.",
   "registryDependencies": [
     "utils",
-    "https://www.fluidfunctionalism.com/r/font-weight.json",
-    "https://www.fluidfunctionalism.com/r/icon-context.json",
-    "https://www.fluidfunctionalism.com/r/radix/dialog.json",
-    "https://www.fluidfunctionalism.com/r/radix/sidebar.json",
-    "https://www.fluidfunctionalism.com/r/radix/scroll-area.json",
-    "https://www.fluidfunctionalism.com/r/radix/button.json",
-    "https://www.fluidfunctionalism.com/r/radix/switch.json",
-    "https://www.fluidfunctionalism.com/r/radix/select.json",
-    "https://www.fluidfunctionalism.com/r/input-group.json",
-    "https://www.fluidfunctionalism.com/r/type-scale.json"
+    "https://raw.githubusercontent.com/dyxxxyd/fluid-functionalism/linkstart/public/r/font-weight.json",
+    "https://raw.githubusercontent.com/dyxxxyd/fluid-functionalism/linkstart/public/r/icon-context.json",
+    "https://raw.githubusercontent.com/dyxxxyd/fluid-functionalism/linkstart/public/r/radix/dialog.json",
+    "https://raw.githubusercontent.com/dyxxxyd/fluid-functionalism/linkstart/public/r/radix/sidebar.json",
+    "https://raw.githubusercontent.com/dyxxxyd/fluid-functionalism/linkstart/public/r/radix/scroll-area.json",
+    "https://raw.githubusercontent.com/dyxxxyd/fluid-functionalism/linkstart/public/r/radix/button.json",
+    "https://raw.githubusercontent.com/dyxxxyd/fluid-functionalism/linkstart/public/r/radix/switch.json",
+    "https://raw.githubusercontent.com/dyxxxyd/fluid-functionalism/linkstart/public/r/radix/select.json",
+    "https://raw.githubusercontent.com/dyxxxyd/fluid-functionalism/linkstart/public/r/input-group.json",
+    "https://raw.githubusercontent.com/dyxxxyd/fluid-functionalism/linkstart/public/r/type-scale.json"
   ],
   "files": [
     {

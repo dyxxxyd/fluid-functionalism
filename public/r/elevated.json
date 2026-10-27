@@ -4,10 +4,10 @@
   "title": "Elevated",
   "description": "Elevation primitive. Wraps the read-substrate / compute-level / apply-classes / re-provide-context pattern into one component. Pulls in the surface theme tokens, substrate context, and class lookup so a single install drops in the whole elevation system.",
   "registryDependencies": [
-    "https://www.fluidfunctionalism.com/r/surfaces.json",
+    "https://raw.githubusercontent.com/dyxxxyd/fluid-functionalism/linkstart/public/r/surfaces.json",
     "utils",
-    "https://www.fluidfunctionalism.com/r/surface-context.json",
-    "https://www.fluidfunctionalism.com/r/surface-classes.json"
+    "https://raw.githubusercontent.com/dyxxxyd/fluid-functionalism/linkstart/public/r/surface-context.json",
+    "https://raw.githubusercontent.com/dyxxxyd/fluid-functionalism/linkstart/public/r/surface-classes.json"
   ],
   "files": [
     {

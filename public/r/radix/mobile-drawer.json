@@ -8,9 +8,9 @@
     "motion"
   ],
   "registryDependencies": [
-    "https://www.fluidfunctionalism.com/r/springs.json",
-    "https://www.fluidfunctionalism.com/r/surface-context.json",
-    "https://www.fluidfunctionalism.com/r/surface-classes.json"
+    "https://raw.githubusercontent.com/dyxxxyd/fluid-functionalism/linkstart/public/r/springs.json",
+    "https://raw.githubusercontent.com/dyxxxyd/fluid-functionalism/linkstart/public/r/surface-context.json",
+    "https://raw.githubusercontent.com/dyxxxyd/fluid-functionalism/linkstart/public/r/surface-classes.json"
   ],
   "files": [
     {

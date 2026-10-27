@@ -5,7 +5,7 @@
   "description": "Loading placeholders based on shadcn/ui Skeleton, with Fluid shapes, forwarded refs, and reduced-motion support. Set dimensions with utility classes for avatars, text, cards, forms, and tables.",
   "registryDependencies": [
     "utils",
-    "https://www.fluidfunctionalism.com/r/shape-context.json"
+    "https://raw.githubusercontent.com/dyxxxyd/fluid-functionalism/linkstart/public/r/shape-context.json"
   ],
   "files": [
     {

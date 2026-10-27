@@ -8,7 +8,7 @@
     "lucide-react"
   ],
   "registryDependencies": [
-    "https://www.fluidfunctionalism.com/r/icon-context.json"
+    "https://raw.githubusercontent.com/dyxxxyd/fluid-functionalism/linkstart/public/r/icon-context.json"
   ],
   "files": [
     {
