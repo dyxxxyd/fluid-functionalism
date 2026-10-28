@@ -295,7 +295,7 @@ describe("latestMarks", () => {
     return dir;
   };
 
-  it("marks the latest release's docs pages: New, then Updated and Breaking", () => {
+  it("marks the latest release's Updated and Breaking docs pages, never its New ones", () => {
     const dir = dirWith({
       "2026-08.md": release("2026-08", "## New\n\n- [Badge](/docs/badge): Old news. (#1)\n"),
       "2026-09.md": release(
@@ -315,7 +315,7 @@ describe("latestMarks", () => {
       ),
     });
     try {
-      expect(latestMarks(source(dir), [])).toEqual({ new: ["combobox"], updated: ["select"], ahead: [] });
+      expect(latestMarks(source(dir), [])).toEqual({ updated: ["select"], ahead: [] });
     } finally {
       rmSync(dir, { recursive: true, force: true });
     }
@@ -329,9 +329,9 @@ describe("latestMarks", () => {
     const after = dirWith({ "2026-09.md": september, "2026-10.md": october });
     try {
       // Ahead of its release it is New, not Updated; once October lands, the
-      // release marks it and the ahead list lapses.
-      expect(latestMarks(source(before), ahead)).toEqual({ new: [], updated: [], ahead: ["banner"] });
-      expect(latestMarks(source(after), ahead)).toEqual({ new: ["banner"], updated: [], ahead: [] });
+      // ahead list lapses and the New mark with it.
+      expect(latestMarks(source(before), ahead)).toEqual({ updated: [], ahead: ["banner"] });
+      expect(latestMarks(source(after), ahead)).toEqual({ updated: [], ahead: [] });
     } finally {
       rmSync(before, { recursive: true, force: true });
       rmSync(after, { recursive: true, force: true });
@@ -349,7 +349,7 @@ describe("latestMarks", () => {
     const dir = dirWith({ "2026-09.md": "no frontmatter" });
     const error = vi.spyOn(console, "error").mockImplementation(() => {});
     try {
-      expect(latestMarks(source(dir))).toEqual({ new: [], updated: [], ahead: [] });
+      expect(latestMarks(source(dir))).toEqual({ updated: [], ahead: [] });
       expect(error).toHaveBeenCalledOnce();
     } finally {
       error.mockRestore();

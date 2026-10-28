@@ -2,7 +2,7 @@ import { readFileSync } from "node:fs";
 import { join } from "node:path";
 import { describe, expect, it } from "vite-plus/test";
 import { createPresetTypechecker, root } from "./helpers/preset-typecheck.mjs";
-import { neutralizeComponentImports } from "../scripts/postbuild-registry.mjs";
+import { BASE_URL, neutralizeComponentImports } from "../scripts/postbuild-registry.mjs";
 
 const payload = (name) => JSON.parse(readFileSync(join(root, `public/r/${name}.json`), "utf8"));
 
@@ -18,7 +18,7 @@ describe("loading feedback installation", () => {
 
   it("resolves Reveal's Skeleton to the Fluid registry, preserving its installed path", () => {
     expect(payload("reveal").registryDependencies).toContain(
-      "https://www.fluidfunctionalism.com/r/skeleton.json",
+      `${BASE_URL}/skeleton.json`,
     );
     expect(payload("skeleton").files[0].content).toBe(
       readFileSync(join(root, "registry/default/skeleton.tsx"), "utf8"),
@@ -30,7 +30,7 @@ describe("loading feedback installation", () => {
     (flavor) => {
       const notification = payload(`${flavor}/toast`);
       expect(notification.registryDependencies).toContain(
-        `https://www.fluidfunctionalism.com/r/${flavor}/button.json`,
+        `${BASE_URL}/${flavor}/button.json`,
       );
       expect(notification.files[0].content).toBe(
         neutralizeComponentImports(readFileSync(join(root, "registry/default/toast.tsx"), "utf8")),

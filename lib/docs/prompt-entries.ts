@@ -26,10 +26,10 @@ export interface PromptEntry {
 export const PROMPT_ENTRIES: Record<string, PromptEntry> = {
   "fluid-hover": {
     craft: [
-      "The whole picking rule is one pure function: an item the pointer is inside always wins; otherwise the item whose center is nearest does, so a cursor in a gap, in the container padding, or past the last row still lands. Ties keep the first item. Axes: `y` for lists, `x` for strips, `xy` for grids (Euclidean distance to centers).",
+      "By default only the item the pointer is inside lights: empty space (a gap, the container padding, past the last row) puts the highlight out, and the next item lit fades it in fresh instead of sliding over. `nearest: true` swaps in one pure function: an item the pointer is inside always wins; otherwise the item whose center is nearest does, so a cursor in a gap still lands. Ties keep the first item. Axes, for `nearest`: `y` for lists, `x` for strips, `xy` for grids (Euclidean distance to centers).",
       "One highlight per list: a single absolutely positioned `bg-hover` element pinned to the container's padding corner, travelling on a transform (framer `x`/`y`) on `spring.fast` so per-frame work stays on the compositor; width/height are layout values but only change when the target rect's size does \u2014 in most lists never.",
-      "The pointer session counter increments on `onMouseEnter` and re-keys the highlight, so a fresh entry fades in at the nearest row instead of sliding over from wherever it was last; `from` sets where that fresh entry fades in from (a dropdown passes its checked row, a nav menu its active route), and `fadeIn={false}` starts it opaque when `from` sits under a filled item (the calendar's range start), so the highlight slides out of it.",
-      "Gap click: a click that lands between items (gap, padding, past the last row) is routed as a real DOM `.click()` to the highlighted item's activator \u2014 \"what is lit is what a click hits\". Clicks inside an item, on controls between rows (a menu's search field), and on disabled items are left alone; `gapClick: false` turns it off, `{maxDistance}` caps it (the card grid uses 16px).",
+      "The pointer session counter increments on `onMouseEnter` and re-keys the highlight, so a fresh entry fades in at the row it lands on instead of sliding over from wherever it was last; `from` sets where that fresh entry fades in from (a dropdown passes its checked row, a nav menu its active route), and `fadeIn={false}` starts it opaque when `from` sits under a filled item (the calendar's range start), so the highlight slides out of it.",
+      "With `nearest: true`, a click that lands between items (gap, padding, past the last row) is routed as a real DOM `.click()` to the highlighted item's activator \u2014 \"what is lit is what a click hits\". Clicks inside an item, on controls between rows (a menu's search field), and on disabled items are left alone; `gapClick: false` turns it off and `{maxDistance}` caps it. Without `nearest`, gap clicks stay inert.",
       "Gate overlays on `isMeasured`: an overlay mounted against a rect a later pass corrects animates from the wrong place to the right one, which reads as the highlight sliding in from another row. Measurement coalesces every trigger into one rAF pass, retries up to 3 frames while a popup has no layout box, and never publishes zeroed rects \u2014 the last complete measurement stands.",
       "Reduced motion is handled inside the component itself via `useReducedMotion()`: travel snaps, the 0.08s opacity fade stays \u2014 so an installed copy behaves correctly without the consumer wrapping their app in `MotionConfig`.",
       "Only click targets register: a card without `href` or `onClick` does not join the highlight, because lighting it would promise a click with nowhere to land. One list per group of alternatives \u2014 children ride in the parent's list, a divider between different kinds of rows means a new container and a new hook.",
@@ -250,6 +250,7 @@ const { type } = useSize(); // type.caption, type.body, ...
       "Conventional offsets: `2` for dropdown / popover / select menu, `4` for dialog / modal.",
       "`shadowLevel` decouples shadow from background: a dropdown always reads `shadow-surface-3` whether it opens on the page or inside a dialog \u2014 the background tracks the substrate, but the shadow weight stays constant, so \"a popover still reads as a popover three layers down\".",
       "Hover and selected states are surface-relative overlays, not fixed colors, so they work at any elevation: `--overlay` flips tint direction per theme (black on light, white on dark); dark hover is +6% white and selected +10% (light: 4% / 7%) \u2014 the demo labels these exactly.",
+      "One accent, `--fluid-accent` (#6B97FF by default), carries the brand: every focus ring (through `--focus-ring: var(--fluid-accent)`), the switch track, drag-over and swatch rings, and the copy highlight. Hover and selected stay neutral overlays. Components read `var(--fluid-accent, #6B97FF)` and derive shades in place with `color-mix(in oklab, …)`, never a raw hex. Declare the accent on `:root` only: a `.light` / `.dark` subtree that re-declares it resets a forced-theme preview to the default.",
       "Closely nested rounded surfaces use concentric corners: inner radius = max(0, outer radius - inset - border), where inset is the interior spacing (usually parent padding) and border is the parent's border width. The fixed shape pair (`container` 12/24px \u2192 `bg` 8/20px) is for a 4px total inset; any other padding uses `nestedRadius()` instead of reusing those classes. Past 24px, with asymmetric gaps, or when the inner element does not reach the corner, the layers are independent and may be tuned by eye.",
     ],
     usage: `import { Elevated } from "@/lib/elevated";
@@ -376,7 +377,7 @@ const questions: AskUserQuestion[] = [
     props: [
       "variant: \"solid\" | \"dot\" (default \"solid\"). Solid uses a tinted background; dot shows a colored indicator.",
       "size: \"default\" | \"compact\" (default from SizeProvider). Step on the size ladder; legacy sm/md/lg values resolve as aliases.",
-      "color: BadgeColor (default \"gray\"). Tailwind palette name: gray, red, orange, amber, yellow, lime, green, emerald, teal, cyan, blue, indigo, violet, purple, fuchsia, pink, rose.",
+      "color: BadgeColor (default \"gray\"). accent (the app's --fluid-accent), or a Tailwind palette name: gray, red, orange, amber, yellow, lime, green, emerald, teal, cyan, blue, indigo, violet, purple, fuchsia, pink, rose.",
     ],
   },
   banner: {
@@ -523,7 +524,7 @@ export function Stay() {
     craft: [
       "Cards are transparent and borderless by default, unlike stock shadcn: they inherit the parent substrate and lean on hairline dividers plus the fluid hover highlight instead of a drawn frame.",
       "Only clickable cards (href/onClick) register with the group's fluid hover \u2014 \"a highlight on an informational card would promise a click that has nowhere to land\".",
-      "With columns > 1 the fluid hover resolves the nearest card in two dimensions (axis \"xy\"); gap clicks route to the highlighted card only within 16px, because a card grid has generous whitespace.",
+      "Only the enabled card under the pointer lights, in columns and grids alike. Gaps between cards light nothing and leave clicks inert.",
       "Hairline dividers drop next to the active OR selected card so highlight and selection fill read clean (the Table row-border trick); where a bottom and right hairline meet, the vertical one stops 1px short so the horizontal line owns the crossing pixel \u2014 two 60%-alpha lines stacked would read brighter than the grid.",
       "CardTitle uses the ghost-span pattern (invisible semibold copy reserves width) and animates 'wght' 400 \u2192 550 only for the persistent `selected` state \u2014 fluid hover previews via the highlight fill, not by bolding the label. A consumer's `truncate` still ellipsizes via overflow-hidden cell spans clamped by grid-cols-[minmax(0,1fr)].",
       "Clickable cards use a stretched z-20 overlay link/button, with footer actions and dismiss at z-30 above it \u2014 the accessible alternative to nesting interactive elements; a disabled card drops the overlay entirely so keyboard can't reach it (pointer-events-none only blocks the mouse).",
@@ -688,7 +689,7 @@ const [color, setColor] = useState("#6B97FF");
       "onValueChange: (value, parsed) => void. Fired on every change with the formatted string and a parsed color object.",
       'format: "hex" | "rgb" | "hsl" | "oklch". Controlled format selection.',
       'defaultFormat: "hex" | "rgb" | "hsl" | "oklch" (default "hex"). Initial format when uncontrolled.',
-      "swatches: string[]. Optional preset swatches; the strip is hidden when omitted.",
+      "swatches: (string | { color, label? })[]. Optional preset swatches; a label names the color in a tooltip and to screen readers. The strip is hidden when omitted.",
       "hideEyedropper: boolean (default false). Force-hide the eyedropper button.",
       "ColorPickerPopover triggerLabel: string. Optional label rendered next to the color tile.",
       "ColorPickerPopover triggerShowValue: boolean (default true). Show the hex value next to the tile.",
@@ -923,7 +924,7 @@ const [view, setView] = useState(0);
       "Status resets to idle after exactly 2000ms; \"copied\" and \"error\" deliberately occupy the same animation slot on the button.",
       "Tooltip choreography (icon variant): tooltip visibility is captured on pointerdown \u2014 before Radix closes it on press \u2014 and after copying the tooltip is force-opened as \"Copied\" only if it was already showing; otherwise it's suppressed. Leaving the row suppresses it, re-entering re-arms normal 500ms-delay behavior.",
       "Button variant renders an invisible \"Copied\" layer in the same grid cell behind Copy/Copied/Failed, so the label swap never shifts the row's width.",
-      "The entire row is one `<button>`; hovering it highlights the mono value with a `<mark>` tinted #6B97FF/20 and thickens icon strokes 1.5\u21922 over 80ms, making the whole value read as the click target.",
+      "The entire row is one `<button>`; hovering it highlights the mono value with a `<mark>` tinted with the accent at 20% (`color-mix(in oklab, var(--fluid-accent, #6B97FF) 20%, transparent)`) and thickens icon strokes 1.5\u21922 over 80ms, making the whole value read as the click target.",
       "Accessible name reflects state (\"Copied\" / \"Copy failed\" / \"Copy\"), and when a field label exists `aria-labelledby` chains button-then-label so screen readers hear \"Copy <label>\".",
     ],
     usage: `import { InputCopy } from "@/components/ui/input-copy";
@@ -1029,7 +1030,7 @@ function Quantity() {
     craft: [
       "Auto-resize clamps the textarea between minRows and maxRows \u00d7 the parsed line-height (cached per element to avoid getComputedStyle on every keystroke); overflow-y only turns on past maxRows. A width-gated ResizeObserver re-runs the measure because a near-zero-width mount wraps the placeholder into many lines and pins the height at maxRows.",
       "Enter sends, Shift+Enter newlines, and IME composition keydowns are ignored (`e.nativeEvent.isComposing`) so committing Japanese/Chinese input never fires a send.",
-      "The composer's edge is the box-shadow's 1px hairline ring recolored in place \u2014 drag-over #6B97FF > focus (20% foreground) > hover (border) \u2014 so state changes bump contrast \"without ever appearing to thicken\" the stroke; the 0 1px 1px drop layer is kept so the lift never flickers. Applied inline because Tailwind shadow utilities mangle multi-layer arbitrary values.",
+      "The composer's edge is the box-shadow's 1px hairline ring recolored in place \u2014 drag-over accent (`var(--fluid-accent, #6B97FF)`) > focus (20% foreground) > hover (border) \u2014 so state changes bump contrast \"without ever appearing to thicken\" the stroke; the 0 1px 1px drop layer is kept so the lift never flickers. Applied inline because Tailwind shadow utilities mangle multi-layer arbitrary values.",
       "File drop only reacts to drags whose dataTransfer types include \"Files\" (text/HTML drags don't trigger), sets dropEffect \"copy\", swaps the placeholder to \"Drop files here to add to chat\", and ignores dragLeave into children; drops are filtered by accept and deduped by a name+size+lastModified fingerprint.",
       "Attachment thumbnails use a 1px inset image outline (pure black at 10% in light mode, pure white at 10% in dark) instead of an outside border, so light image/PDF edges stay legible without shrinking the preview or changing its box. Their radius is the composer's outer radius minus its real 8px padding, not the popup-specific 4px shape pair.",
       "The three collapsible regions (attachments, queue, suggestions) spring to a self-measured PIXEL height, never `height:\"auto\"`, because framer resolves auto from the element's visual (transformed) size \u2014 under a scaled ancestor the region would balloon to scale\u00d7 and snap back. The suggestions region exits height-only (no opacity fade) because a simultaneous fade \"read as a height glitch\".",
@@ -1248,7 +1249,7 @@ const [value, setValue] = useState(25);
       "Hover extends the thumb into a pill (+2px width); press extends it further (+4px) and squashes it (\u22124px height, recentred). Compact keeps the same +2px hover pill and softens only the press, to +3/\u22123, \"so the compact switch keeps the same feel\".",
       "When checked, the extra press/hover width grows leftward (thumbX subtracts extraWidth) so the thumb's outer edge stays pinned to the track end.",
       "All thumb motion rides spring.moderate (0.16s, critically damped); initial mount sets position with duration 0 so a pre-checked switch never animates on load.",
-      "Track colors: checked #6B97FF darkening to #5C89F2 on hover; unchecked uses `--accent`, hovered mixing in 10% overlay via color-mix in oklab. Geometry per ladder step: 34\u00d720 track / 16px thumb default, 28\u00d716 / 12px compact, constant 2px inset.",
+      "Track colors: checked is the accent (`var(--fluid-accent, #6B97FF)`), mixing in 8% black on hover; unchecked uses `--accent`, hovered mixing in 10% overlay via color-mix in oklab. Geometry per ladder step: 34\u00d720 track / 16px thumb default, 28\u00d716 / 12px compact, constant 2px inset.",
       "Hover state is only set for mouse pointers (pointerType check), so touch never leaves the switch stuck in its pill-extended hover shape.",
       "The whole row is the pointer target (touch-none stops scroll fighting the drag); the label shifts muted-foreground \u2192 foreground over 80ms when on, with text-box trim recentering letterforms against the taller track without changing layout.",
     ],

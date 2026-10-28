@@ -15,12 +15,16 @@ import { SizeShortcut } from "@/lib/docs/size-shortcut";
 import { SizeAttribute } from "@/lib/docs/size-attribute";
 import { SettingsToast } from "@/lib/docs/settings-toast";
 import { SettingsPersistence } from "@/lib/docs/settings-persistence";
-import { readHeadingFont, readSettings } from "@/lib/docs/site-settings";
+import { readCustomAccent, readHeadingFont, readSettings } from "@/lib/docs/site-settings";
+import { AccentProvider, AccentShortcut } from "@/lib/docs/accent";
+import { accentCss } from "@/lib/accent";
 import { HeadingFontProvider, HeadingFontShortcut } from "@/lib/docs/heading-font";
 import googleFonts from "@/lib/docs/google-fonts.json";
 import { customHeadingVars, googleFontWeights, type GoogleFont } from "@/lib/docs/google-fonts";
 import { BaseProvider } from "@/lib/base-context";
 import { SidebarLayout } from "@/app/components/sidebar-layout";
+import { GitHubStarsProvider } from "@/app/components/right-panel";
+import { getGitHubStars } from "@/lib/github-stars";
 import { latestMarks } from "@/lib/changelog/load";
 
 // The optional serif for headings (right panel > Heading font, or F). Variable on both
@@ -71,12 +75,17 @@ export default async function RootLayout({
   // Server-side read of the sidebar's persisted open state so the rail
   // renders in its last position with no post-hydration flicker. A missing
   // cookie means open — the component's own default.
-  const cookieStore = await cookies();
+  // The star count rides along so the panel's GitHub button paints with
+  // its number instead of widening when a client fetch lands.
+  const [cookieStore, stars] = await Promise.all([cookies(), getGitHubStars()]);
   const sidebarDefaultOpen = cookieStore.get("sidebar_state")?.value !== "false";
   // The "Make them yours" settings, saved one cookie each by
   // SettingsPersistence: rendering them here means a reload paints the
   // visitor's theme, radius, size, icons and primitive from the first frame.
   const settings = readSettings((name) => cookieStore.get(name)?.value);
+  // A custom accent overrides the preset; either way the color goes inline
+  // on <html>, so focus rings paint in it from the first frame.
+  const customAccent = readCustomAccent((name) => cookieStore.get(name)?.value);
   // The heading font, and the Google Fonts family behind "custom": unknown
   // to the catalog, it falls back to Inter.
   const saved = readHeadingFont((name) => cookieStore.get(name)?.value);
@@ -98,7 +107,12 @@ export default async function RootLayout({
       className={settings.theme === "system" ? sourceSerif.variable : `${settings.theme} ${sourceSerif.variable}`}
       data-size={settings.size}
       data-font={headingFont}
-      style={customFont ? (customHeadingVars(customFont, customWeight) as React.CSSProperties) : undefined}
+      style={
+        {
+          "--fluid-accent": accentCss(settings.accent, customAccent),
+          ...(customFont ? customHeadingVars(customFont, customWeight) : {}),
+        } as React.CSSProperties
+      }
     >
       {/* Font smoothing (antialiased/grayscale) is set globally in globals.css */}
       <body>
@@ -115,22 +129,27 @@ export default async function RootLayout({
               <ThemeProvider defaultTheme={settings.theme}>
                 <IconPlaygroundProvider defaultLibrary={settings.icons}>
                   <BaseProvider defaultBase={settings.base}>
-                    <HeadingFontProvider defaultFont={headingFont} defaultCustom={customFont} defaultWeight={customWeight}>
-                      <HeadingFontShortcut />
-                      <SettingsPersistence />
-                      {/* The sidebar's New dots: what the latest changelog
-                          release lists as New, read from content/changelog. */}
-                      <SidebarLayout defaultOpen={sidebarDefaultOpen} marks={latestMarks()}>
-                        {children}
-                      </SidebarLayout>
-                      <SettingsToast />
-                      {process.env.VERCEL === "1" && (
-                        <>
-                          <Analytics />
-                          <SpeedInsights />
-                        </>
-                      )}
-                    </HeadingFontProvider>
+                    <AccentProvider defaultPreset={settings.accent} defaultCustom={customAccent}>
+                      <AccentShortcut />
+                      <HeadingFontProvider defaultFont={headingFont} defaultCustom={customFont} defaultWeight={customWeight}>
+                        <HeadingFontShortcut />
+                        <SettingsPersistence />
+                        {/* The sidebar's New dots: what the latest changelog
+                            release lists as New, read from content/changelog. */}
+                        <GitHubStarsProvider stars={stars}>
+                          <SidebarLayout defaultOpen={sidebarDefaultOpen} marks={latestMarks()}>
+                            {children}
+                          </SidebarLayout>
+                        </GitHubStarsProvider>
+                        <SettingsToast />
+                        {process.env.VERCEL === "1" && (
+                          <>
+                            <Analytics />
+                            <SpeedInsights />
+                          </>
+                        )}
+                      </HeadingFontProvider>
+                    </AccentProvider>
                   </BaseProvider>
                 </IconPlaygroundProvider>
               </ThemeProvider>

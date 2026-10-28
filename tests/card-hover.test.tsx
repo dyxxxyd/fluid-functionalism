@@ -11,7 +11,7 @@ window.matchMedia ??= ((media: string) => ({
 })) as typeof window.matchMedia;
 
 describe("CardGroup disabled cards", () => {
-  it("skips disabled cards when resolving the hover and gap-click target", async () => {
+  it("highlights only enabled cards under the pointer and leaves gap clicks inert", async () => {
     vi.spyOn(HTMLElement.prototype, "offsetHeight", "get").mockReturnValue(60);
     vi.spyOn(HTMLElement.prototype, "offsetWidth", "get").mockReturnValue(200);
     vi.spyOn(HTMLElement.prototype, "offsetTop", "get").mockImplementation(function (this: HTMLElement) {
@@ -19,7 +19,7 @@ describe("CardGroup disabled cards", () => {
     });
     const onSelect = vi.fn();
     const onDismiss = vi.fn();
-    const { container, rerender } = render(
+    const { container, getByRole, rerender } = render(
       <CardGroup separated>
         <Card disabled onClick={() => {}} dismissible onDismiss={onDismiss} label="Unavailable">Unavailable</Card>
         <Card onClick={onSelect} label="Available">Available</Card>
@@ -38,16 +38,24 @@ describe("CardGroup disabled cards", () => {
       });
     }
     await act(() => new Promise<void>((resolve) => requestAnimationFrame(() => resolve())));
-    fireEvent.mouseMove(group, { clientX: 10, clientY: 10 });
+    const [disabledCard, enabledCard] = container.querySelectorAll<HTMLElement>('[data-slot="card"]');
+    fireEvent.mouseMove(disabledCard, { clientX: 10, clientY: 10 });
+    await act(() => new Promise<void>((resolve) => requestAnimationFrame(() => resolve())));
+    expect(group.hasAttribute("data-fluid-hover-active-index")).toBe(false);
+    fireEvent.mouseMove(enabledCard, { clientX: 10, clientY: 100 });
     await waitFor(() => expect(group.getAttribute("data-fluid-hover-active-index")).toBe("1"));
     fireEvent.click(group, { clientX: 10, clientY: 62 });
+    expect(onSelect).not.toHaveBeenCalled();
+    fireEvent.mouseMove(group, { clientX: 10, clientY: 62 });
+    await waitFor(() => expect(group.hasAttribute("data-fluid-hover-active-index")).toBe(false));
+    fireEvent.click(getByRole("button", { name: "Available" }));
     expect(onSelect).toHaveBeenCalledOnce();
     expect(onDismiss).not.toHaveBeenCalled();
     rerender(<CardGroup separated>
       <Card disabled onClick={() => {}} label="Unavailable">Unavailable</Card>
       <Card disabled onClick={onSelect} label="Available">Available</Card>
     </CardGroup>);
-    fireEvent.mouseMove(group, { clientX: 10, clientY: 100 });
+    fireEvent.mouseMove(enabledCard, { clientX: 10, clientY: 100 });
     await waitFor(() => expect(group.hasAttribute("data-fluid-hover-active-index")).toBe(false));
   });
 });

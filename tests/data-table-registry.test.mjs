@@ -2,7 +2,7 @@ import { readFileSync } from "node:fs";
 import { join } from "node:path";
 import { describe, expect, it } from "vite-plus/test";
 import { createPresetTypechecker, root } from "./helpers/preset-typecheck.mjs";
-import { neutralizeComponentImports } from "../scripts/postbuild-registry.mjs";
+import { BASE_URL, neutralizeComponentImports } from "../scripts/postbuild-registry.mjs";
 
 const source = readFileSync(join(root, "registry/default/data-table.tsx"), "utf8");
 
@@ -16,11 +16,11 @@ describe.each(["radix", "base"])("%s/data-table registry", (flavor) => {
     expect(payload.dependencies).toContain("@tanstack/react-table@^9.3.1");
     for (const component of ["button", "dropdown", "select"]) {
       expect(payload.registryDependencies).toContain(
-        `https://www.fluidfunctionalism.com/r/${flavor}/${component}.json`,
+        `${BASE_URL}/${flavor}/${component}.json`,
       );
     }
     expect(payload.registryDependencies).toContain(
-      "https://www.fluidfunctionalism.com/r/table.json",
+      `${BASE_URL}/table.json`,
     );
   });
 

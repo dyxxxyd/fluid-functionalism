@@ -36,6 +36,8 @@ tester.run("fluid/registry-type", plugin.rules["registry-type"], {
   valid: [
     '<span className="text-[length:var(--fs-body,13px)] leading-[var(--lh-body,20px)]" />',
     '<input className="pointer-coarse:text-[16px]" />',
+    'const accent = "var(--fluid-accent, #6B97FF)";',
+    'const ring = `var(--focus-ring,#6b97ff)`;',
   ],
   invalid: [
     { code: '<span className="text-[13px]" />', errors: [{ message: /type scale/ }] },
@@ -45,6 +47,8 @@ tester.run("fluid/registry-type", plugin.rules["registry-type"], {
       errors: [{ message: /type scale/ }],
     },
     { code: '<span className="leading-[18px]" />', errors: [{ message: /type scale/ }] },
+    { code: 'const accent = "#6B97FF";', errors: [{ message: /accent comes from the token/ }] },
+    { code: 'const accent = `#6b97ff`;', errors: [{ message: /accent comes from the token/ }] },
   ],
 });
 

@@ -147,7 +147,14 @@ const designRestrictions = [
   },
 ];
 
+// Registry accents follow the shared token, with a fallback for standalone installs.
+const RAW_ACCENT_REGEX = "(?<!(?:focus-ring|fluid-accent), ?)#6[bB]97[fF][fF]";
+const RAW_ACCENT_MESSAGE =
+  "The accent comes from the token: var(--fluid-accent, #6B97FF) (or var(--focus-ring, #6B97FF) for focus rings), with color-mix() for shades, never the raw hex.";
+
 const registryRestrictions = [
+  { selector: `Literal[value=/${RAW_ACCENT_REGEX}/]`, message: RAW_ACCENT_MESSAGE },
+  { selector: `TemplateElement[value.raw=/${RAW_ACCENT_REGEX}/]`, message: RAW_ACCENT_MESSAGE },
   { selector: `Literal[value=/${REGISTRY_TYPE_REGEX}/]`, message: REGISTRY_TYPE_MESSAGE },
   {
     selector: `TemplateElement[value.raw=/${REGISTRY_TYPE_REGEX}/]`,

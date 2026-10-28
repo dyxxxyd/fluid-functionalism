@@ -38,9 +38,10 @@ import { readFileSync } from "node:fs";
 import { join } from "node:path";
 import { pathToFileURL } from "node:url";
 import { DUAL_FLAVOR_SLUGS } from "../lib/dual-flavor-slugs.mjs";
+import { REGISTRY_BASE_URL } from "../lib/registry-urls.mjs";
 
 const REGISTRY_DIR = new URL("../public/r", import.meta.url).pathname;
-export const BASE_URL = "https://raw.githubusercontent.com/dyxxxyd/fluid-functionalism/linkstart/public/r";
+export const BASE_URL = REGISTRY_BASE_URL;
 
 // Single source of truth lives in lib/dual-flavor-slugs.mjs.
 const DUAL_FLAVOR_ITEMS = new Set(DUAL_FLAVOR_SLUGS);
