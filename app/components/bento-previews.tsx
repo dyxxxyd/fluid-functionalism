@@ -14,6 +14,7 @@ import { SizeProvider } from "@/lib/size-context";
 import { ChatMessage } from "@/registry/default/chat-message";
 import { Skeleton } from "@/registry/default/skeleton";
 import { Toaster, createToastManager } from "@/registry/default/toast";
+import { REGISTRY_ADD_COMMAND } from "@/lib/install-url";
 import {
   ACCORDION_ITEMS,
   BADGE_ITEMS,
@@ -412,7 +413,7 @@ function DropdownPreview() {
 function InputCopyPreview() {
   return (
     <div className="w-full max-w-[420px] relative z-10">
-      <InputCopy value="npx shadcn@latest registry add @fluid" />
+      <InputCopy value={REGISTRY_ADD_COMMAND} />
     </div>
   );
 }

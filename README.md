@@ -24,7 +24,7 @@ A [shadcn/ui](https://ui.shadcn.com) registry of components, the systems they sh
 
 ## Install
 
-A new app can start with every component installed and wired, from one command:
+The upstream starter scaffolds a new app with every component installed and wired.
 
 ```bash
 npx shadcn@latest create -n my-app -t next https://www.fluidfunctionalism.com/r/starter/default.json
@@ -32,11 +32,13 @@ npx shadcn@latest create -n my-app -t next https://www.fluidfunctionalism.com/r/
 
 Replace `default` with the settings you want, joined by dashes: `radix`, `pill`, `compact`, `lucide`/`tabler`/`phosphor`/`hugeicons`, `light`/`dark`. The home page builds this command from your Make them yours settings.
 
-In an existing project, add the registry once:
+Add the fork registry once in an existing project.
 
 ```bash
-npx shadcn@latest registry add @fluid
+npx shadcn@latest registry add "@fluid=https://raw.githubusercontent.com/dyxxxyd/fluid-functionalism/linkstart/public/r/{name}.json"
 ```
+
+If `@fluid` is already configured, replace its URL under `registries` in `components.json` with the URL above.
 
 Then install any component, system, or block by its registry name:
 
@@ -47,7 +49,7 @@ npx shadcn@latest add @fluid/button
 Or install straight from the URL, without adding the registry:
 
 ```bash
-npx shadcn@latest add https://www.fluidfunctionalism.com/r/button.json
+npx shadcn@latest add https://raw.githubusercontent.com/dyxxxyd/fluid-functionalism/linkstart/public/r/button.json
 ```
 
 Dependencies, shared libs, and hooks resolve on their own.
@@ -60,7 +62,7 @@ Every component that touches a primitive has both a Radix and a Base UI flavor. 
 npx shadcn@latest add @fluid/base/button
 ```
 
-The URL form is `https://www.fluidfunctionalism.com/r/base/button.json`. Dependencies follow the flavor you pick, so a Base UI dialog pulls in the Base UI button. Components built on top of a flavored one (AskUserQuestions, Banner, Calendar, ColorPicker, CommandMenu, InputCopy, InputMessage, and the blocks) accept `base/` too. Everything else has one source and installs from the bare name in either kind of project. The tables below list the names.
+The URL form is `https://raw.githubusercontent.com/dyxxxyd/fluid-functionalism/linkstart/public/r/base/button.json`. Dependencies follow the flavor you pick, so a Base UI dialog pulls in the Base UI button. The tables also list which shared components publish a `base/` variant.
 
 ### Overwrite the stock files
 

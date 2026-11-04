@@ -20,7 +20,7 @@ import { basename, extname, join, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
 import { readStack } from "./stack.mjs";
 
-export const REGISTRY = "https://www.fluidfunctionalism.com/r";
+export const REGISTRY = "https://raw.githubusercontent.com/dyxxxyd/fluid-functionalism/linkstart/public/r";
 export const CHANGELOG = "https://www.fluidfunctionalism.com/changelog.md";
 
 const isRemote = (registry) => /^https?:\/\//.test(registry);

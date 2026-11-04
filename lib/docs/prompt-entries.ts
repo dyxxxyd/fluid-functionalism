@@ -1,3 +1,5 @@
+import { installUrl } from "@/lib/install-url";
+
 /** Per-page usage snippet and props list for the "Copy prompt" button, and
  *  the craft notes the skill ships (references/craft.md).
  *  Keyed by doc page slug. `install-prompt.ts` derives the rest (install
@@ -937,7 +939,7 @@ const [view, setView] = useState(0);
 
 <InputCopy
   label="Install command"
-  value="npx shadcn@latest add https://www.fluidfunctionalism.com/r/input-copy.json"
+  value="npx shadcn@latest add ${installUrl("input-copy", "radix")}"
   onCopy={() => console.log("copied")}
 />`,
     props: [

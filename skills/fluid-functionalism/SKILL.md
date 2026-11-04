@@ -178,8 +178,10 @@ The stack read tells you which of these are already done. Skip those.
 1. **Add the registry** (or install per-URL, next section):
 
    ```bash
-   npx shadcn@latest registry add @fluid
+   npx shadcn@latest registry add "@fluid=https://raw.githubusercontent.com/dyxxxyd/fluid-functionalism/linkstart/public/r/{name}.json"
    ```
+
+   If `@fluid` is already configured, replace its registry URL in `components.json` with the URL above.
 
 2. **Pick the flavor once, per project.** The bare name installs the Radix
    flavor; prefix `base/` for Base UI. The stack script settles the verdict
@@ -218,8 +220,8 @@ npx shadcn@latest add @fluid/button            # Radix flavor
 npx shadcn@latest add @fluid/base/button       # Base UI flavor
 # URL form (no registry entry needed) - the flavor lives in the path, so a
 # base project needs the /base/ segment here too:
-npx shadcn@latest add https://www.fluidfunctionalism.com/r/button.json       # Radix
-npx shadcn@latest add https://www.fluidfunctionalism.com/r/base/button.json  # Base UI
+npx shadcn@latest add https://raw.githubusercontent.com/dyxxxyd/fluid-functionalism/linkstart/public/r/button.json       # Radix
+npx shadcn@latest add https://raw.githubusercontent.com/dyxxxyd/fluid-functionalism/linkstart/public/r/base/button.json  # Base UI
 ```
 
 Dependencies, shared libs (`springs`, `font-weight`, contexts), and hooks

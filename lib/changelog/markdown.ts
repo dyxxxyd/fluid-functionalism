@@ -1,6 +1,8 @@
 import { KIND_LABEL, type ChangeEntry, type ChangeRef, type Inline, type Release } from "@/lib/changelog/parse";
 import { monthLabel } from "@/lib/changelog/migration-prompt";
 import type { EntryInstall } from "@/lib/changelog/install";
+import { installUrl } from "@/lib/install-url";
+import { REGISTRY_BASE_URL } from "@/lib/registry-urls.mjs";
 
 // ---------------------------------------------------------------------------
 // The whole changelog as one Markdown document, for agents and for anyone
@@ -26,8 +28,8 @@ function installLine(install: EntryInstall): string {
   switch (install.kind) {
     case "item":
       return install.base
-        ? `Install: \`${SITE}/r/${install.name}.json\`, or \`${SITE}/r/base/${install.name}.json\` for the Base UI flavor.`
-        : `Install: \`${SITE}/r/${install.name}.json\` (one source for both flavors).`;
+        ? `Install: \`${installUrl(install.name, "radix")}\`, or \`${installUrl(install.name, "base")}\` for the Base UI flavor.`
+        : `Install: \`${installUrl(install.name, "radix")}\` (one source for both flavors).`;
     case "skill":
       return "Install: `npx skills add mickadesign/fluid-functionalism`.";
     case "all":
@@ -90,8 +92,8 @@ export function releasesToMarkdown(
     "- New: a component or system that just landed.",
     "- Breaking: an API change that needs a migration. Each one carries a diff of the call site, before and after.",
     "- Updated: a change to something already here.",
-    `- Install or update a component: \`npx shadcn@latest add ${SITE}/r/<name>.json --overwrite\`, or \`${SITE}/r/base/<name>.json\` for the Base UI flavor. Each entry names its own install line. Diff a file before overwriting it: \`--overwrite\` replaces local edits.`,
-    "- Upgrade a whole project: the Fluid Functionalism agent skill (`npx skills add mickadesign/fluid-functionalism`) reads the project's flavor, compares every installed item with the registry, and applies this changelog. Ask it to update Fluid Functionalism.",
+    `- Install or update a component: \`npx shadcn@latest add ${REGISTRY_BASE_URL}/<name>.json --overwrite\`, or \`${REGISTRY_BASE_URL}/base/<name>.json\` for the Base UI flavor. Each entry names its own install line. Diff a file before overwriting it: \`--overwrite\` replaces local edits.`,
+    `- Upgrade a whole project with the Fluid Functionalism agent skill (\`npx skills add mickadesign/fluid-functionalism\`). Pass \`--registry ${REGISTRY_BASE_URL}\` to its upgrade script to compare against this fork.`,
   ];
 
   for (const release of releases) {

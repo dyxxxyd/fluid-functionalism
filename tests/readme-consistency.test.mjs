@@ -12,11 +12,18 @@
 import { existsSync, readFileSync } from "node:fs";
 import { join } from "node:path";
 import { describe, expect, it } from "vite-plus/test";
+import { REGISTRY_BASE_URL, REGISTRY_URL_TEMPLATE } from "../lib/registry-urls.mjs";
 
 const ROOT = new URL("..", import.meta.url).pathname;
 const readme = readFileSync(join(ROOT, "README.md"), "utf-8");
 
 describe("README", () => {
+  it("registers and installs from the fork registry", () => {
+    expect(readme).toContain(`npx shadcn@latest registry add "@fluid=${REGISTRY_URL_TEMPLATE}"`);
+    expect(readme).toContain(`npx shadcn@latest add ${REGISTRY_BASE_URL}/button.json`);
+    expect(readme).toContain(`${REGISTRY_BASE_URL}/base/button.json`);
+  });
+
   it("links every component and system docs page", async () => {
     const { componentList, systemList } = await import("../lib/docs/components.ts");
     for (const entry of [...componentList, ...systemList]) {

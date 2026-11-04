@@ -1,4 +1,5 @@
-import type { Base } from "@/lib/install-url";
+import { installUrl, type Base } from "@/lib/install-url";
+import { REGISTRY_BASE_URL } from "@/lib/registry-urls.mjs";
 import { OVERWRITE_NOTE, SITE } from "@/lib/docs/install-brief";
 import type { EntryInstall } from "@/lib/changelog/install";
 import type { ChangeEntry, Inline } from "@/lib/changelog/parse";
@@ -29,19 +30,19 @@ interface BuildMigrationPromptOptions {
 function reinstallStep(install: EntryInstall, base: Base): string[] {
   switch (install.kind) {
     case "item": {
-      const url = `${SITE}/r/${install.base && base === "base" ? "base/" : ""}${install.name}.json`;
+      const url = installUrl(install.name, base);
       return ["1. Re-install it (shadcn CLI):", `npx shadcn@latest add ${url} --overwrite`, OVERWRITE_NOTE];
     }
     case "skill":
       return ["1. Update the agent skill:", "npx skills add mickadesign/fluid-functionalism"];
     case "all":
       return [
-        `1. Re-install every Fluid Functionalism component this project uses, with the shadcn CLI and --overwrite, from the same URLs they came from (${SITE}/r/<name>.json, or /r/base/<name>.json for the Base UI flavor).`,
+        `1. Re-install every Fluid Functionalism component this project uses, with the shadcn CLI and --overwrite, from ${REGISTRY_BASE_URL}/<name>.json or ${REGISTRY_BASE_URL}/base/<name>.json for the Base UI flavor.`,
         OVERWRITE_NOTE,
       ];
     case "none":
       return [
-        `1. Re-install the Fluid Functionalism items the sentence above names, with the shadcn CLI and --overwrite, from the same URLs they came from (${SITE}/r/<name>.json, or /r/base/<name>.json for the Base UI flavor).`,
+        `1. Re-install the Fluid Functionalism items the sentence above names, with the shadcn CLI and --overwrite, from ${REGISTRY_BASE_URL}/<name>.json or ${REGISTRY_BASE_URL}/base/<name>.json for the Base UI flavor.`,
         OVERWRITE_NOTE,
       ];
   }
