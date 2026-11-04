@@ -11,6 +11,7 @@ import { entryInstall } from "@/lib/changelog/install";
 import { buildUpgradePrompt } from "@/lib/changelog/upgrade-prompt";
 import { SHOWCASE_PREVIEW_SLUGS } from "@/app/changelog/previews";
 import { componentList, systemNavList } from "@/lib/docs/components";
+import { REGISTRY_BASE_URL } from "@/lib/registry-urls.mjs";
 
 // The release files in content/changelog/ follow changelog-guidelines.md.
 // The parser already rejects anything off-format; these checks cover what it
@@ -118,11 +119,10 @@ describe("/changelog.md", () => {
 
   it("names what each entry installs, under the registry's own names", () => {
     const withInstall = releasesToMarkdown(releases, entryInstall);
-    const SITE = "https://www.fluidfunctionalism.com";
     // A system page installs under another name; a flavored component lists
     // both URLs; the skill page installs the skill.
-    expect(withInstall).toContain(`Install: \`${SITE}/r/use-fluid-hover.json\``);
-    expect(withInstall).toContain(`\`${SITE}/r/combobox.json\`, or \`${SITE}/r/base/combobox.json\``);
+    expect(withInstall).toContain(`Install: \`${REGISTRY_BASE_URL}/use-fluid-hover.json\``);
+    expect(withInstall).toContain(`\`${REGISTRY_BASE_URL}/tabs.json\`, or \`${REGISTRY_BASE_URL}/base/tabs.json\``);
     expect(withInstall).toContain("Install: `npx skills add mickadesign/fluid-functionalism`.");
     // Every entry gets a line, and every Breaking entry its steps.
     const entries = releases.flatMap(releaseEntries);
@@ -143,6 +143,7 @@ describe("the Copy upgrade prompt", () => {
   it("leads with the skill, then the same job by hand from the changelog", () => {
     expect(prompt.indexOf("npx skills add mickadesign/fluid-functionalism")).toBeLessThan(prompt.indexOf("Without the skill"));
     expect(prompt).toContain("https://www.fluidfunctionalism.com/changelog.md");
+    expect(prompt).toContain(`--registry ${REGISTRY_BASE_URL}`);
     expect(prompt).toContain("--overwrite");
   });
 
@@ -264,11 +265,11 @@ describe("Copy migration prompt", () => {
     const fluidHover = breaking.find((e) => e.href === "/docs/fluid-hover")!;
     const scrollbars = breaking.find((e) => e.href === "/docs/scrollbars")!;
     for (const [entry, url] of [
-      [fluidHover, "/r/use-fluid-hover.json"],
-      [scrollbars, "/r/scroll-area.json"],
+      [fluidHover, "use-fluid-hover.json"],
+      [scrollbars, "scroll-area.json"],
     ] as const) {
       const prompt = buildMigrationPrompt({ entry, month: "2026-09", install: entryInstall(entry), base: "radix" });
-      expect(prompt).toContain(`npx shadcn@latest add https://www.fluidfunctionalism.com${url} --overwrite`);
+      expect(prompt).toContain(`npx shadcn@latest add ${REGISTRY_BASE_URL}/${url} --overwrite`);
       expect(prompt).not.toContain("every Fluid Functionalism component");
     }
   });
@@ -278,7 +279,7 @@ describe("Copy migration prompt", () => {
       const install = entryInstall(entry);
       if (install.kind !== "item") continue;
       const prompt = buildMigrationPrompt({ entry, month: "2026-09", install, base: "base" });
-      expect(prompt).toContain(`/r/${install.base ? "base/" : ""}${install.name}.json --overwrite`);
+      expect(prompt).toContain(`${REGISTRY_BASE_URL}/${install.base ? "base/" : ""}${install.name}.json --overwrite`);
     }
   });
 });

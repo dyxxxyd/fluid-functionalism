@@ -22,8 +22,10 @@ import type { ApiTable } from "@/lib/docs/api/types";
 import {
   DUAL_FLAVOR_SLUGS,
   FLAVORED_SINGLE_SOURCE_SLUGS,
+  REGISTRY_ADD_COMMAND,
   installUrl,
 } from "@/lib/install-url";
+import { REGISTRY_BASE_URL } from "@/lib/registry-urls.mjs";
 import {
   SITE,
   OVERWRITE_NOTE,
@@ -78,17 +80,19 @@ export function llmsTxt(): string {
     "Install one component with the shadcn CLI. The bare URL installs the Radix flavor; put `base/` before the name for Base UI. Components without a Base UI flavor have one URL that works in both kinds of project. Dependencies, shared libs, and hooks resolve on their own.",
     "",
     "```bash",
-    `npx shadcn@latest add ${SITE}/r/button.json --overwrite`,
-    `npx shadcn@latest add ${SITE}/r/base/button.json --overwrite`,
+    `npx shadcn@latest add ${installUrl("button", "radix")} --overwrite`,
+    `npx shadcn@latest add ${installUrl("button", "base")} --overwrite`,
     "```",
     "",
     "Or register the namespace once, then install by name:",
     "",
     "```bash",
-    "npx shadcn@latest registry add @fluid",
+    REGISTRY_ADD_COMMAND,
     "npx shadcn@latest add @fluid/button --overwrite",
     "npx shadcn@latest add @fluid/base/button --overwrite",
     "```",
+    "",
+    "If `@fluid` is already configured, replace its registry URL in `components.json` with the URL from the command.",
     "",
     "Or start a new Next.js app with every component installed and every system wired (Base UI flavor; use `radix.json` for Radix):",
     "",
@@ -102,7 +106,7 @@ export function llmsTxt(): string {
   lines.push(
     "- Icons render through named slots with Lucide defaults, so `lucide-react` is the only icon dependency. Wrap the app in `IconProvider` from `@/lib/icon-context` and pass `icons={{ \"chevron-right\": MyIcon }}` to swap any slot.",
   );
-  lines.push(`- Registry index: ${SITE}/r/registry.json`);
+  lines.push(`- Registry index: ${REGISTRY_BASE_URL}/registry.json`);
   lines.push(
     `- Changelog: every change, month by month, with an install URL per entry and migration steps for breaking changes: ${SITE}/changelog.md`,
   );

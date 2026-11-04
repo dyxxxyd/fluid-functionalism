@@ -3,8 +3,10 @@ import {
   FLAVORED_SINGLE_SOURCE_SLUGS as FLAVORED_SINGLE_SOURCE_LIST,
   FLUID_HOVER_SLUGS as FLUID_HOVER_LIST,
 } from "./dual-flavor-slugs.mjs";
-import { REGISTRY_BASE_URL } from "./registry-urls.mjs";
+import { REGISTRY_BASE_URL, REGISTRY_URL_TEMPLATE } from "./registry-urls.mjs";
 import type { HoverMode } from "@/lib/docs/site-settings";
+
+export const REGISTRY_ADD_COMMAND = `npx shadcn@latest registry add "@fluid=${REGISTRY_URL_TEMPLATE}"`;
 
 /** The primitive library a component is installed for. */
 export type Base = "radix" | "base";

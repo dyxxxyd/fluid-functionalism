@@ -24,6 +24,7 @@ import { Tooltip } from "@/registry/radix/tooltip";
 import { typeStyles } from "@/lib/type-scale";
 import { selectorList, typesetRules } from "@/lib/typeset/generate";
 import { ACCENT_VAR } from "@/lib/accent";
+import { installUrl } from "@/lib/install-url";
 
 /** Starting HTML of the Markdown section on /docs/typography: a
  *  getting-started doc with most of what markdown writes: 3 heading levels,
@@ -61,7 +62,7 @@ export const MARKDOWN_SAMPLE = [
   "</tbody></table>",
   "<h2>Install</h2>",
   "<p>Each piece installs with the shadcn CLI. We planned to <s>ship one big bundle</s> ship one item per component, so you only add what you use:</p>",
-  '<pre><code class="language-bash"># One component\nnpx shadcn@latest add https://www.fluidfunctionalism.com/r/dropdown.json\n\n# The skill for your coding agent\nnpx skills add mickadesign/fluid-functionalism</code></pre>',
+  `<pre><code class="language-bash"># One component\nnpx shadcn@latest add ${installUrl("dropdown", "radix")}\n\n# The skill for your coding agent\nnpx skills add mickadesign/fluid-functionalism</code></pre>`,
   "<h3>Next steps</h3>",
   "<ol>",
   "<li><p>Read the craft notes for each component</p></li>",

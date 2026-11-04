@@ -20,10 +20,10 @@ import { fileURLToPath } from "node:url";
 import { parseArgs } from "node:util";
 import { changedFiles, makeTemplates } from "../../evals/copy-prompts/project.mjs";
 import { run } from "../../evals/copy-prompts/util.mjs";
+import { REGISTRY_BASE_URL } from "../../lib/registry-urls.mjs";
 
 const ROOT = fileURLToPath(new URL("../..", import.meta.url));
 const REGISTRY_DIR = join(ROOT, "public/r");
-const LIVE = "https://www.fluidfunctionalism.com/r";
 const BUILD_ENV = { NEXT_TELEMETRY_DISABLED: "1", NO_COLOR: "1", FORCE_COLOR: "0" };
 const ENV_PACKAGES = ["next", "react", "react-dom", "tailwindcss", "typescript"];
 
@@ -95,7 +95,7 @@ const server = createServer((req, res) => {
   }
   const body = readFileSync(file, "utf8");
   res.writeHead(200, { "content-type": file.endsWith(".json") ? "application/json" : "text/plain" });
-  res.end(file.endsWith(".json") ? body.replaceAll(LIVE, local) : body);
+  res.end(file.endsWith(".json") ? body.replaceAll(REGISTRY_BASE_URL, local) : body);
 });
 await new Promise((ok) => server.listen(0, "127.0.0.1", ok));
 local = `http://127.0.0.1:${server.address().port}/r`;

@@ -17,6 +17,7 @@ import { generateSidebarPresetFiles } from "@/lib/preset/sidebar-install";
 import { DEFAULT_PRESET } from "@/lib/preset/sidebar-options";
 import { starterSlug, type StarterSettings } from "./settings";
 import { ACCENT_PRESETS, accentCss } from "@/lib/accent";
+import { REGISTRY_URL_TEMPLATE } from "@/lib/registry-urls.mjs";
 
 export const SITE = "https://www.fluidfunctionalism.com";
 
@@ -495,7 +496,7 @@ export function buildStarterItem(s: StarterSettings, items: readonly ManifestIte
     config: {
       style: s.base === "base" ? "base-nova" : "radix-nova",
       iconLibrary: "lucide",
-      registries: { "@fluid": `${SITE}/r/{name}.json` },
+      registries: { "@fluid": REGISTRY_URL_TEMPLATE },
     },
     dependencies: ["next-themes", "motion"],
     registryDependencies: registryDepsFor(s, items, depUrl),

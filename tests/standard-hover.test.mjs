@@ -111,4 +111,15 @@ describe("install URLs and prompts", () => {
     expect(prompt).toContain(`Same API on Radix: ${REGISTRY_BASE_URL}/standard/dropdown.json.`);
     expect(buildInstallPrompt({ slug: "dropdown", base: "base" })).not.toContain("standard");
   });
+
+  it.each([
+    ["radix", "fluid", "tabs.json"],
+    ["base", "fluid", "base/tabs.json"],
+    ["radix", "standard", "standard/tabs.json"],
+    ["base", "standard", "standard/base/tabs.json"],
+  ])("installs the %s Tabs with %s hover from the fork", (base, hover, path) => {
+    const command = `npx shadcn@latest add ${REGISTRY_BASE_URL}/${path} --overwrite`;
+    expect(buildInstallPrompt({ slug: "tabs", base, hover })).toContain(command);
+    expect(read(path).name).toBe("tabs");
+  });
 });

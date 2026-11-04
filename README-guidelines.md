@@ -25,7 +25,7 @@ the site.
 | Wordmark: tracked caps between two rules, top of the file | this file | test: present, first thing in the file |
 | Tagline and intro | `app/page.tsx` tagline; the docs Introduction for the principles | routine |
 | Starter command and its settings words | `lib/starter/settings.ts`, `app/r/starter/[slug]/route.ts` | routine |
-| Install: `registry add @fluid`, `@fluid/<name>`, the URL form | shadcn CLI; the registry is listed in shadcn's directory | routine |
+| Install with `registry add @fluid=<url>`, `@fluid/<name>`, or a direct URL | shadcn CLI with the fork's registry URL | routine |
 | Flavor rule: the `base/` prefix | `lib/dual-flavor-slugs.mjs` | test: names resolve to `public/r` |
 | `--overwrite` note | `lib/docs/install-prompt.ts` | routine |
 | Inter with its `opsz` axis | `registry/default/lib/font-weight.ts`, `app/globals.css` | routine |

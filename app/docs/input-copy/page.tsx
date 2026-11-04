@@ -6,35 +6,39 @@ import { ComponentPreview } from "@/lib/docs/ComponentPreview";
 import { PropsTable } from "@/lib/docs/PropsTable";
 import { DocPage, DocSection } from "@/lib/docs/DocPage";
 import { inputCopyProps } from "@/lib/docs/api/input-copy";
+import { installUrl } from "@/lib/install-url";
+
+const inputCopyUrl = installUrl("input-copy", "radix");
+const installCommand = `npx shadcn@latest add ${inputCopyUrl}`;
 
 const basicCode = `import { InputCopy } from "./components";
 
-<InputCopy value="npx shadcn@latest add https://www.fluidfunctionalism.com/r/input-copy.json" />`;
+<InputCopy value="${installCommand}" />`;
 
 const labelCode = `import { InputCopy } from "./components";
 
 <InputCopy
   label="Install command"
-  value="npx shadcn@latest add https://www.fluidfunctionalism.com/r/input-copy.json"
+  value="${installCommand}"
 />`;
 
 const buttonVariantCode = `import { InputCopy } from "./components";
 
 <InputCopy
   variant="button"
-  value="npx shadcn@latest add https://www.fluidfunctionalism.com/r/input-copy.json"
+  value="${installCommand}"
 />`;
 
 const alignLeftCode = `import { InputCopy } from "./components";
 
 <InputCopy
   align="left"
-  value="npx shadcn@latest add https://www.fluidfunctionalism.com/r/input-copy.json"
+  value="${installCommand}"
 />
 <InputCopy
   variant="button"
   align="left"
-  value="npx shadcn@latest add https://www.fluidfunctionalism.com/r/input-copy.json"
+  value="${installCommand}"
 />`;
 
 const disabledCode = `import { InputCopy } from "./components";
@@ -52,7 +56,7 @@ const [copyCount, setCopyCount] = useState(0);
 
 <InputCopy
   label="Share link"
-  value="https://fluidfunctionalism.com/r/input-copy"
+  value="${inputCopyUrl}"
   onCopy={() => setCopyCount((count) => count + 1)}
 />
 
@@ -70,7 +74,7 @@ export default function InputCopyDoc() {
       <DocSection title="Basic">
         <ComponentPreview code={basicCode}>
           <div className="w-72">
-            <InputCopy value="npx shadcn@latest add https://www.fluidfunctionalism.com/r/input-copy.json" />
+            <InputCopy value={installCommand} />
           </div>
         </ComponentPreview>
       </DocSection>
@@ -80,7 +84,7 @@ export default function InputCopyDoc() {
           <div className="w-72">
             <InputCopy
               label="Install command"
-              value="npx shadcn@latest add https://www.fluidfunctionalism.com/r/input-copy.json"
+              value={installCommand}
             />
           </div>
         </ComponentPreview>
@@ -91,7 +95,7 @@ export default function InputCopyDoc() {
           <div className="w-72">
             <InputCopy
               variant="button"
-              value="npx shadcn@latest add https://www.fluidfunctionalism.com/r/input-copy.json"
+              value={installCommand}
             />
           </div>
         </ComponentPreview>
@@ -102,12 +106,12 @@ export default function InputCopyDoc() {
           <div className="flex flex-col gap-4 w-72">
             <InputCopy
               align="left"
-              value="npx shadcn@latest add https://www.fluidfunctionalism.com/r/input-copy.json"
+              value={installCommand}
             />
             <InputCopy
               variant="button"
               align="left"
-              value="npx shadcn@latest add https://www.fluidfunctionalism.com/r/input-copy.json"
+              value={installCommand}
             />
           </div>
         </ComponentPreview>
@@ -130,7 +134,7 @@ export default function InputCopyDoc() {
           <div className="w-72 flex flex-col gap-2">
             <InputCopy
               label="Share link"
-              value="https://fluidfunctionalism.com/r/input-copy"
+              value={inputCopyUrl}
               onCopy={() => setCopyCount((count) => count + 1)}
             />
             <p className="text-site-caption text-muted-foreground px-1">

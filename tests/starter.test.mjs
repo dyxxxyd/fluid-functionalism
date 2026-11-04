@@ -87,6 +87,7 @@ describe("starter item", () => {
       const other = base === "base" ? "/r/radix/" : "/r/base/";
       expect(item.registryDependencies.filter((u) => u.includes(other))).toEqual([]);
       expect(item.registryDependencies).toContain(`${REGISTRY_BASE_URL}/${base}/select.json`);
+      expect(item.config.registries["@fluid"]).toBe(`${REGISTRY_BASE_URL}/{name}.json`);
       expect(item.config.style).toBe(base === "base" ? "base-nova" : "radix-nova");
     }
   });

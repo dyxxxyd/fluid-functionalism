@@ -15,7 +15,7 @@ import {
 import { API_REFERENCE } from "@/lib/docs/api";
 import { PROMPT_ENTRIES } from "@/lib/docs/prompt-entries";
 import { DUAL_FLAVOR_SLUGS } from "@/lib/install-url";
-import { REGISTRY_BASE_URL } from "@/lib/registry-urls.mjs";
+import { REGISTRY_BASE_URL, REGISTRY_URL_TEMPLATE } from "@/lib/registry-urls.mjs";
 import { docMetadata } from "@/lib/docs/metadata";
 import { plainDescription } from "@/lib/docs/install-brief";
 import robots from "@/app/robots";
@@ -129,6 +129,12 @@ describe("llms.txt", () => {
 
   it("links every page's Markdown", () => {
     for (const page of MARKDOWN_PAGES) expect(txt).toContain(`](${markdownUrl(page.slug)})`);
+  });
+
+  it("registers and installs from the fork registry", () => {
+    expect(txt).toContain(`npx shadcn@latest registry add "@fluid=${REGISTRY_URL_TEMPLATE}"`);
+    expect(txt).toContain(`npx shadcn@latest add ${REGISTRY_BASE_URL}/base/button.json --overwrite`);
+    expect(txt).toContain(`${REGISTRY_BASE_URL}/registry.json`);
   });
 
   it("points agents at the changelog, where updates and migrations live", () => {
