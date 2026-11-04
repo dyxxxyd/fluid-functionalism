@@ -266,7 +266,8 @@ describe("DataTable", () => {
     );
     expect(screen.getByRole("button", { name: "Next page" }).className).toContain("h-7");
     expect(screen.getByRole("combobox", { name: "Rows per page" }).className).toContain("h-7");
-    expect(bodyRows()[0].querySelector("td")?.className).toContain("py-[5px]");
+    expect(screen.getByRole("table").className).toContain("[--table-cell-py:5px]");
+    expect(bodyRows()[0].querySelector("td")?.className).toContain("py-(--table-cell-py)");
   });
 
   it("preserves group headers and a caller's non-sortable columns", () => {

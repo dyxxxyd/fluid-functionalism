@@ -7,6 +7,7 @@ import { rankBriefs, rotationSlice, selectWeek } from "../evals/copy-prompts/sel
 import { attention, compare, reportHtml, summaryMarkdown } from "../evals/copy-prompts/report.mjs";
 import { readTranscript } from "../evals/copy-prompts/agents.mjs";
 import { flavorLeaks, readVerdict, runStatus, statusOf } from "../evals/copy-prompts/grade.mjs";
+import { REGISTRY_BASE_URL } from "../lib/registry-urls.mjs";
 
 const briefs = await listBriefs();
 const ids = briefs.map((b) => b.id);
@@ -21,7 +22,8 @@ describe("the sweep's briefs", () => {
   it("each carry an install command for the live registry", () => {
     for (const b of briefs) {
       expect(b.install, b.id).not.toBeNull();
-      expect(b.install.url, b.id).toMatch(/^https:\/\/www\.fluidfunctionalism\.com\/r\//);
+      const registry = b.kind === "doc" ? REGISTRY_BASE_URL : "https://www.fluidfunctionalism.com/r";
+      expect(b.install.url.startsWith(`${registry}/`), b.id).toBe(true);
       expect(b.install.command, b.id).toContain("--overwrite");
     }
   });

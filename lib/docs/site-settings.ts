@@ -116,9 +116,9 @@ export function customAccentCookie(hex: string | null): string {
 // <html data-font> so a saved serif paints on the first frame.
 // ---------------------------------------------------------------------------
 
-export type HeadingFont = "inter" | "source-serif" | "custom";
+export type HeadingFont = "inter" | "geist-serif" | "custom";
 
-export const HEADING_FONTS = ["inter", "source-serif", "custom"] as const satisfies readonly HeadingFont[];
+export const HEADING_FONTS = ["inter", "geist-serif", "custom"] as const satisfies readonly HeadingFont[];
 
 export const DEFAULT_HEADING_FONT: HeadingFont = "inter";
 
@@ -166,4 +166,35 @@ export function customWeightCookie(weight: number | null): string {
   return weight === null
     ? `${CUSTOM_WEIGHT_COOKIE}=; path=/; max-age=0; samesite=lax`
     : `${CUSTOM_WEIGHT_COOKIE}=${weight}; path=/; max-age=${MAX_AGE}; samesite=lax`;
+}
+
+// ---------------------------------------------------------------------------
+// Hover: fluid (the highlight glides between items) or standard (it sits on
+// the item under the pointer). Outside SiteSettings, like the heading font:
+// it travels to installs through the install URL (`r/standard/…`), not a
+// starter slug.
+// ---------------------------------------------------------------------------
+
+export type HoverMode = "fluid" | "standard";
+
+export const HOVER_MODES = ["fluid", "standard"] as const satisfies readonly HoverMode[];
+
+export const HOVER_COOKIE = "ff_hover";
+
+/** The saved hover mode, fluid when missing or unknown. */
+export function readHoverMode(get: (name: string) => string | undefined): HoverMode {
+  return get(HOVER_COOKIE) === "standard" ? "standard" : "fluid";
+}
+
+export function hoverModeCookie(value: HoverMode): string {
+  return `${HOVER_COOKIE}=${value}; path=/; max-age=${MAX_AGE}; samesite=lax`;
+}
+
+/** Whether the request comes from a Mac (or iPhone/iPad), from the
+ *  `Sec-CH-UA-Platform` hint where the browser sends one, the User-Agent
+ *  otherwise. Seeds CommandMenuPlatform so shortcut caps paint as ⌘ or Ctrl
+ *  from the first frame. */
+export function readMacPlatform(platformHint: string | null, userAgent: string | null): boolean {
+  if (platformHint) return /mac|ios/i.test(platformHint);
+  return /mac|iphone|ipad|ipod/i.test(userAgent ?? "");
 }

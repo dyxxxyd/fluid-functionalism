@@ -1,12 +1,11 @@
 "use client";
 
 import { useState, useEffect, useRef, type MouseEvent, type ReactNode } from "react";
-import { highlight } from "./highlight";
 import { routeKeyboardOnMouseDown } from "@/lib/click-to-focus";
 import { fontWeights } from "@/registry/default/lib/font-weight";
 import { useShape } from "@/registry/default/lib/shape-context";
 import { useIcon } from "@/registry/default/lib/icon-context";
-import { TabsSubtle, TabsSubtleItem } from "@/components/flavored/tabs-subtle";
+import { Tabs, TabsItem } from "@/components/flavored/tabs";
 import { Tooltip } from "@/registry/radix/tooltip";
 import { Switch } from "@/registry/radix/switch";
 import { AnimatePresence } from "motion/react";
@@ -82,7 +81,12 @@ export function ComponentPreview({
 }: ComponentPreviewProps) {
   const [tab, setTab] = useState(0);
   const [inspect, setInspect] = useState(defaultInspect);
-  const [html, setHtml] = useState("");
+  // The highlighted sample, keyed by the code it came from so a changed
+  // sample never shows the previous one's colors.
+  const [highlighted, setHighlighted] = useState<{ code: string; html: string } | null>(null);
+  // Intent to read the code: the pointer or focus reached the header.
+  // Highlighting starts then, so the Code tab usually opens already colored.
+  const [codeWanted, setCodeWanted] = useState(false);
   const shape = useShape();
   const ReplayIcon = useIcon("rotate-ccw");
   const previewRef = useRef<HTMLDivElement>(null);
@@ -94,16 +98,26 @@ export function ComponentPreview({
   const handlePreviewMouseDown = (e: MouseEvent<HTMLDivElement>) =>
     routeKeyboardOnMouseDown(e, previewRef.current);
 
+  // Shiki (its grammars and regex engine) loads only for a reader who goes
+  // for the code, never with the page: most visitors only use the Preview.
+  const codeNeeded = !!code && (codeWanted || tab === 1);
   useEffect(() => {
+    if (!codeNeeded || !code) return;
     let cancelled = false;
-    if (code) {
-      void highlight(code).then(
-        (html) => { if (!cancelled) setHtml(html); },
-        () => { if (!cancelled) setHtml(""); },
-      );
-    }
-    return () => { cancelled = true; };
-  }, [code]);
+    import("./highlight")
+      .then(({ highlight }) => highlight(code))
+      .then((html) => {
+        if (!cancelled) setHighlighted({ code, html });
+      })
+      // A chunk that fails to load (offline, deploy skew) leaves the plain
+      // text in place rather than an unhandled rejection.
+      .catch(() => {});
+    return () => {
+      cancelled = true;
+    };
+  }, [codeNeeded, code]);
+  const html = highlighted && highlighted.code === code ? highlighted.html : null;
+  const wantCode = () => setCodeWanted(true);
 
   const showButton = !!playbackButton || !!onReplay;
   // Inspect only applies to the live Preview tab. When on, reserve a strip at
@@ -130,6 +144,8 @@ export function ComponentPreview({
           (z-[70] > z-[60]) so the ruler ticks tuck cleanly under it. */}
       {!hideHeader && (
       <div
+        onPointerEnter={wantCode}
+        onFocus={wantCode}
         className="relative z-[70] flex items-center gap-0 px-3 py-3 min-h-[52px] border-b border-border/60 bg-background"
         style={{ borderTopLeftRadius: "inherit", borderTopRightRadius: "inherit" }}
       >
@@ -141,10 +157,10 @@ export function ComponentPreview({
             {title}
           </span>
         )}
-        <TabsSubtle selectedIndex={tab} onSelect={setTab}>
-          <TabsSubtleItem index={0} label="Preview" />
-          <TabsSubtleItem index={1} label="Code" />
-        </TabsSubtle>
+        <Tabs selectedIndex={tab} onSelect={setTab}>
+          <TabsItem index={0} label="Preview" />
+          <TabsItem index={1} label="Code" />
+        </Tabs>
         <div className="ml-auto flex items-center gap-1">
           {inspectable && tab === 0 && (
             // Toggling Inspect must not dismiss whatever the preview has open
@@ -190,7 +206,7 @@ export function ComponentPreview({
       {/* Content. Wrapped so its rectangular bottom corners get clipped
           to the outer container's rounded shape (rounded-xl / rounded-3xl
           depending on shape). overflow-hidden alone on the outer would
-          re-clip the TabsSubtle focus ring above; this scoped clipper
+          re-clip the Tabs focus ring above; this scoped clipper
           uses `border-bottom-*-radius: inherit` so it adopts whichever
           shape is active, and leaves the top corners square (the tab
           bar sits above, well below the outer's curved top edge). */}
@@ -231,11 +247,21 @@ export function ComponentPreview({
           >
             {children}
           </div>
-        ) : (
+        ) : html !== null ? (
           <div
             className={`overflow-auto text-site-body [&_pre]:m-0 [&_pre]:p-4 ${minHeightClass.replace("min-h-", "[&_pre]:min-h-")} [&_.shiki]:!bg-transparent`}
             dangerouslySetInnerHTML={{ __html: html }}
           />
+        ) : (
+          // Plain text in the same box until the colors land, so the tab
+          // never opens empty.
+          <div
+            className={`overflow-auto text-site-body [&_pre]:m-0 [&_pre]:p-4 ${minHeightClass.replace("min-h-", "[&_pre]:min-h-")}`}
+          >
+            <pre>
+              <code>{code?.trim()}</code>
+            </pre>
+          </div>
         )}
       </div>
 

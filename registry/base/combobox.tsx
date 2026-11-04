@@ -2,6 +2,7 @@
 
 import {
   forwardRef,
+  memo,
   useRef,
   useEffect,
   useLayoutEffect,
@@ -22,7 +23,9 @@ import { cn } from "@/lib/utils";
 import { spring, exitFallbackMs } from "@/lib/springs";
 import {
   useFluidHover,
+  useFluidHoverSelect,
   useRegisterFluidHoverItem,
+  type FluidHoverActiveStore,
   type ItemRect,
 } from "@/hooks/use-fluid-hover";
 import {
@@ -130,7 +133,7 @@ function useComboboxContext() {
 // Content context for fluid hover
 interface ComboboxContentContextValue {
   registerItem: (index: number, element: HTMLElement | null) => void;
-  activeIndex: number | null;
+  activeStore: FluidHoverActiveStore;
 }
 
 const ComboboxContentContext =
@@ -380,7 +383,9 @@ const ALWAYS_HIGHLIGHT = "always" as unknown as boolean;
 const fieldVariants = cva(
   [
     "group flex items-center ring-1 cursor-text",
-    "transition-all duration-80",
+    // Listed, never `all`: the chips field springs its height, and size or
+    // padding changes must snap instead of easing against that spring.
+    "transition-[color,background-color,border-radius,box-shadow,opacity] duration-80",
     "data-[disabled]:opacity-50 data-[disabled]:pointer-events-none",
   ],
   {
@@ -412,8 +417,17 @@ const clearButtonClass = cn(
   fieldButtonClass,
   "hover:bg-hover active:bg-active transition-[color,background-color]"
 );
+// The clear target grows to the field's full height, and only 2px sideways so
+// it never reaches the chevron across the gap.
+const clearHitArea = (compact: boolean) =>
+  cn("relative before:absolute before:-inset-x-0.5", compact ? "before:-inset-y-1" : "before:-inset-y-1.5");
 // A chip's ✕ sits on the chip's own hover-tinted fill, so it steps up a notch.
-const chipRemoveClass = cn(fieldButtonClass, "rounded hover:bg-active");
+// The 16/20px × grows by the chip's own 2px edge (a pseudo-element), so the
+// target reaches the chip's full height without overlapping the next chip.
+const chipRemoveClass = cn(
+  fieldButtonClass,
+  "relative rounded hover:bg-active before:absolute before:-inset-0.5"
+);
 
 interface ComboboxFieldProps
   extends Omit<
@@ -455,7 +469,7 @@ function FieldControls({
         <span className={cn("flex shrink-0 items-center justify-center", compact ? "size-5" : "size-6")}>
           <ComboboxPrimitive.Clear
             aria-label="Clear"
-            className={cn(clearButtonClass, pill && "rounded-full", compact ? "size-5" : "size-6")}
+            className={cn(clearButtonClass, pill && "rounded-full", compact ? "size-5" : "size-6", clearHitArea(compact))}
           >
             <XIcon size={iconSize} strokeWidth={1.5} />
           </ComboboxPrimitive.Clear>
@@ -725,9 +739,6 @@ const ComboboxChips = forwardRef<HTMLInputElement, ComboboxChipsProps>(
           data-popup-open={open || undefined}
           className={cn(
             fieldVariants({ variant }),
-            // The spring above owns the height; leaving it in transition-all
-            // would have the 80ms CSS ease drag behind every spring frame.
-            "transition-[color,background-color,border-radius,box-shadow,opacity]",
             // Grows with its chips. Rows top-align (`items-start`) so the
             // icon and controls hold the first line while chips wrap; the
             // vertical padding is exactly what centers one 24px (20px
@@ -762,10 +773,9 @@ const ComboboxChips = forwardRef<HTMLInputElement, ComboboxChipsProps>(
                 : "flex-wrap",
               // A chip leads the field: the row pulls left so the chip sits
               // an even distance from every edge. The offset lives here, not
-              // on the container's padding — the container's transition-all
-              // would ease a padding change against the chip's spring and
-              // drag the caret with it; the row snaps instead, in the same
-              // frame as the chip. An icon keeps the full inset — it leads,
+              // on the container's padding, so it can never be eased against
+              // the chip's spring and drag the caret with it; the row snaps
+              // instead, in the same frame as the chip. An icon keeps the full inset — it leads,
               // not the chip.
               !Icon && values.length > 0 && "-ml-1"
             )}
@@ -927,7 +937,7 @@ const ComboboxContent = forwardRef<HTMLDivElement, ComboboxContentProps>(
           side={side}
           align={align}
           sideOffset={sideOffset}
-          className="z-50 outline-none"
+          className="z-[var(--z-popover,60)] outline-none"
         >
           <motion.div
             className={popupMotionClass}
@@ -986,7 +996,7 @@ const ComboboxList = forwardRef<HTMLDivElement, ComboboxListProps>(
 
     const hover = useFluidHover(containerRef, { isItemDisabled: isDisabledRow });
     const {
-      activeIndex,
+      activeStore,
       setActiveIndex,
       itemRects,
       isMeasured,
@@ -1101,13 +1111,43 @@ const ComboboxList = forwardRef<HTMLDivElement, ComboboxListProps>(
     );
 
     const contentCtx = useMemo(
-      () => ({ registerItem, activeIndex }),
-      [registerItem, activeIndex]
+      () => ({ registerItem, activeStore }),
+      [registerItem, activeStore]
     );
+
+    // No matches keeps the popup at the height the last matches gave it, so
+    // ComboboxEmpty sits where the rows were and the popup doesn't jump on
+    // each keystroke into and out of an empty query. Watching the rows
+    // themselves catches every filter pass; the observer fires before paint.
+    useIsoLayoutEffect(() => {
+      const list = containerRef.current;
+      const surface = list?.closest<HTMLElement>('[data-slot="scroll-area"]')?.parentElement;
+      if (!list || !surface) return;
+      let shownHeight = 0;
+      const sync = () => {
+        if (list.querySelector('[role="option"]')) {
+          surface.style.minHeight = "";
+          shownHeight = surface.offsetHeight;
+        } else if (shownHeight) {
+          surface.style.minHeight = `${shownHeight}px`;
+        }
+      };
+      sync();
+      const observer = new MutationObserver(sync);
+      observer.observe(list, { childList: true, subtree: true });
+      return () => {
+        observer.disconnect();
+        surface.style.minHeight = "";
+      };
+    }, []);
 
     return (
       <ComboboxContentContext.Provider value={contentCtx}>
-        <ScrollArea className={popupScrollAreaClass} viewportClassName={cn(popupViewportClass, "scroll-fade")}>
+        {/* Let the empty message take the free height when no options remain. */}
+        <ScrollArea
+          className={cn(popupScrollAreaClass, "[&:not(:has([role=option]))]:flex-none")}
+          viewportClassName={cn(popupViewportClass, "scroll-fade")}
+        >
           <ComboboxPrimitive.List
             ref={(node: HTMLDivElement | null) => {
               (containerRef as React.RefObject<HTMLDivElement | null>).current =
@@ -1212,7 +1252,11 @@ interface ComboboxItemProps extends HTMLAttributes<HTMLDivElement> {
   disabled?: boolean;
 }
 
-const ComboboxItem = forwardRef<HTMLDivElement, ComboboxItemProps>(
+// Memoized: the list re-renders on every highlight change (it reads the
+// highlight context) and builds its rows inline, so without memo every row
+// would render again per pointer move. Rows read their own lit state from
+// the fluid hover store.
+const ComboboxItem = memo(forwardRef<HTMLDivElement, ComboboxItemProps>(
   ({ className, children, icon: Icon, value, disabled = false, ...props }, ref) => {
     const comboboxCtx = useComboboxContext();
     const contentCtx = useContext(ComboboxContentContext);
@@ -1228,7 +1272,7 @@ const ComboboxItem = forwardRef<HTMLDivElement, ComboboxItemProps>(
     const registerItem = contentCtx?.registerItem;
     useRegisterFluidHoverItem(registerItem, index, internalRef);
 
-    const isActive = contentCtx?.activeIndex === index;
+    const isActive = useFluidHoverSelect(contentCtx?.activeStore, (i) => i === index);
     const isChecked = comboboxCtx.values.includes(value);
     // Base UI matches rows to `items` by value, so the row hands back the
     // item it was rendered from.
@@ -1323,7 +1367,7 @@ const ComboboxItem = forwardRef<HTMLDivElement, ComboboxItemProps>(
       </ComboboxPrimitive.Item>
     );
   }
-);
+));
 
 ComboboxItem.displayName = "ComboboxItem";
 
@@ -1348,7 +1392,7 @@ const ComboboxEmpty = forwardRef<HTMLDivElement, ComboboxEmptyProps>(
       <ComboboxPrimitive.Empty
         ref={ref}
         className={cn(
-          "px-3 text-center text-muted-foreground not-empty:py-6",
+          "my-auto px-3 text-center text-muted-foreground not-empty:py-6",
           sizeClasses.text,
           className
         )}

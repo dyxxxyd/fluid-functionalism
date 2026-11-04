@@ -18,7 +18,12 @@ import * as SelectPrimitive from "@radix-ui/react-select";
 import type { IconComponent } from "@/lib/icon-context";
 import { cn } from "@/lib/utils";
 import { spring, exitFallbackMs } from "@/lib/springs";
-import { useFluidHover, useRegisterFluidHoverItem } from "@/hooks/use-fluid-hover";
+import {
+  useFluidHover,
+  useFluidHoverSelect,
+  useRegisterFluidHoverItem,
+  type FluidHoverActiveStore,
+} from "@/hooks/use-fluid-hover";
 import { useShape, shapeMap } from "@/lib/shape-context";
 import { SizeProvider, useSize, typeClass, type SizeVariant } from "@/lib/size-context";
 import { Elevated } from "@/lib/elevated";
@@ -94,7 +99,7 @@ function useSelectContext() {
 // Content context for fluid hover
 interface SelectContentContextValue {
   registerItem: (index: number, element: HTMLElement | null) => void;
-  activeIndex: number | null;
+  activeStore: FluidHoverActiveStore;
   checkedIndex?: number;
 }
 
@@ -228,7 +233,9 @@ Select.displayName = "Select";
 const triggerVariants = cva(
   [
     "group inline-flex items-center justify-between outline-none cursor-pointer",
-    "transition-all duration-80",
+    // Listed, never `all`: a size change snaps instead of easing the
+    // trigger's height and padding.
+    "transition-[color,background-color,border-radius,box-shadow,opacity] duration-80",
     "disabled:opacity-50 disabled:pointer-events-none",
     // data-pointer-focus: focus handed back after a pick with the pointer.
     "focus-visible:not-data-[pointer-focus]:ring-1 focus-visible:ring-[color:var(--focus-ring,#6B97FF)]",
@@ -358,7 +365,7 @@ const SelectContent = forwardRef<HTMLDivElement, SelectContentProps>(
 
     const hover = useFluidHover(containerRef, { isItemDisabled: isDisabledRow });
     const {
-      activeIndex,
+      activeStore,
       setActiveIndex,
       itemRects,
       isMeasured,
@@ -457,8 +464,8 @@ const SelectContent = forwardRef<HTMLDivElement, SelectContentProps>(
       isMeasured && focusedIndex !== null ? itemRects[focusedIndex] : null;
 
     const contentCtx = useMemo(
-      () => ({ registerItem, activeIndex, checkedIndex }),
-      [registerItem, activeIndex, checkedIndex]
+      () => ({ registerItem, activeStore, checkedIndex }),
+      [registerItem, activeStore, checkedIndex]
     );
 
     // Rendered unconditionally: while closed, Radix parks these children in a
@@ -475,7 +482,7 @@ const SelectContent = forwardRef<HTMLDivElement, SelectContentProps>(
           side="bottom"
           align="start"
           sideOffset={6}
-          className="z-50"
+          className="z-[var(--z-popover,60)]"
           // Radix hands focus back to the trigger with focus(), which the
           // browser may report as :focus-visible even after a pick with the
           // pointer. Without keyboard navigation in the popup, the trigger
@@ -691,7 +698,7 @@ const SelectItem = forwardRef<HTMLDivElement, SelectItemProps>(
     const registerItem = contentCtx?.registerItem;
     useRegisterFluidHoverItem(registerItem, index, internalRef);
 
-    const isActive = contentCtx?.activeIndex === index;
+    const isActive = useFluidHoverSelect(contentCtx?.activeStore, (i) => i === index);
     const isChecked = selectCtx.value === value;
 
     return (

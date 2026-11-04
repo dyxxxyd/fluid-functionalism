@@ -82,7 +82,7 @@
       "name": "tokens",
       "type": "registry:theme",
       "title": "Interaction Tokens",
-      "description": "Shared interaction-state tokens: surface-relative hover/active overlays (bg-hover, bg-active), the selected fill, the see-through secondary-button tint (--tint, --tint-hover), the destructive-light ground, the --overlay RGB triplet, the --fluid-accent color (switch track, drop and swatch rings, copy highlight) with --focus-ring derived from it, the accent text selection, and the base-layer :focus-visible fallback ring.",
+      "description": "Shared interaction-state tokens: surface-relative hover/active overlays (bg-hover, bg-active), the selected fill, the see-through secondary-button tint (--tint, --tint-hover), the destructive-light ground, the --overlay RGB triplet, the --fluid-accent color (switch track, drop and swatch rings, copy highlight) with --focus-ring derived from it, the --z-* stacking scale (sticky, overlay, modal, popover, tooltip), the accent text selection, and the base-layer :focus-visible fallback ring.",
       "cssVars": {
         "theme": {
           "color-hover": "var(--hover)",
@@ -99,7 +99,12 @@
           "fluid-accent": "#6B97FF",
           "focus-ring": "var(--fluid-accent)",
           "tint": "rgb(0 0 0 / 0.08)",
-          "tint-hover": "rgb(0 0 0 / 0.065)"
+          "tint-hover": "rgb(0 0 0 / 0.065)",
+          "z-sticky": "30",
+          "z-overlay": "40",
+          "z-modal": "50",
+          "z-popover": "60",
+          "z-tooltip": "70"
         },
         "dark": {
           "hover": "rgb(255 255 255 / 0.06)",
@@ -880,6 +885,30 @@
       ]
     },
     {
+      "name": "standard/use-fluid-hover",
+      "type": "registry:hook",
+      "title": "useFluidHover + FluidHoverHighlight (standard hover)",
+      "description": "Standard hover: the same API as fluid hover, without the glide. The item under the pointer lights with a plain fill; nothing travels between items. Served as r/standard/use-fluid-hover.json.",
+      "registryDependencies": [
+        "utils",
+        "https://raw.githubusercontent.com/dyxxxyd/fluid-functionalism/linkstart/public/r/tokens.json"
+      ],
+      "files": [
+        {
+          "path": "registry/standard/hooks/use-fluid-hover.ts",
+          "type": "registry:hook"
+        },
+        {
+          "path": "registry/standard/fluid-hover-highlight.tsx",
+          "type": "registry:component"
+        }
+      ],
+      "docs": "Part of Fluid Functionalism — https://www.fluidfunctionalism.com",
+      "categories": [
+        "hook"
+      ]
+    },
+    {
       "name": "use-touch-primary",
       "type": "registry:hook",
       "title": "useTouchPrimary",
@@ -1442,7 +1471,8 @@
         "https://raw.githubusercontent.com/dyxxxyd/fluid-functionalism/linkstart/public/r/shape-context.json",
         "https://raw.githubusercontent.com/dyxxxyd/fluid-functionalism/linkstart/public/r/size-context.json",
         "https://raw.githubusercontent.com/dyxxxyd/fluid-functionalism/linkstart/public/r/surface-context.json",
-        "https://raw.githubusercontent.com/dyxxxyd/fluid-functionalism/linkstart/public/r/surface-classes.json"
+        "https://raw.githubusercontent.com/dyxxxyd/fluid-functionalism/linkstart/public/r/surface-classes.json",
+        "https://raw.githubusercontent.com/dyxxxyd/fluid-functionalism/linkstart/public/r/tokens.json"
       ],
       "files": [
         {
@@ -1540,7 +1570,8 @@
       "registryDependencies": [
         "https://raw.githubusercontent.com/dyxxxyd/fluid-functionalism/linkstart/public/r/springs.json",
         "https://raw.githubusercontent.com/dyxxxyd/fluid-functionalism/linkstart/public/r/surface-context.json",
-        "https://raw.githubusercontent.com/dyxxxyd/fluid-functionalism/linkstart/public/r/surface-classes.json"
+        "https://raw.githubusercontent.com/dyxxxyd/fluid-functionalism/linkstart/public/r/surface-classes.json",
+        "https://raw.githubusercontent.com/dyxxxyd/fluid-functionalism/linkstart/public/r/tokens.json"
       ],
       "files": [
         {
@@ -1567,7 +1598,8 @@
         "https://raw.githubusercontent.com/dyxxxyd/fluid-functionalism/linkstart/public/r/springs.json",
         "https://raw.githubusercontent.com/dyxxxyd/fluid-functionalism/linkstart/public/r/omit.json",
         "https://raw.githubusercontent.com/dyxxxyd/fluid-functionalism/linkstart/public/r/surface-context.json",
-        "https://raw.githubusercontent.com/dyxxxyd/fluid-functionalism/linkstart/public/r/surface-classes.json"
+        "https://raw.githubusercontent.com/dyxxxyd/fluid-functionalism/linkstart/public/r/surface-classes.json",
+        "https://raw.githubusercontent.com/dyxxxyd/fluid-functionalism/linkstart/public/r/tokens.json"
       ],
       "files": [
         {
@@ -1799,9 +1831,9 @@
       ]
     },
     {
-      "name": "tabs-subtle",
+      "name": "tabs",
       "type": "registry:ui",
-      "title": "Tabs Subtle",
+      "title": "Tabs",
       "description": "Horizontal tab navigation with fluid hover, animated pill selection indicator, and fluid font-weight transitions. Radix flavor.",
       "dependencies": [
         "@radix-ui/react-tabs",
@@ -1820,9 +1852,9 @@
       ],
       "files": [
         {
-          "path": "registry/radix/tabs-subtle.tsx",
+          "path": "registry/radix/tabs.tsx",
           "type": "registry:ui",
-          "target": "components/ui/tabs-subtle.tsx"
+          "target": "components/ui/tabs.tsx"
         }
       ],
       "css": {
@@ -1834,15 +1866,15 @@
           "display": "none"
         }
       },
-      "docs": "Docs & live playground: https://www.fluidfunctionalism.com/docs/tabs-subtle. Craft notes, the color, layout and motion decisions to keep when you change it: https://github.com/mickadesign/fluid-functionalism/blob/main/skills/fluid-functionalism/references/craft.md#tabs-subtle.",
+      "docs": "Docs & live playground: https://www.fluidfunctionalism.com/docs/tabs. Craft notes, the color, layout and motion decisions to keep when you change it: https://github.com/mickadesign/fluid-functionalism/blob/main/skills/fluid-functionalism/references/craft.md#tabs.",
       "categories": [
         "components"
       ]
     },
     {
-      "name": "base/tabs-subtle",
+      "name": "base/tabs",
       "type": "registry:ui",
-      "title": "Tabs Subtle",
+      "title": "Tabs",
       "description": "Horizontal tab navigation with fluid hover, animated pill selection indicator, and fluid font-weight transitions. Base UI flavor.",
       "dependencies": [
         "@base-ui/react@^1.9.0",
@@ -1861,9 +1893,9 @@
       ],
       "files": [
         {
-          "path": "registry/base/tabs-subtle.tsx",
+          "path": "registry/base/tabs.tsx",
           "type": "registry:ui",
-          "target": "components/ui/tabs-subtle.tsx"
+          "target": "components/ui/tabs.tsx"
         }
       ],
       "css": {
@@ -1875,7 +1907,7 @@
           "display": "none"
         }
       },
-      "docs": "Docs & live playground: https://www.fluidfunctionalism.com/docs/tabs-subtle. Craft notes, the color, layout and motion decisions to keep when you change it: https://github.com/mickadesign/fluid-functionalism/blob/main/skills/fluid-functionalism/references/craft.md#tabs-subtle.",
+      "docs": "Docs & live playground: https://www.fluidfunctionalism.com/docs/tabs. Craft notes, the color, layout and motion decisions to keep when you change it: https://github.com/mickadesign/fluid-functionalism/blob/main/skills/fluid-functionalism/references/craft.md#tabs.",
       "categories": [
         "components"
       ]
@@ -2409,74 +2441,6 @@
       ]
     },
     {
-      "name": "tabs",
-      "type": "registry:ui",
-      "title": "Tabs",
-      "description": "Segmented control tabs with sliding active indicator, fluid hover, and spring animations. Built on Radix UI Tabs.",
-      "dependencies": [
-        "motion",
-        "@radix-ui/react-tabs",
-        "lucide-react"
-      ],
-      "registryDependencies": [
-        "utils",
-        "https://raw.githubusercontent.com/dyxxxyd/fluid-functionalism/linkstart/public/r/springs.json",
-        "https://raw.githubusercontent.com/dyxxxyd/fluid-functionalism/linkstart/public/r/font-weight.json",
-        "https://raw.githubusercontent.com/dyxxxyd/fluid-functionalism/linkstart/public/r/shape-context.json",
-        "https://raw.githubusercontent.com/dyxxxyd/fluid-functionalism/linkstart/public/r/surface-context.json",
-        "https://raw.githubusercontent.com/dyxxxyd/fluid-functionalism/linkstart/public/r/surface-classes.json",
-        "https://raw.githubusercontent.com/dyxxxyd/fluid-functionalism/linkstart/public/r/icon-context.json",
-        "https://raw.githubusercontent.com/dyxxxyd/fluid-functionalism/linkstart/public/r/use-fluid-hover.json",
-        "https://raw.githubusercontent.com/dyxxxyd/fluid-functionalism/linkstart/public/r/size-context.json",
-        "https://raw.githubusercontent.com/dyxxxyd/fluid-functionalism/linkstart/public/r/tokens.json"
-      ],
-      "files": [
-        {
-          "path": "registry/radix/tabs.tsx",
-          "type": "registry:ui",
-          "target": "components/ui/tabs.tsx"
-        }
-      ],
-      "docs": "Docs & live playground: https://www.fluidfunctionalism.com/docs/tabs. Craft notes, the color, layout and motion decisions to keep when you change it: https://github.com/mickadesign/fluid-functionalism/blob/main/skills/fluid-functionalism/references/craft.md#tabs.",
-      "categories": [
-        "components"
-      ]
-    },
-    {
-      "name": "base/tabs",
-      "type": "registry:ui",
-      "title": "Tabs (Base UI)",
-      "description": "Segmented control tabs with sliding active indicator, fluid hover, and spring animations. Base UI flavor.",
-      "dependencies": [
-        "motion",
-        "@base-ui/react@^1.9.0",
-        "lucide-react"
-      ],
-      "registryDependencies": [
-        "utils",
-        "https://raw.githubusercontent.com/dyxxxyd/fluid-functionalism/linkstart/public/r/springs.json",
-        "https://raw.githubusercontent.com/dyxxxyd/fluid-functionalism/linkstart/public/r/font-weight.json",
-        "https://raw.githubusercontent.com/dyxxxyd/fluid-functionalism/linkstart/public/r/shape-context.json",
-        "https://raw.githubusercontent.com/dyxxxyd/fluid-functionalism/linkstart/public/r/surface-context.json",
-        "https://raw.githubusercontent.com/dyxxxyd/fluid-functionalism/linkstart/public/r/surface-classes.json",
-        "https://raw.githubusercontent.com/dyxxxyd/fluid-functionalism/linkstart/public/r/icon-context.json",
-        "https://raw.githubusercontent.com/dyxxxyd/fluid-functionalism/linkstart/public/r/use-fluid-hover.json",
-        "https://raw.githubusercontent.com/dyxxxyd/fluid-functionalism/linkstart/public/r/size-context.json",
-        "https://raw.githubusercontent.com/dyxxxyd/fluid-functionalism/linkstart/public/r/tokens.json"
-      ],
-      "files": [
-        {
-          "path": "registry/base/tabs.tsx",
-          "type": "registry:ui",
-          "target": "components/ui/tabs.tsx"
-        }
-      ],
-      "docs": "Docs & live playground: https://www.fluidfunctionalism.com/docs/tabs. Craft notes, the color, layout and motion decisions to keep when you change it: https://github.com/mickadesign/fluid-functionalism/blob/main/skills/fluid-functionalism/references/craft.md#tabs.",
-      "categories": [
-        "components"
-      ]
-    },
-    {
       "name": "thinking-indicator",
       "type": "registry:ui",
       "title": "Thinking Indicator",
@@ -2628,10 +2592,10 @@
           }
         },
         ":is(.reveal-product, .reveal-product-subtle, .reveal-items, .reveal-swap) [data-slot=\"skeleton\"]": {
-          "animation": "reveal-skeleton-in 250ms ease-in-out both, reveal-pulse 2s cubic-bezier(0.4, 0, 0.6, 1) 250ms infinite"
+          "animation": "reveal-skeleton-in 250ms ease-in-out 160ms both, reveal-pulse 2s cubic-bezier(0.4, 0, 0.6, 1) 410ms infinite"
         },
         ".reveal-swap > :first-child:not(:last-child) [data-slot=\"skeleton\"]": {
-          "animation": "none"
+          "animation-play-state": "paused"
         },
         "@keyframes reveal-leave": {
           "to": {
@@ -2686,7 +2650,7 @@
             "animation-delay": "calc(var(--reveal-load-delay, 0s) + var(--reveal-step))"
           },
           ":is(.reveal-product, .reveal-product-subtle, .reveal-items, .reveal-swap) [data-slot=\"skeleton\"]": {
-            "animation": "reveal-skeleton-in 250ms ease-in-out both"
+            "animation": "reveal-skeleton-in 250ms ease-in-out 160ms both"
           }
         }
       },
@@ -3185,7 +3149,7 @@
       "name": "command-menu",
       "type": "registry:ui",
       "title": "Command Menu",
-      "description": "Search field over a list of actions: type to filter, arrows to move the fluid hover highlight, Enter to run. Grouped rows with icons, descriptions, and shortcut caps; suggestions listed first while nothing is typed; subtle tabs or a borderless filter bar under the field; and a dialog shell opened by a global shortcut (default ⌘K / Ctrl+K). The list needs no primitive; the dialog is the library's Dialog in either flavor.",
+      "description": "Search field over a list of actions: type to filter, arrows to move the fluid hover highlight, Enter to run. Grouped rows with icons, descriptions, and shortcut caps; suggestions listed first while nothing is typed; tabs or a borderless filter bar under the field; and a dialog shell opened by a global shortcut (default ⌘K / Ctrl+K). The list needs no primitive; the dialog is the library's Dialog in either flavor.",
       "dependencies": [
         "motion",
         "lucide-react"
@@ -3203,7 +3167,7 @@
         "https://raw.githubusercontent.com/dyxxxyd/fluid-functionalism/linkstart/public/r/popup.json",
         "https://raw.githubusercontent.com/dyxxxyd/fluid-functionalism/linkstart/public/r/scroll-area.json",
         "https://raw.githubusercontent.com/dyxxxyd/fluid-functionalism/linkstart/public/r/dialog.json",
-        "https://raw.githubusercontent.com/dyxxxyd/fluid-functionalism/linkstart/public/r/tabs-subtle.json",
+        "https://raw.githubusercontent.com/dyxxxyd/fluid-functionalism/linkstart/public/r/tabs.json",
         "https://raw.githubusercontent.com/dyxxxyd/fluid-functionalism/linkstart/public/r/tokens.json",
         "https://raw.githubusercontent.com/dyxxxyd/fluid-functionalism/linkstart/public/r/type-scale.json"
       ],
@@ -3400,7 +3364,8 @@
         "https://raw.githubusercontent.com/dyxxxyd/fluid-functionalism/linkstart/public/r/springs.json",
         "https://raw.githubusercontent.com/dyxxxyd/fluid-functionalism/linkstart/public/r/font-weight.json",
         "https://raw.githubusercontent.com/dyxxxyd/fluid-functionalism/linkstart/public/r/shape-context.json",
-        "https://raw.githubusercontent.com/dyxxxyd/fluid-functionalism/linkstart/public/r/type-scale.json"
+        "https://raw.githubusercontent.com/dyxxxyd/fluid-functionalism/linkstart/public/r/type-scale.json",
+        "https://raw.githubusercontent.com/dyxxxyd/fluid-functionalism/linkstart/public/r/tokens.json"
       ],
       "files": [
         {
@@ -3429,7 +3394,8 @@
         "https://raw.githubusercontent.com/dyxxxyd/fluid-functionalism/linkstart/public/r/omit.json",
         "https://raw.githubusercontent.com/dyxxxyd/fluid-functionalism/linkstart/public/r/font-weight.json",
         "https://raw.githubusercontent.com/dyxxxyd/fluid-functionalism/linkstart/public/r/shape-context.json",
-        "https://raw.githubusercontent.com/dyxxxyd/fluid-functionalism/linkstart/public/r/type-scale.json"
+        "https://raw.githubusercontent.com/dyxxxyd/fluid-functionalism/linkstart/public/r/type-scale.json",
+        "https://raw.githubusercontent.com/dyxxxyd/fluid-functionalism/linkstart/public/r/tokens.json"
       ],
       "files": [
         {
@@ -3565,6 +3531,7 @@
         "https://raw.githubusercontent.com/dyxxxyd/fluid-functionalism/linkstart/public/r/icon-context.json",
         "https://raw.githubusercontent.com/dyxxxyd/fluid-functionalism/linkstart/public/r/use-fluid-hover.json",
         "https://raw.githubusercontent.com/dyxxxyd/fluid-functionalism/linkstart/public/r/elevated.json",
+        "https://raw.githubusercontent.com/dyxxxyd/fluid-functionalism/linkstart/public/r/popup.json",
         "https://raw.githubusercontent.com/dyxxxyd/fluid-functionalism/linkstart/public/r/slider.json",
         "https://raw.githubusercontent.com/dyxxxyd/fluid-functionalism/linkstart/public/r/size-context.json",
         "https://raw.githubusercontent.com/dyxxxyd/fluid-functionalism/linkstart/public/r/tooltip.json",

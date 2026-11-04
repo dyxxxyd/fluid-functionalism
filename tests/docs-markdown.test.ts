@@ -15,6 +15,7 @@ import {
 import { API_REFERENCE } from "@/lib/docs/api";
 import { PROMPT_ENTRIES } from "@/lib/docs/prompt-entries";
 import { DUAL_FLAVOR_SLUGS } from "@/lib/install-url";
+import { REGISTRY_BASE_URL } from "@/lib/registry-urls.mjs";
 import { docMetadata } from "@/lib/docs/metadata";
 import { plainDescription } from "@/lib/docs/install-brief";
 import robots from "@/app/robots";
@@ -64,8 +65,9 @@ describe("page Markdown", () => {
   it.each(pages)("%s: title, install command, usage and the full API", (slug) => {
     const md = docMarkdown(slug)!;
     const entry = MARKDOWN_PAGES.find((p) => p.slug === slug)!;
+    const installSlug = "installSlug" in entry ? entry.installSlug ?? slug : slug;
     expect(md.startsWith(`# ${entry.name}\n`)).toBe(true);
-    expect(md).toMatch(/npx shadcn@latest add https:\/\/www\.fluidfunctionalism\.com\/r\/[a-z-]+\.json --overwrite/);
+    expect(md).toContain(`npx shadcn@latest add ${REGISTRY_BASE_URL}/${installSlug}.json --overwrite`);
     expect(md).toContain(`https://www.fluidfunctionalism.com/docs/${slug}`);
     const usage = PROMPT_ENTRIES[slug]?.usage;
     if (usage) expect(md).toContain(usage.trim());

@@ -31,6 +31,7 @@ export const PROMPT_ENTRIES: Record<string, PromptEntry> = {
       "The pointer session counter increments on `onMouseEnter` and re-keys the highlight, so a fresh entry fades in at the row it lands on instead of sliding over from wherever it was last; `from` sets where that fresh entry fades in from (a dropdown passes its checked row, a nav menu its active route), and `fadeIn={false}` starts it opaque when `from` sits under a filled item (the calendar's range start), so the highlight slides out of it.",
       "With `nearest: true`, a click that lands between items (gap, padding, past the last row) is routed as a real DOM `.click()` to the highlighted item's activator \u2014 \"what is lit is what a click hits\". Clicks inside an item, on controls between rows (a menu's search field), and on disabled items are left alone; `gapClick: false` turns it off and `{maxDistance}` caps it. Without `nearest`, gap clicks stay inert.",
       "Gate overlays on `isMeasured`: an overlay mounted against a rect a later pass corrects animates from the wrong place to the right one, which reads as the highlight sliding in from another row. Measurement coalesces every trigger into one rAF pass, retries up to 3 frames while a popup has no layout box, and never publishes zeroed rects \u2014 the last complete measurement stands.",
+      "Rows never read `activeIndex` from a context: every row would re-render on every highlight change. Pass the hook's stable `activeStore` down instead and read it per row with `useFluidHoverSelect(store, (i) => i === index)`, which re-renders only the row the highlight left and the row it reached. The selector returns a primitive (a boolean, or a small number for a table row whose border hides next to the lit one).",
       "Reduced motion is handled inside the component itself via `useReducedMotion()`: travel snaps, the 0.08s opacity fade stays \u2014 so an installed copy behaves correctly without the consumer wrapping their app in `MotionConfig`.",
       "Only click targets register: a card without `href` or `onClick` does not join the highlight, because lighting it would promise a click with nowhere to land. One list per group of alternatives \u2014 children ride in the parent's list, a divider between different kinds of rows means a new container and a new hook.",
       "The docs' skip-list is explicit UX judgment: skip fluid hover when a wrong click would hurt, when only some items are clickable, when there is a lot of empty space around items, or when rows change place as you scroll.",
@@ -100,7 +101,7 @@ import { spring } from "@/lib/springs";
       "1 class on a page's container, like shadcn's `scroll-fade`. Pure CSS: no JavaScript, no hydration, nothing hidden on the server.",
       "`reveal-landing` is for a page read once. The 1st child is the hero: its children rise 12px and scale in from 0.94 on first paint, 0.1s apart for 4 steps (the 5th onward arrives with the 4th). Every later child rises and scales in the same way with the scroll on a view() timeline, from when its top edge is 12px inside the viewport to 120px, so nothing starts moving at the very edge. Everything on screen at first paint belongs in the hero, product shot included: a later section that starts on screen sits half revealed, waiting for a scroll, instead of playing on load. For a grid, `reveal-scroll` on each card makes every card a scroll section of its own with the same values, while the section holding them stays still; wrap a card that already animates `transform` (a framer layout node), since the CSS animation would override it. A `reveal-scroll` nested in another follows it half a range later on the way in (72px to 180px by default) and leaves half a range sooner, so a card arrives and then its content; the Showcase wraps each tile and each tile's component this way. Every scroll section and `reveal-scroll` also plays a load step after the hero (from the 4th step, then a step per sibling for 4 steps, and a step later for nested content), so one already on screen at first paint arrives with the page; off screen, the step plays unseen and the scroll takes over. A view() timeline binds to the nearest scroll container and `overflow: hidden` makes one even if it never scrolls, so clip a revealed element's ancestors with `overflow: clip` or its animation never moves. Leaving at the top mirrors it: from when a section's bottom edge is 120px from the top of the viewport to 12px, it fades out, lifts 12px, and scales to 0.94 (the hero too). Product reveals have no exit.",
       "`reveal-product` is for the app people come back to: every child fades in on first paint, 0.06s apart, with no rise, and nothing moves on scroll: an app's layout should feel like it was already there. Scroll reveals in an app are noise on the 10th visit.",
-      "Slow data in `reveal-product` waits on Skeleton (installed with the item). Never swap a skeleton out and the data in on the same frame: the data starts at opacity 0, so the space blinks empty. `reveal-swap` stacks both in 1 grid cell: render the skeleton, then add the real block after it when the data lands, and the skeleton fades out as the block fades in. With `reveal-items` on both, each skeleton row hands over to its real row a step apart. Build the skeleton the size of the real block so nothing shifts, and keep Skeletons inside a block: a Skeleton that is itself an animated child loses its pulse. Skeletons in a preset, a `reveal-items` block, or a `reveal-swap` fade in over 250ms on an even ease-in-out curve before shadcn's pulse starts, so a placeholder arrives instead of popping in. Reduced motion keeps that fade and stops the pulse.",
+      "Slow data in `reveal-product` waits on Skeleton (installed with the item). Never swap a skeleton out and the data in on the same frame: the data starts at opacity 0, so the space blinks empty. `reveal-swap` stacks both in 1 grid cell: render the skeleton, then add the real block after it when the data lands, and the skeleton fades out as the block fades in. With `reveal-items` on both, each skeleton row hands over to its real row a step apart. Build the skeleton the size of the real block so nothing shifts, and keep Skeletons inside a block: a Skeleton that is itself an animated child loses its pulse. Skeletons in a preset, a `reveal-items` block, or a `reveal-swap` wait 160ms, then fade in over 250ms on an even ease-in-out curve before shadcn's pulse starts: data that lands within 160ms never shows a skeleton, and a slower one arrives instead of popping in. A swapped-out skeleton pauses where it is and fades out from there, never jumping back to full opacity first. Reduced motion keeps the wait and the fade and stops the pulse.",
       "`reveal-items` on a block keeps the block still and brings its children in one by one, a step apart, for 8 steps: table rows, metrics, and a sidebar's items fill in in order when their data lands instead of all at once. Inside a preset it takes the preset's travel and step; outside one (a sidebar beside the preset) it fades like the product, 0.06s apart.",
       "`-subtle` tones the gesture down: landing 8px and 0.98 scale, 0.06s steps, 8px to 60px of scroll; product 0.04s steps.",
       "No new token: landing steps ride `spring.slow` (0.24s, bounce 0.12), the tier for large surfaces; product steps ride `spring.moderate` (0.16s, no bounce), since app blocks are panels and a fade has no travel for a bounce to act on. Both are written as CSS `linear()` in `--reveal-motion`, and only the `from` keyframe is set, so each block lands on its own styles.",
@@ -171,7 +172,7 @@ import { Skeleton } from "@/components/ui/skeleton";
     craft: [
       "Two steps only: default 36px controls and compact 28px. Every dimension steps down together \u2014 text 13\u219212px, icon 16\u219214px, control padding 12\u219210px, row padding 8\u21926px, gap 8\u21924px \u2014 \"so the whole control shrinks together, not just its box\".",
       "One `control` height token by design for BOTH bounded controls (buttons, inputs, select triggers) AND list/menu rows: a popup row lines up with the trigger that opened it because they share this height.",
-      "Segmented tabs are sized so `segmentPad` + `segmentItem` adds back up to the control height (28px item + 4px pad = 36px default; 24 + 2 = 28 compact) \u2014 the segmented control's outer box stays on the same ladder as its neighbours.",
+      "Tabs take the `control` height directly (36px default, 28px compact), so a tab row lines up with the buttons, selects and inputs beside it. The `segmentPad` + `segmentItem` pair stays on the ladder for segmented controls built by hand.",
       "The compact step halves the `gap` token (8px \u2192 4px) because \"density is spacing as much as control height\" \u2014 control-to-control spacing comes from the ladder, not from layout code.",
       "Type follows the ladder: compact drops each of the six roles one notch, size and leading together (body 13/20px \u2192 12/18px, caption 12/16px \u2192 11/14px), so a dense region reads as \"a smaller sibling of the same hierarchy, not a squeezed copy\". The scale itself is its own system: see Typography.",
       "Resolution order is explicit component `size` prop > surrounding `SizeProvider` > `\"default\"`; ~20 components accept the per-component override and it wins over the provider.",
@@ -600,24 +601,29 @@ const [slide, setSlide] = useState(0);
     craft: [
       "Every message enters with opacity 0, y 8, scale 0.96 \u2192 settled on spring.moderate, with transformOrigin bottom-right for user messages and bottom-left for assistant, so bubbles appear to grow from the composer side they belong to.",
       "`layout=\"position\"` is baked in so earlier messages slide up smoothly when a new one is appended to the transcript.",
+      "Messages already sent when the transcript first renders skip the entrance: wrap the list in `<AnimatePresence initial={false}>` (keyed children), so loaded history appears settled and only messages added later rise in. Layout motion starts once a message has entered, so page-load width changes never slide a bubble sideways mid-entrance.",
       "User = right-aligned accent bubble filled with `color-mix(in oklab, var(--accent), var(--background) 45%)`; assistant = flush-left plain text with no background at all.",
       "`text-pretty` is applied only to user bubbles and deliberately left off assistant replies: `text-wrap: pretty` re-balances the last lines on every content change, so a word-by-word stream would visibly reflow earlier words onto new lines; normal wrapping appends left-to-right and stays put.",
       "The meta row (timestamp + icon actions) is always rendered so it reserves its height and the gap between bubbles never shifts; it fades in over 150ms on hover or focus-within, and stays permanently visible on touch where hover is unreachable.",
       "Timestamps are a user-message-only affordance \u2014 `time` is ignored on assistant replies, which show their actions alone; the timestamp renders tabular-nums.",
       "Messages cap at max-w-[80%]; attachments render as square thumbnails (default 64px) in a row above the bubble, justified toward the message's own side, and an attachment-only message (no children) drops the text bubble entirely. Each thumbnail gets a 1px inset pure-black/pure-white 10% outline so bright edge pixels do not disappear into the page.",
     ],
-    usage: `import { ChatMessage } from "@/components/ui/chat-message";
+    usage: `import { AnimatePresence } from "motion/react";
+import { ChatMessage } from "@/components/ui/chat-message";
 import { Copy } from "lucide-react";
 
 const actions = <button aria-label="Copy"><Copy size={13} /></button>;
 
+// initial={false}: messages already sent skip the entrance; new ones animate in.
 <div className="flex flex-col gap-2">
-  <ChatMessage from="user" time="Wednesday 6:06 PM" actions={actions}>
-    What does "good design" actually mean?
-  </ChatMessage>
-  <ChatMessage from="assistant" actions={actions}>
-    Good design is mostly invisible. You only notice it when it is missing.
-  </ChatMessage>
+  <AnimatePresence initial={false}>
+    <ChatMessage key="m1" from="user" time="Wednesday 6:06 PM" actions={actions}>
+      What does "good design" actually mean?
+    </ChatMessage>
+    <ChatMessage key="m2" from="assistant" actions={actions}>
+      Good design is mostly invisible. You only notice it when it is missing.
+    </ChatMessage>
+  </AnimatePresence>
 </div>`,
     props: [
       'from: "user" | "assistant". Who sent it: user is a right-aligned accent bubble, assistant is left-aligned plain text.',
@@ -1359,43 +1365,7 @@ const data = [{ id: "alice", name: "Alice" }, { id: "bob", name: "Bob" }];
   },
   "tabs": {
     craft: [
-      "The active pill travels between tabs on `spring.moderate`; clicking sets an optimistic selected index so the indicator jumps immediately instead of waiting for controlled state to round-trip \u2014 the item's onClick is composed, not spread-overridable, so a consumer onClick can't break this.",
-      "The hover pill is born AT the selected pill (initial = selectedRect, opacity 0) and springs to the hovered tab at opacity 0.4 on `spring.fast`; when the mouse exits the list it travels back to the selected pill while fading out (spring.moderate, 60ms opacity) rather than just disappearing.",
-      "While a non-selected tab is hovered, the active pill dims to opacity 0.85 (0.08s), signalling the split attention.",
-      "The active pill's surface level is `min(substrate + 3, 8)` \u2014 \"1 above the muted track + 2 for pop\": surface 4 on the page, but 8 inside a dialog (substrate 5) instead of colliding at 4.",
-      "Labels change weight without layout shift: two stacked grid spans, an invisible semibold sizer plus the visible label, both carrying `[text-box:trim-both_cap_alphabetic]` so their boxes stay identical; selected = semibold, color+weight transition `duration-80`.",
-      "Items use a fixed height from the size ladder instead of `py` \"so the text-box trim below doesn't shrink the tab \u2014 browsers without text-box support render identically\"; segmentPad + segmentItem sum to the ladder's 36px/28px control height so the control lines up with adjacent buttons/selects/inputs.",
-      "Icons animate strokeWidth 1.5 \u2192 2 and muted \u2192 foreground color when the tab is hovered or selected (`transition-[color,stroke-width] duration-80`).",
-      "Keyboard focus draws a springing 2px-outset focus ring rect only on `:focus-visible`, and focus also drives the hover highlight; blur clears the highlight only if the mouse isn't inside the list.",
-    ],
-    usage: `import { Tabs, TabsList, TabItem, TabPanel } from "@/components/ui/tabs";
-
-<Tabs defaultValue="library">
-  <TabsList>
-    <TabItem value="library" label="Library" />
-    <TabItem value="recents" label="Recents" />
-    <TabItem value="favorites" label="Favorites" />
-  </TabsList>
-  <TabPanel value="library">Library content.</TabPanel>
-  <TabPanel value="recents">Recents content.</TabPanel>
-  <TabPanel value="favorites">Favorites content.</TabPanel>
-</Tabs>`,
-    props: [
-      "value: string. Controlled active tab value. Takes precedence over selectedIndex.",
-      "onValueChange: (value: string) => void. Called when the active tab changes.",
-      "defaultValue: string. Default active tab for uncontrolled usage.",
-      "selectedIndex: number. Index-based controlled alternative.",
-      "onSelect: (index: number) => void. Called with the new index when the active tab changes.",
-      "size: \"default\" | \"compact\" (default from SizeProvider). Pins the segmented control to one step of the size ladder.",
-      "TabItem.value: string. Unique value identifying this tab.",
-      "TabItem.label: string. Text label for the tab.",
-      "TabItem.icon: IconComponent. Optional leading icon.",
-      "TabPanel.value: string. Must match a TabItem value; content renders when that tab is active.",
-    ],
-  },
-  "tabs-subtle": {
-    craft: [
-      "Same pill choreography as Tabs: the hover pill starts at the selected pill (opacity 0), springs to the hovered tab at opacity 0.4 (`spring.fast`), and on mouse exit travels back to the selected pill while fading (spring.moderate, 60ms opacity); the selected pill dims to 0.8 while another tab is hovered.",
+      "The hover pill starts at the selected pill (opacity 0), springs to the hovered tab at opacity 0.4 (`spring.fast`), and on mouse exit travels back to the selected pill while fading (spring.moderate, 60ms opacity); the selected pill dims to 0.8 while another tab is hovered.",
       "`activeLabel` mode collapses every non-selected tab to its icon; the label expands/collapses by animating width to a MEASURED `offsetWidth`, never `\"auto\"` \u2014 framer resolves an \"auto\" target from the element's visual (transformed) size, so under a scaled ancestor the spring overshoots and snaps.",
       "Until the first measurement lands, width stays plain CSS `auto` instead of handing framer \"auto\": under the /demo card's ~1.76x scale framer would write back a too-wide width and spring back down, making the selected tab visibly pulse on arrival.",
       "The expanding label animates `marginLeft` to 8px, 6px compact: the default matches the ladder's `gap-2`, while the compact value is its own, 2px wider than the ladder's `gap-1`.",
@@ -1404,20 +1374,20 @@ const data = [{ id: "alice", name: "Alice" }, { id: "bob", name: "Bob" }];
       "Activation is manual, `activationMode=\"manual\"` on Radix and `activateOnFocus={false}` on Base UI: arrows move focus, Enter/Space selects. The primitive owns role=\"tablist\", roving tabindex, and Arrow/Home/End.",
     ],
     usage: `import { useState } from "react";
-import { TabsSubtle, TabsSubtleItem, TabsSubtlePanel } from "@/components/ui/tabs-subtle";
+import { Tabs, TabsItem, TabsPanel } from "@/components/ui/tabs";
 
 const tabs = ["Teamspaces", "Recents", "Favorites"];
 const [selected, setSelected] = useState(0);
 
-<TabsSubtle idPrefix="demo" selectedIndex={selected} onSelect={setSelected}>
+<Tabs idPrefix="demo" selectedIndex={selected} onSelect={setSelected}>
   {tabs.map((label, i) => (
-    <TabsSubtleItem key={label} index={i} label={label} />
+    <TabsItem key={label} index={i} label={label} />
   ))}
-</TabsSubtle>
+</Tabs>
 {tabs.map((label, i) => (
-  <TabsSubtlePanel key={label} index={i} selectedIndex={selected} idPrefix="demo">
+  <TabsPanel key={label} index={i} selectedIndex={selected} idPrefix="demo">
     <p>{label} content</p>
-  </TabsSubtlePanel>
+  </TabsPanel>
 ))}`,
     props: [
       "selectedIndex: number. Index of the currently selected tab.",
@@ -1425,11 +1395,11 @@ const [selected, setSelected] = useState(0);
       "idPrefix: string. Prefix for ARIA IDs linking tabs to panels.",
       "activeLabel: boolean (default false). Only the selected tab shows its text label. Requires icons on tabs.",
       "size: \"default\" | \"compact\" (default from SizeProvider). Pins the tabs to one step of the size ladder.",
-      "TabsSubtleItem.index: number. Position index within the tab list.",
-      "TabsSubtleItem.label: string. Text label for the tab.",
-      "TabsSubtleItem.icon: IconComponent. Icon displayed in the tab.",
-      "TabsSubtlePanel.index: number. Index of this panel; rendered only when it matches selectedIndex.",
-      "TabsSubtlePanel.idPrefix: string. Must match the TabsSubtle idPrefix.",
+      "TabsItem.index: number. Position index within the tab list.",
+      "TabsItem.label: string. Text label for the tab.",
+      "TabsItem.icon: IconComponent. Icon displayed in the tab.",
+      "TabsPanel.index: number. Index of this panel; rendered only when it matches selectedIndex.",
+      "TabsPanel.idPrefix: string. Must match the Tabs idPrefix.",
     ],
   },
   "thinking-indicator": {
@@ -1530,7 +1500,7 @@ import { Button } from "@/components/ui/button";
       "Hover delay defaults to 200ms; an app-level `TooltipProvider` adds skip-delay grouping (300ms window) so moving between adjacent triggers shows the next tooltip instantly. Each bare Tooltip falls back to a per-instance provider only when no ambient one exists \u2014 a per-instance provider everywhere would defeat the grouping and re-wait the full delay between neighbors.",
       "`followCursor=\"x\" | \"y\"` tracks the pointer along one axis for tall or wide triggers (the Sidebar rail) where a centered tooltip sits far from the pointer; the other axis stays anchored by `side`. The offset is a framer motion value, so per-move updates skip React re-renders; a force-opened follow tooltip rests centered until a real pointer takes over.",
       "The bubble is an inverted surface (`bg-foreground text-background`), 12px at regular weight (`fontVariationSettings`); `text-box: trim-both cap alphabetic` recenters the label, with the padding bump applied only where text-box is supported so overall height stays ~24px on untrimmed browsers.",
-      "`contentClassName` exists because Radix copies the content's z-index onto its popper wrapper: pass a z utility there to lift the whole tooltip above other fixed layers (default z-50); on Base UI the same prop lands on the Positioner instead. `className` styles the bubble itself.",
+      "`contentClassName` exists because Radix copies the content's z-index onto its popper wrapper: pass a z utility there to lift the whole tooltip above other fixed layers (default: the `--z-tooltip` step, 70); on Base UI the same prop lands on the Positioner instead. `className` styles the bubble itself.",
       "`forceOpen` pins the tooltip open (or closed) over the hover/focus behavior \u2014 `onOpenChange` still reports the internal state before forceOpen is applied.",
     ],
     usage: `import { Tooltip } from "@/components/ui/tooltip";
@@ -1552,7 +1522,7 @@ import { Button } from "@/components/ui/button";
       "forceOpen: boolean. True forces the tooltip open, false forces it closed, undefined uses hover and focus.",
       "onOpenChange: (open: boolean) => void. Called when the internal open state changes.",
       "className: string. Additional classes applied to the tooltip content container.",
-      "contentClassName: string. Classes for the portalled element; pass a z-index utility to lift the tooltip above other fixed layers (default z-50).",
+      "contentClassName: string. Classes for the portalled element; pass a z-index utility to lift the tooltip above other fixed layers (default: the --z-tooltip step, 70).",
     ],
   },
   "command-menu": {

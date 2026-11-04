@@ -117,6 +117,20 @@
      value in each scope. */
   --focus-ring: var(--fluid-accent);
 
+  /* ── Stacking scale ──
+     The only z-index steps for layers that leave their component: sticky
+     chrome, the scrim under a modal, the modal or sheet itself, popovers
+     (menus, selects, pickers), and tooltips on top. A popover opened from a
+     dialog, or a tooltip on a menu row, wins by its step, never by which
+     portal mounted last. Components read var(--z-*, <literal>), so they keep
+     the same order in projects without these variables. Values inside one
+     component (rows over their hover fill) stay plain z-10 / z-20. */
+  --z-sticky: 30;
+  --z-overlay: 40;
+  --z-modal: 50;
+  --z-popover: 60;
+  --z-tooltip: 70;
+
   /* ── Alpha checkerboard (color-picker swatches) ── */
   --checker-a: light-dark(#bbbbbb, #1f1f1f);
   --checker-b: light-dark(#ffffff, #2a2a2a);
@@ -517,15 +531,15 @@ html[data-size="compact"] {
    through .typeset. The typography specimen reads sizes and weights back
    from the DOM, so nothing here is mirrored in JS. */
 
-/* Source Serif 4 (next/font, app/layout.tsx): every role at 450, as the
-   serif carries its own contrast and heavier weights read loud, each with
-   Inter's opsz for that role. The display role also runs 4px larger (and 4px
-   more leading) at every step, as its smaller x-height reads small at
-   Inter's size. The [data-size] rules out-rank the base one on purpose. */
-:root[data-font="source-serif"] {
-  --heading-family: var(--font-source-serif), Georgia, serif;
-  --heading-fvs: 'wght' 450, 'opsz' 18;
-  --heading-display-fvs: 'wght' 450, 'opsz' 25;
+/* Geist Serif (next/font/local, app/layout.tsx): one Regular cut so far,
+   with no weight or opsz axis, so every role draws its Regular. The display
+   role runs 4px larger (and 4px more leading) at every step, as the serif
+   reads small at Inter's size. The [data-size] rules out-rank the base one
+   on purpose. */
+:root[data-font="geist-serif"] {
+  --heading-family: var(--font-geist-serif);
+  --heading-fvs: normal;
+  --heading-display-fvs: normal;
   --fs-display: 32px;
   --lh-display: 38px;
   --fs-display-compact: 28px;
@@ -534,17 +548,17 @@ html[data-size="compact"] {
   --lh-site-display: 32px;
 }
 @media (min-width: 640px) {
-  :root[data-font="source-serif"] {
+  :root[data-font="geist-serif"] {
     --fs-site-display: 32px;
     --lh-site-display: 38px;
   }
 }
-:root[data-font="source-serif"][data-size="compact"] {
+:root[data-font="geist-serif"][data-size="compact"] {
   --fs-site-display: 24px;
   --lh-site-display: 30px;
 }
 @media (min-width: 640px) {
-  :root[data-font="source-serif"][data-size="compact"] {
+  :root[data-font="geist-serif"][data-size="compact"] {
     --fs-site-display: 28px;
     --lh-site-display: 34px;
   }
@@ -568,7 +582,7 @@ html[data-size="compact"] {
 /* !important: site headings set their weight inline from fontWeights, and
    a mode has to win over it. No faux bold: a single-weight face stays as
    drawn. The display rule has the same specificity and wins by order. */
-:root:is([data-font="source-serif"], [data-font="custom"]) :is(
+:root:is([data-font="geist-serif"], [data-font="custom"]) :is(
   :is(h1, h2, h3):is(.text-site-display, .text-site-title, .text-site-subtitle),
   .font-heading,
   .font-heading-display,
@@ -579,7 +593,7 @@ html[data-size="compact"] {
   font-weight: var(--heading-weight, 400);
   font-synthesis-weight: none;
 }
-:root:is([data-font="source-serif"], [data-font="custom"]) :is(
+:root:is([data-font="geist-serif"], [data-font="custom"]) :is(
   :is(h1, h2, h3).text-site-display,
   .font-heading-display,
   .typeset h1
@@ -992,8 +1006,9 @@ html[data-size="compact"] {
 }
 /* </generated:typeset> */
 
-/* Theme-toggle cross-fade: ThemeProvider adds `.transitioning` around the
-   class swap so colors tween instead of snapping. */
+/* Shape-toggle morph: ShapeProvider adds `.transitioning` around the swap so
+   radii tween instead of snapping. (Theme swaps cross-fade as one View
+   Transition snapshot instead: registry/default/lib/theme-context.tsx.) */
 html.transitioning *,
 html.transitioning *::before,
 html.transitioning *::after {
@@ -1159,9 +1174,11 @@ html.transitioning *::after {
    token's faster `.exit`). The `@starting-style` gives the appear transition a
    starting opacity — required for an element to animate *out of* `display:none`
    (otherwise it would pop in). Because the panel's space is already reserved at
-   that width, the appear is a pure opacity fade with no layout shift (it also
-   fades in once on initial wide-screen load). Browsers without
-   `transition-behavior` degrade gracefully to the old instant switch. */
+   that width, the appear is a pure opacity fade with no layout shift. Until
+   the element carries `data-ready` (set after hydration) it has no
+   transition, so first paint shows the panel at once instead of fading it in
+   apart from the page's own reveal. Browsers without `transition-behavior`
+   degrade gracefully to the old instant switch. */
 
 .xl-fade-flex,
 .xl-fade-block {
@@ -1199,6 +1216,10 @@ html.transitioning *::after {
   .xl-fade-block {
     transition: none;
   }
+}
+.xl-fade-flex:not([data-ready]),
+.xl-fade-block:not([data-ready]) {
+  transition: none;
 }
 
 /* ── In-view cross-fade ──
@@ -1505,10 +1526,12 @@ html.transitioning *::after {
   animation-name: reveal-out;
   animation-fill-mode: forwards;
 }
-/* Skeletons fade in over the slow tier's 250ms on an even curve, then pulse
-   like shadcn's `animate-pulse`, on keyframes of their own so the block
-   works without Tailwind's. A skeleton that has been swapped out stops
-   pulsing: it is fading away and would otherwise animate unseen forever. */
+/* Skeletons wait 160ms, so data that lands sooner never shows one, then fade
+   in over the slow tier's 250ms on an even curve and pulse like shadcn's
+   `animate-pulse`, on keyframes of their own so the block works without
+   Tailwind's. A skeleton that has been swapped out pauses where it is: it
+   fades away from the opacity it had, instead of jumping back to full, and
+   stops animating unseen. Swapped out during the wait, it never shows. */
 @keyframes reveal-skeleton-in {
   from {
     opacity: 0;
@@ -1521,11 +1544,11 @@ html.transitioning *::after {
 }
 :is(.reveal-product, .reveal-product-subtle, .reveal-items, .reveal-swap) [data-slot="skeleton"] {
   animation:
-    reveal-skeleton-in 250ms ease-in-out both,
-    reveal-pulse 2s cubic-bezier(0.4, 0, 0.6, 1) 250ms infinite;
+    reveal-skeleton-in 250ms ease-in-out 160ms both,
+    reveal-pulse 2s cubic-bezier(0.4, 0, 0.6, 1) 410ms infinite;
 }
 .reveal-swap > :first-child:not(:last-child) [data-slot="skeleton"] {
-  animation: none;
+  animation-play-state: paused;
 }
 /* Leaving at the top mirrors the way in: it fades out, lifts, and scales down. */
 @keyframes reveal-leave {
@@ -1597,7 +1620,7 @@ html.transitioning *::after {
     animation-delay: calc(var(--reveal-load-delay, 0s) + var(--reveal-step));
   }
   :is(.reveal-product, .reveal-product-subtle, .reveal-items, .reveal-swap) [data-slot="skeleton"] {
-    animation: reveal-skeleton-in 250ms ease-in-out both;
+    animation: reveal-skeleton-in 250ms ease-in-out 160ms both;
   }
 }
 /* </generated:reveal> */

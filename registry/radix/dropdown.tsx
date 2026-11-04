@@ -19,7 +19,7 @@ import { motion, AnimatePresence } from "motion/react";
 import * as DropdownMenuPrimitive from "@radix-ui/react-dropdown-menu";
 import { cn } from "@/lib/utils";
 import { spring, exitFallbackMs } from "@/lib/springs";
-import { useFluidHover, isOwnEvent } from "@/hooks/use-fluid-hover";
+import { useFluidHover, useFluidHoverSelect, isOwnEvent } from "@/hooks/use-fluid-hover";
 import {
   useMergeSplitBlocks,
   useSelectionRuns,
@@ -107,7 +107,7 @@ const Dropdown = forwardRef<HTMLDivElement, DropdownProps>(
     const containerRef = useRef<HTMLDivElement>(null);
     const hover = useFluidHover(containerRef, { isItemDisabled: isDisabledRow });
     const {
-      activeIndex,
+      activeStore,
       setActiveIndex,
       itemRects,
       handlers,
@@ -124,8 +124,8 @@ const Dropdown = forwardRef<HTMLDivElement, DropdownProps>(
     const runs = useSelectionRuns(checkedIndices ?? []);
     const blocks = useMergeSplitBlocks(runs, itemRects, shape.bgRadius);
     const panelCtx = useMemo(
-      () => ({ registerItem, activeIndex, checkedIndex, multiple, checkedIndices }),
-      [registerItem, activeIndex, checkedIndex, multiple, checkedIndices]
+      () => ({ registerItem, activeStore, checkedIndex, multiple, checkedIndices }),
+      [registerItem, activeStore, checkedIndex, multiple, checkedIndices]
     );
     const panel = (
       <DropdownContext.Provider value={panelCtx}>
@@ -432,7 +432,7 @@ const DropdownContent = forwardRef<HTMLDivElement, DropdownContentProps>(
 
     const hover = useFluidHover(containerRef, { isItemDisabled: isDisabledRow });
     const {
-      activeIndex,
+      activeStore,
       setActiveIndex,
       itemRects,
       handlers,
@@ -590,7 +590,7 @@ const DropdownContent = forwardRef<HTMLDivElement, DropdownContentProps>(
     const contentCtx = useMemo(
       () => ({
         registerItem,
-        activeIndex,
+        activeStore,
         checkedIndex,
         multiple,
         checkedIndices,
@@ -600,7 +600,7 @@ const DropdownContent = forwardRef<HTMLDivElement, DropdownContentProps>(
       }),
       [
         registerItem,
-        activeIndex,
+        activeStore,
         checkedIndex,
         multiple,
         checkedIndices,
@@ -629,7 +629,7 @@ const DropdownContent = forwardRef<HTMLDivElement, DropdownContentProps>(
           alignOffset={alignOffset}
         >
           <motion.div
-            className={cn("z-50 outline-none", popupMotionClass)}
+            className={cn("z-[var(--z-popover,60)] outline-none", popupMotionClass)}
             initial={{ opacity: 0, y: "var(--popup-enter-y)", scaleY: 0.96 }}
             animate={
               open
@@ -830,7 +830,7 @@ const DropdownSubTrigger = forwardRef<HTMLDivElement, DropdownSubTriggerProps>(
     const parent = useDropdown();
     const { open } = useDropdownMenuContext();
     useReportSubmenu(parent.onSubmenuOpenChange, index, open);
-    const lit = parent.activeIndex === index;
+    const lit = useFluidHoverSelect(parent.activeStore, (i) => i === index);
 
     // The row renders through the parent's MenuItem, wrapped in the submenu
     // trigger primitive instead of a plain item.

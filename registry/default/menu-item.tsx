@@ -17,7 +17,11 @@ import { cn } from "@/lib/utils";
 import { fontWeights } from "@/lib/font-weight";
 import { shapeMap } from "@/lib/shape-context";
 import { useSize } from "@/lib/size-context";
-import { useRegisterFluidHoverItem } from "@/hooks/use-fluid-hover";
+import {
+  useFluidHoverSelect,
+  useRegisterFluidHoverItem,
+  type FluidHoverActiveStore,
+} from "@/hooks/use-fluid-hover";
 
 // MenuItem is only used inside Dropdown, which opts out of the global pill
 // shape — see dropdown.tsx for the rationale.
@@ -62,7 +66,9 @@ export interface MenuItemRenderOptions {
 
 export interface DropdownContextValue {
   registerItem: (index: number, element: HTMLElement | null) => void;
-  activeIndex: number | null;
+  /** The highlighted row, read per row with `useFluidHoverSelect` so a
+   *  highlight change re-renders two rows instead of the whole menu. */
+  activeStore: FluidHoverActiveStore;
   checkedIndex?: number;
   /** Multiple selection (`checkedIndices` on the dropdown): rows are
    *  checkbox items and activating one keeps the menu open by default. */
@@ -154,7 +160,7 @@ const MenuItem = forwardRef<HTMLDivElement, MenuItemProps>(
     const internalRef = useRef<HTMLDivElement>(null);
     const {
       registerItem,
-      activeIndex,
+      activeStore,
       checkedIndex,
       multiple,
       checkedIndices,
@@ -164,7 +170,7 @@ const MenuItem = forwardRef<HTMLDivElement, MenuItemProps>(
 
     useRegisterFluidHoverItem(registerItem, index, internalRef);
 
-    const isActive = activeIndex === index;
+    const isActive = useFluidHoverSelect(activeStore, (i) => i === index);
     const sizeClasses = useSize();
 
     const mergeRef = (node: HTMLDivElement | null) => {
@@ -193,7 +199,7 @@ const MenuItem = forwardRef<HTMLDivElement, MenuItemProps>(
     const content = (
       <>
         {Icon && (
-          <span className="inline-grid">
+          <span className="inline-grid shrink-0">
             <span className="col-start-1 row-start-1 invisible">
               <Icon size={sizeClasses.icon} strokeWidth={2} />
             </span>
@@ -210,10 +216,14 @@ const MenuItem = forwardRef<HTMLDivElement, MenuItemProps>(
           </span>
         )}
         {/* Both stacked spans carry the text-box trim so the invisible bold
-            sizer and the visible label keep identical boxes. */}
-        <span className={cn("inline-grid flex-1", sizeClasses.text)}>
+            sizer and the visible label keep identical boxes. Both truncate:
+            the popup has a fixed width and the row a fixed height, so a long
+            label clips with an ellipsis instead of wrapping into the next
+            row. The padding pair extends the clip box past the trim so
+            ascenders and descenders aren't shaved. */}
+        <span className={cn("inline-grid min-w-0 flex-1", sizeClasses.text)}>
           <span
-            className="col-start-1 row-start-1 invisible [text-box:trim-both_cap_alphabetic]"
+            className="col-start-1 row-start-1 invisible truncate pt-[0.25em] -mt-[0.25em] pb-[0.25em] -mb-[0.25em] [text-box:trim-both_cap_alphabetic]"
             style={{ fontVariationSettings: fontWeights.semibold }}
             aria-hidden="true"
           >
@@ -221,7 +231,7 @@ const MenuItem = forwardRef<HTMLDivElement, MenuItemProps>(
           </span>
           <span
             className={cn(
-              "col-start-1 row-start-1 transition-[color,font-variation-settings] duration-80 [text-box:trim-both_cap_alphabetic]",
+              "col-start-1 row-start-1 truncate pt-[0.25em] -mt-[0.25em] pb-[0.25em] -mb-[0.25em] transition-[color,font-variation-settings] duration-80 [text-box:trim-both_cap_alphabetic]",
               isActive || checked
                 ? "text-foreground"
                 : "text-muted-foreground"

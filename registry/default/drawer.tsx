@@ -97,7 +97,7 @@ function DrawerOverlay({
     <DrawerPrimitive.Backdrop
       data-slot="drawer-overlay"
       className={(state) => cn(
-        "fixed inset-0 z-50 min-h-dvh bg-black/40 dark:bg-black/80 select-none supports-[-webkit-touch-callout:none]:absolute",
+        "fixed inset-0 z-[var(--z-overlay,40)] min-h-dvh bg-black/40 dark:bg-black/80 select-none supports-[-webkit-touch-callout:none]:absolute",
         "opacity-[max(var(--drawer-overlay-min-opacity,0),calc(1-var(--drawer-swipe-progress,0)))] [transition:opacity_var(--drawer-enter)]",
         "data-starting-style:opacity-0 data-ending-style:opacity-0 data-ending-style:pointer-events-none data-ending-style:duration-(--drawer-exit-duration) data-ending-style:ease-in data-swiping:duration-0 data-snap-points:[--drawer-overlay-min-opacity:0.5]",
         typeof className === "function" ? className(state) : className,
@@ -142,7 +142,7 @@ const DrawerContent = React.forwardRef<HTMLDivElement, DrawerContentProps>(
         <DrawerPrimitive.Viewport
           data-slot="drawer-viewport"
           data-modal={modal}
-          className="pointer-events-none fixed inset-0 z-50 select-none data-[modal=true]:pointer-events-auto"
+          className="pointer-events-none fixed inset-0 z-[var(--z-modal,50)] select-none data-[modal=true]:pointer-events-auto"
         >
           <DrawerPrimitive.Popup
             ref={ref}
@@ -150,7 +150,7 @@ const DrawerContent = React.forwardRef<HTMLDivElement, DrawerContentProps>(
             data-swipe-axis={swipeAxis}
             data-snap-points={hasSnapPoints ? "" : undefined}
             className={(state) => cn(
-              "group/drawer-popup pointer-events-auto fixed z-50 m-(--drawer-inset,0px) flex min-h-0 flex-col text-foreground outline-none select-none will-change-transform",
+              "group/drawer-popup pointer-events-auto fixed z-10 m-(--drawer-inset,0px) flex min-h-0 flex-col text-foreground outline-none select-none will-change-transform",
               type.body,
               surfaceClasses(level),
               // Float from the viewport like shadcn's Maia/Mira styles.

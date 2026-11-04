@@ -24,7 +24,9 @@ const buttonVariants = cva(
     // button (or overflows) instead of squeezing it.
     "group relative isolate inline-flex items-center justify-center outline-none cursor-pointer select-none whitespace-nowrap",
     "transition-colors duration-80",
-    "disabled:opacity-50 disabled:pointer-events-none aria-disabled:opacity-50 aria-disabled:pointer-events-none",
+    // A loading button is disabled too, but stays at full strength: aria-busy
+    // marks it as working, not unavailable.
+    "disabled:not-aria-busy:opacity-50 disabled:pointer-events-none aria-disabled:not-aria-busy:opacity-50 aria-disabled:pointer-events-none",
     "focus-visible:ring-1 focus-visible:ring-[color:var(--focus-ring,#6B97FF)]",
   ],
   {
@@ -310,6 +312,7 @@ const Button = forwardRef<HTMLButtonElement, ButtonProps>(
         style: { ...style, ...asChildElement.props.style },
         ...(blocked ? {
           "aria-disabled": true,
+          "aria-busy": loading || undefined,
           tabIndex: -1,
           ...(asChildElement.type === "button" ? { disabled: true } : {}),
           onClickCapture: (event: React.MouseEvent<HTMLButtonElement>) => {
@@ -329,6 +332,7 @@ const Button = forwardRef<HTMLButtonElement, ButtonProps>(
         ref={ref as React.Ref<HTMLButtonElement>}
         className={rootClassName}
         disabled={disabled || loading}
+        aria-busy={loading || undefined}
         style={style}
         {...props}
       >
